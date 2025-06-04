@@ -1,7 +1,7 @@
 ---
 title: Technical Information
 type: note
-permalink: docs/technical-information-1
+permalink: docs/technical-information-1-1
 ---
 
 # Technical Information

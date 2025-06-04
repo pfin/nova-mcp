@@ -1,7 +1,7 @@
 ---
 title: Introduction to Nova Memory
 type: docs
-permalink: docs/introduction-1
+permalink: docs/introduction-1-1
 tags:
 - documentation
 - index

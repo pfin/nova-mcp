@@ -1,7 +1,7 @@
 ---
 title: Canvas Visualizations
 type: note
-permalink: docs/canvas-1
+permalink: docs/canvas-1-1
 tags:
 - visualization
 - mapping

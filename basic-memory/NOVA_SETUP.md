@@ -20,10 +20,14 @@ Add to Claude Code with:
 claude mcp add nova-memory /path/to/nova-mcp/basic-memory/run-mcp.sh -s user
 ```
 
-The wrapper script uses:
+The wrapper script uses the installed basic-memory package with the nova project:
 ```bash
 uvx basic-memory --project nova mcp
 ```
+
+This requires that:
+1. You have basic-memory installed (`pip install basic-memory` or `uv tool install basic-memory`)
+2. The nova project is configured in `~/.basic-memory/config.json`
 
 ## Differences from Basic Memory
 

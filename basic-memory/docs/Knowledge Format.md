@@ -1,7 +1,7 @@
 ---
 title: Knowledge Format
 type: note
-permalink: docs/knowledge-format-1
+permalink: docs/knowledge-format-1-1
 tags:
 - architecture
 - patterns

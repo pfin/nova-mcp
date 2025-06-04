@@ -1,7 +1,7 @@
 ---
 title: Test Note Creation - Basic Functionality
 type: note
-permalink: testing/test-note-creation-basic-functionality-1
+permalink: testing/test-note-creation-basic-functionality-1-1
 tags:
 - '["testing"'
 - '"core-functionality"'

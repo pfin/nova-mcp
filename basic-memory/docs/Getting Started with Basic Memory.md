@@ -1,7 +1,7 @@
 ---
 title: Getting Started with Nova Memory
 type: note
-permalink: docs/getting-started-1
+permalink: docs/getting-started-1-1
 ---
 
 # Getting Started with Nova Memory

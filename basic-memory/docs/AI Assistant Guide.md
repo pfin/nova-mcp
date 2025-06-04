@@ -1,7 +1,7 @@
 ---
 title: AI Assistant Guide
 type: note
-permalink: docs/ai-assistant-guide-1
+permalink: docs/ai-assistant-guide-1-1
 ---
 
 > Note: This is an optional document that can be copy/pasted into the project knowledge for an LLM to provide a full description of how it can work with Nova Memory. It is provided as a helpful resource. The tools contain extensive usage description prompts with enable the LLM to understand them. 

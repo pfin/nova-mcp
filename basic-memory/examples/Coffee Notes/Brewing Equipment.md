@@ -1,7 +1,7 @@
 ---
 title: Brewing Equipment
 type: note
-permalink: coffee/brewing-equipment-1
+permalink: coffee/brewing-equipment-1-1
 tags:
 - '#coffee'
 - '#equipment'

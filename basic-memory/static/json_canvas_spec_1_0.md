@@ -2,7 +2,7 @@
 title: JSON Canvas Spec
 version: 1.0
 url: https://raw.githubusercontent.com/obsidianmd/jsoncanvas/refs/heads/main/spec/1.0.md
-permalink: basic-memory-nova/static/json-canvas-spec-1-0-1
+permalink: basic-memory-nova/static/json-canvas-spec-1-0-1-1
 ---
 
 # JSON Canvas Spec

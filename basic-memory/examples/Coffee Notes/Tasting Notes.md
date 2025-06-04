@@ -1,7 +1,7 @@
 ---
 title: Tasting Notes
 type: note
-permalink: coffee/tasting-notes-1
+permalink: coffee/tasting-notes-1-1
 tags:
 - '#coffee'
 - '#tasting'

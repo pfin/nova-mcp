@@ -1,7 +1,7 @@
 ---
 title: User Guide
 type: note
-permalink: docs/user-guide-1
+permalink: docs/user-guide-1-1
 ---
 
 # User Guide
