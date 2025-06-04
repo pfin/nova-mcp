@@ -1,4 +1,4 @@
-"""Tests for the Basic Memory CLI tools.
+"""Tests for the Nova Memory CLI tools.
 
 These tests use real MCP tools with the test environment instead of mocks.
 """
@@ -15,8 +15,8 @@ from unittest.mock import patch
 import pytest_asyncio
 from typer.testing import CliRunner
 
-from basic_memory.cli.commands.tool import tool_app
-from basic_memory.schemas.base import Entity as EntitySchema
+from nova_memory.cli.commands.tool import tool_app
+from nova_memory.schemas.base import Entity as EntitySchema
 
 runner = CliRunner()
 
@@ -419,7 +419,7 @@ def test_continue_conversation_no_results(cli_env):
 @patch("basic_memory.services.initialization.initialize_database")
 def test_ensure_migrations_functionality(mock_initialize_database, project_config, monkeypatch):
     """Test the database initialization functionality."""
-    from basic_memory.services.initialization import ensure_initialization
+    from nova_memory.services.initialization import ensure_initialization
 
     # Call the function
     ensure_initialization(project_config)
@@ -431,7 +431,7 @@ def test_ensure_migrations_functionality(mock_initialize_database, project_confi
 @patch("basic_memory.services.initialization.initialize_database")
 def test_ensure_migrations_handles_errors(mock_initialize_database, project_config, monkeypatch):
     """Test that initialization handles errors gracefully."""
-    from basic_memory.services.initialization import ensure_initialization
+    from nova_memory.services.initialization import ensure_initialization
 
     # Configure mock to raise an exception
     mock_initialize_database.side_effect = Exception("Test error")

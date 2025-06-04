@@ -58,21 +58,21 @@ from pathlib import Path
 
 from httpx import AsyncClient, ASGITransport
 
-import basic_memory.config
-import basic_memory.mcp.project_session
+import nova_memory.config
+import nova_memory.mcp.project_session
 
-from basic_memory.config import BasicMemoryConfig, ProjectConfig, ConfigManager
-from basic_memory.db import engine_session_factory, DatabaseType
-from basic_memory.models import Project
-from basic_memory.repository.project_repository import ProjectRepository
+from nova_memory.config import NovaMemoryConfig, ProjectConfig, ConfigManager
+from nova_memory.db import engine_session_factory, DatabaseType
+from nova_memory.models import Project
+from nova_memory.repository.project_repository import ProjectRepository
 from fastapi import FastAPI
 
-from basic_memory.api.app import app as fastapi_app
-from basic_memory.deps import get_project_config, get_engine_factory, get_app_config
+from nova_memory.api.app import app as fastapi_app
+from nova_memory.deps import get_project_config, get_engine_factory, get_app_config
 
 
 # Import MCP tools so they're available for testing
-from basic_memory.mcp import tools  # noqa: F401
+from nova_memory.mcp import tools  # noqa: F401
 
 
 @pytest_asyncio.fixture(scope="function")
@@ -84,7 +84,7 @@ async def engine_factory(tmp_path):
         session_maker,
     ):
         # Initialize database schema
-        from basic_memory.models.base import Base
+        from nova_memory.models.base import Base
 
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
@@ -116,10 +116,10 @@ def config_home(tmp_path, monkeypatch) -> Path:
 
 
 @pytest.fixture(scope="function")
-def app_config(config_home, test_project, tmp_path, monkeypatch) -> BasicMemoryConfig:
+def app_config(config_home, test_project, tmp_path, monkeypatch) -> NovaMemoryConfig:
     """Create test app configuration."""
     projects = {test_project.name: str(test_project.path)}
-    app_config = BasicMemoryConfig(
+    app_config = NovaMemoryConfig(
         env="test",
         projects=projects,
         default_project=test_project.name,
@@ -132,7 +132,7 @@ def app_config(config_home, test_project, tmp_path, monkeypatch) -> BasicMemoryC
 
 
 @pytest.fixture
-def config_manager(app_config: BasicMemoryConfig, config_home, monkeypatch) -> ConfigManager:
+def config_manager(app_config: NovaMemoryConfig, config_home, monkeypatch) -> ConfigManager:
     config_manager = ConfigManager()
     # Update its paths to use the test directory
     config_manager.config_dir = config_home / ".basic-memory"
@@ -189,12 +189,12 @@ def app(
 @pytest_asyncio.fixture(scope="function")
 async def search_service(engine_factory, test_project):
     """Create and initialize search service for integration tests."""
-    from basic_memory.repository.search_repository import SearchRepository
-    from basic_memory.repository.entity_repository import EntityRepository
-    from basic_memory.services.file_service import FileService
-    from basic_memory.services.search_service import SearchService
-    from basic_memory.markdown.markdown_processor import MarkdownProcessor
-    from basic_memory.markdown import EntityParser
+    from nova_memory.repository.search_repository import SearchRepository
+    from nova_memory.repository.entity_repository import EntityRepository
+    from nova_memory.services.file_service import FileService
+    from nova_memory.services.search_service import SearchService
+    from nova_memory.markdown.markdown_processor import MarkdownProcessor
+    from nova_memory.markdown import EntityParser
 
     engine, session_maker = engine_factory
 
@@ -216,16 +216,16 @@ async def search_service(engine_factory, test_project):
 @pytest.fixture(scope="function")
 def mcp_server(app_config, search_service):
     # Import mcp instance
-    from basic_memory.mcp.server import mcp as server
+    from nova_memory.mcp.server import mcp as server
 
     # Import mcp tools to register them
-    import basic_memory.mcp.tools  # noqa: F401
+    import nova_memory.mcp.tools  # noqa: F401
 
     # Import prompts to register them
-    import basic_memory.mcp.prompts  # noqa: F401
+    import nova_memory.mcp.prompts  # noqa: F401
 
     # Initialize project session with test project
-    from basic_memory.mcp.project_session import session
+    from nova_memory.mcp.project_session import session
 
     session.initialize(app_config.default_project)
 

@@ -602,7 +602,7 @@ Displaying tracking our style!.txt.
 
 ---
 
-# Basic Memory Enhancement Proposals
+# Nova Memory Enhancement Proposals
 
 ## Enhanced Frontmatter
 
@@ -778,14 +778,14 @@ class ContextManager:
 - Cleaner project organization
 - Enhanced searchability
 
-These enhancements build naturally on the core Basic Memory implementation while enabling more sophisticated knowledge
+These enhancements build naturally on the core Nova Memory implementation while enabling more sophisticated knowledge
 management patterns.
 
 # AI-Enabled Semantic Web: A New Paradigm
 
 ## The Vision
 
-Basic Memory combines three powerful ideas:
+Nova Memory combines three powerful ideas:
 
 1. Semantic web's structured knowledge
 2. Local-first human readable storage
@@ -889,7 +889,7 @@ AI can:
 ### 1. Human Writes in Obsidian
 
 ```markdown
-# Basic Memory Sync Implementation
+# Nova Memory Sync Implementation
 
 Working on implementing file sync between Obsidian and our knowledge graph.
 
@@ -1119,7 +1119,7 @@ Claude: Let me build context across projects...
 
 <using build_context with multiple URIs>
 Looking at:
-- [Basic Memory Sync](memory://basic-memory/file-sync)
+- [Nova Memory Sync](memory://basic-memory/file-sync)
 - [12pt.co Architecture](memory://12pt-co/architecture)
 
 I can see how we could integrate these by...

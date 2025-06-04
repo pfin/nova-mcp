@@ -3,8 +3,8 @@
 import datetime
 import pytest
 
-from basic_memory.api.template_loader import TemplateLoader
-from basic_memory.schemas.search import SearchItemType, SearchResult
+from nova_memory.api.template_loader import TemplateLoader
+from nova_memory.schemas.search import SearchItemType, SearchResult
 
 
 @pytest.fixture

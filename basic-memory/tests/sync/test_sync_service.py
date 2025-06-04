@@ -7,13 +7,13 @@ from textwrap import dedent
 
 import pytest
 
-from basic_memory.config import ProjectConfig, BasicMemoryConfig
-from basic_memory.models import Entity
-from basic_memory.repository import EntityRepository
-from basic_memory.schemas.search import SearchQuery
-from basic_memory.services import EntityService, FileService
-from basic_memory.services.search_service import SearchService
-from basic_memory.sync.sync_service import SyncService
+from nova_memory.config import ProjectConfig, NovaMemoryConfig
+from nova_memory.models import Entity
+from nova_memory.repository import EntityRepository
+from nova_memory.schemas.search import SearchQuery
+from nova_memory.services import EntityService, FileService
+from nova_memory.services.search_service import SearchService
+from nova_memory.sync.sync_service import SyncService
 
 
 async def create_test_file(path: Path, content: str = "test content") -> None:
@@ -882,7 +882,7 @@ async def test_sync_permalink_not_created_if_no_frontmatter(
 
 
 @pytest.fixture
-def test_config_update_permamlinks_on_move(app_config) -> BasicMemoryConfig:
+def test_config_update_permamlinks_on_move(app_config) -> NovaMemoryConfig:
     """Test configuration using in-memory DB."""
     app_config.update_permalinks_on_move = True
     return app_config
@@ -890,7 +890,7 @@ def test_config_update_permamlinks_on_move(app_config) -> BasicMemoryConfig:
 
 @pytest.mark.asyncio
 async def test_sync_permalink_updated_on_move(
-    test_config_update_permamlinks_on_move: BasicMemoryConfig,
+    test_config_update_permamlinks_on_move: NovaMemoryConfig,
     project_config: ProjectConfig,
     sync_service: SyncService,
     file_service: FileService,

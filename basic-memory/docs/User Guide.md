@@ -6,12 +6,12 @@ permalink: docs/user-guide-1
 
 # User Guide
 
-This guide explains how to effectively use Basic Memory in your daily workflow, from creating knowledge through
+This guide explains how to effectively use Nova Memory in your daily workflow, from creating knowledge through
 conversations to building a rich semantic network.
 
-## Basic Memory Workflow
+## Nova Memory Workflow
 
-Using Basic Memory follows a natural cycle:
+Using Nova Memory follows a natural cycle:
 
 1. **Have conversations** with AI assistants like Claude
 2. **Capture knowledge** in Markdown files
@@ -46,7 +46,7 @@ You can create files directly:
 
 ## Using Special Prompts
 
-Basic Memory includes several special prompts that help you leverage your knowledge base more effectively. In apps like
+Nova Memory includes several special prompts that help you leverage your knowledge base more effectively. In apps like
 Claude Desktop, these prompts trigger specific tools to search and analyze your knowledge base.
 
 ### Continue Conversation
@@ -125,7 +125,7 @@ Give instructions
 ![[prompt3.png|500]]
 
 Claude Desktop lets you send a prompt to provide context. You can use this at the beginning of a chat to preload context
-without needing to copy paste all the time. By using one of the supplied prompts, Basic Memory will search the knowledge
+without needing to copy paste all the time. By using one of the supplied prompts, Nova Memory will search the knowledge
 base and give the AI instructions for how to build context.
 
 Choose "Continue Conversation":
@@ -147,7 +147,7 @@ context comes from your local knowledge base.
 
 ## Searching Your Knowledge Base
 
-Basic Memory provides multiple ways to search and explore your knowledge base:
+Nova Memory provides multiple ways to search and explore your knowledge base:
 
 ### Natural Language Search
 
@@ -178,7 +178,7 @@ For more precise searches, use boolean operators to refine your queries:
 You: Search for "authentication AND OAuth NOT basic"
 ```
 
-Basic Memory supports standard boolean operators:
+Nova Memory supports standard boolean operators:
 
 - **AND**: Find documents containing both terms
   ```
@@ -280,7 +280,7 @@ You: Look at memory://project-architecture and check related documents to give m
 
 ### File Location and Organization
 
-By default, Basic Memory stores files in `~/basic-memory`:
+By default, Nova Memory stores files in `~/basic-memory`:
 
 - Browse this directory in your file explorer
 - Organize files into subfolders
@@ -320,11 +320,11 @@ Modify files in any text editor:
 1. Open the file in your preferred editor
 2. Make changes to content, observations, or relations
 3. Save the file
-4. Basic Memory detects changes automatically when running in watch mode
+4. Nova Memory detects changes automatically when running in watch mode
 
 ## Building a Knowledge Graph
 
-The value of Basic Memory comes from connections between pieces of knowledge.
+The value of Nova Memory comes from connections between pieces of knowledge.
 
 ### Creating Relations
 
@@ -358,7 +358,7 @@ These references resolve automatically when you create the referenced document.
 
 ## Conversation Continuity
 
-Basic Memory maintains context across different conversations.
+Nova Memory maintains context across different conversations.
 
 ### Starting New Sessions with Context
 
@@ -464,7 +464,7 @@ Use with [Obsidian](https://obsidian.md):
 
 1. Point Obsidian to your `~/basic-memory` directory
 2. Use Obsidian's graph view to visualize your knowledge network
-3. All changes sync back to Basic Memory
+3. All changes sync back to Nova Memory
 
 ### Canvas Visualizations
 
@@ -518,7 +518,7 @@ basic-memory import chatgpt
 
 ## Multiple Projects (v0.13.0)
 
-Basic Memory v0.13.0 introduces **fluid project management** - the ability to switch between projects instantly during conversations without restart. This allows you to maintain separate knowledge graphs for different purposes while seamlessly switching between them.
+Nova Memory v0.13.0 introduces **fluid project management** - the ability to switch between projects instantly during conversations without restart. This allows you to maintain separate knowledge graphs for different purposes while seamlessly switching between them.
 
 ### Instant Project Switching (New in v0.13.0)
 
@@ -597,7 +597,7 @@ BASIC_MEMORY_PROJECT=work basic-memory sync
 
 ### Unified Database Architecture (New in v0.13.0)
 
-Basic Memory v0.13.0 uses a unified database architecture:
+Nova Memory v0.13.0 uses a unified database architecture:
 
 - **Single Database**: All projects share `~/.basic-memory/memory.db`
 - **Project Isolation**: Proper data separation with project context
@@ -650,7 +650,7 @@ If relations aren't working:
 ## Relations
 
 - implements [[Knowledge Format]] (How knowledge is structured)
-- relates_to [[Getting Started with Basic Memory]] (Setup and first steps)
+- relates_to [[Getting Started with Nova Memory]] (Setup and first steps)
 - relates_to [[Canvas]] (Creating visual knowledge maps)
 - relates_to [[CLI Reference]] (Command line tools)
 - enhanced_in_v0.13.0 [[OAuth Authentication Guide]] (Production authentication)

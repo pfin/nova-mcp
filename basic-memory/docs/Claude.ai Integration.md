@@ -1,10 +1,10 @@
 # Claude.ai Integration Guide
 
-This guide explains how to connect Basic Memory to Claude.ai, enabling Claude to read and write to your personal knowledge base.
+This guide explains how to connect Nova Memory to Claude.ai, enabling Claude to read and write to your personal knowledge base.
 
 ## Overview
 
-When connected to Claude.ai, Basic Memory provides:
+When connected to Claude.ai, Nova Memory provides:
 - Persistent memory across conversations
 - Knowledge graph navigation
 - Note-taking and search capabilities
@@ -12,7 +12,7 @@ When connected to Claude.ai, Basic Memory provides:
 
 ## Prerequisites
 
-1. Basic Memory MCP server with OAuth enabled
+1. Nova Memory MCP server with OAuth enabled
 2. Public HTTPS URL (or tunneling service for testing)
 3. Claude.ai account (Free, Pro, or Enterprise)
 
@@ -66,7 +66,7 @@ basic-memory auth register-client --client-id claude-ai
 ### 5. Use in Conversations
 
 - Click the tools icon (🔧) in the chat
-- Select "Basic Memory"
+- Select "Nova Memory"
 - Try commands like:
   - "Create a note about our meeting"
   - "Search for project ideas"
@@ -329,7 +329,7 @@ I found 3 relevant notes about the API redesign:
 
 ## Resources
 
-- [Basic Memory Documentation](../README.md)
+- [Nova Memory Documentation](../README.md)
 - [OAuth Setup Guide](OAuth%20Authentication.md)
 - [MCP Specification](https://modelcontextprotocol.io)
 - [Claude.ai Help Center](https://support.anthropic.com)

@@ -6,7 +6,7 @@ import pytest
 from httpx import AsyncClient, HTTPStatusError
 from mcp.server.fastmcp.exceptions import ToolError
 
-from basic_memory.mcp.tools.utils import call_get, call_post, call_put, call_delete
+from nova_memory.mcp.tools.utils import call_get, call_post, call_put, call_delete
 
 
 @pytest.fixture
@@ -135,7 +135,7 @@ async def test_call_get_with_params(mock_response):
 @pytest.mark.asyncio
 async def test_get_error_message():
     """Test the get_error_message function."""
-    from basic_memory.mcp.tools.utils import get_error_message
+    from nova_memory.mcp.tools.utils import get_error_message
 
     # Test 400 status code
     message = get_error_message(400, "http://test.com/resource", "GET")

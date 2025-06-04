@@ -6,7 +6,7 @@ permalink: docs/cli-reference-1
 
 # CLI Reference
 
-Basic Memory provides command line tools for managing your knowledge base. This reference covers the available commands and their options.
+Nova Memory provides command line tools for managing your knowledge base. This reference covers the available commands and their options.
 
 ## Core Commands
 
@@ -53,7 +53,7 @@ Options:
 As of the v0.12.0 release syncing will occur in real time when the mcp process starts.
 - The real time sync means that it is no longer necessary to run the `basic-memory sync --watch` process in a a terminal to sync changes to the db (so the AI can see them). This will be done automatically.
 
-This behavior can be changed via the config. The config file for Basic Memory is in the home directory under `.basic-memory/config.json`.
+This behavior can be changed via the config. The config file for Nova Memory is in the home directory under `.basic-memory/config.json`.
 
 To change the properties, set the following values:
 ```
@@ -63,7 +63,7 @@ To change the properties, set the following values:
 }
 ```
 
-Thanks for using Basic Memory!
+Thanks for using Nova Memory!
 ### import (Enhanced in v0.13.0)
 
 Imports external knowledge sources with support for project targeting:
@@ -189,7 +189,7 @@ The full list of commands and help for each can be viewed with the `--help` argu
 
  Usage: basic-memory [OPTIONS] COMMAND [ARGS]...
 
- Basic Memory - Local-first personal knowledge management system.
+ Nova Memory - Local-first personal knowledge management system.
 
 ╭─ Options ─────────────────────────────────────────────────────────────────────────────────╮
 │ --project             -p      TEXT  Specify which project to use                          │
@@ -209,14 +209,14 @@ The full list of commands and help for each can be viewed with the `--help` argu
 │ mcp       Run the MCP server for Claude Desktop integration                               │
 │ import    Import data from various sources                                                │
 │ tool      Direct access to MCP tools via CLI                                              │
-│ project   Manage multiple Basic Memory projects                                           │
+│ project   Manage multiple Nova Memory projects                                           │
 ╰───────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## Initial Setup
 
 ```bash
-# Install Basic Memory
+# Install Nova Memory
 uv install basic-memory
 
 # First sync
@@ -226,7 +226,7 @@ basic-memory sync
 basic-memory sync --watch
 ```
 
-> **Important**: You need to install Basic Memory via `uv` or `pip` to use the command line tools, see [[Getting Started with Basic Memory#Installation]].
+> **Important**: You need to install Nova Memory via `uv` or `pip` to use the command line tools, see [[Getting Started with Nova Memory#Installation]].
 
 ## Regular Usage
 
@@ -258,17 +258,17 @@ basic-memory import claude conversations --folder new
 ```
 
 
-## Using stdin with Basic Memory's `write_note` Tool
+## Using stdin with Nova Memory's `write_note` Tool
 
-The `write-note` tool supports reading content from standard input (stdin), allowing for more flexible workflows when creating or updating notes in your Basic Memory knowledge base.
+The `write-note` tool supports reading content from standard input (stdin), allowing for more flexible workflows when creating or updating notes in your Nova Memory knowledge base.
 
 ### Use Cases
 
 This feature is particularly useful for:
 
-1. **Piping output from other commands** directly into Basic Memory notes
+1. **Piping output from other commands** directly into Nova Memory notes
 2. **Creating notes with multi-line content** without having to escape quotes or special characters
-3. **Integrating with AI assistants** like Claude Code that can generate content and pipe it to Basic Memory
+3. **Integrating with AI assistants** like Claude Code that can generate content and pipe it to Nova Memory
 4. **Processing text data** from files or other sources
 
 ### Basic Usage
@@ -363,7 +363,7 @@ You can then use the `/mcp` command in the REPL:
 
 ## Version Management (New in v0.13.0)
 
-Basic Memory v0.13.0 introduces automatic version management and multiple installation options:
+Nova Memory v0.13.0 introduces automatic version management and multiple installation options:
 
 ```bash
 # Stable releases
@@ -409,6 +409,6 @@ If status shows problems:
 
 
 ## Relations
-- used_by [[Getting Started with Basic Memory]] (Installation instructions)
-- complements [[User Guide]] (How to use Basic Memory)
-- relates_to [[Introduction to Basic Memory]] (System overview)
+- used_by [[Getting Started with Nova Memory]] (Installation instructions)
+- complements [[User Guide]] (How to use Nova Memory)
+- relates_to [[Introduction to Nova Memory]] (System overview)

@@ -4,7 +4,7 @@ import json
 
 from typer.testing import CliRunner
 
-from basic_memory.cli.main import app as cli_app
+from nova_memory.cli.main import app as cli_app
 
 
 def test_info_stats_command(cli_env, test_graph, project_session):
@@ -18,7 +18,7 @@ def test_info_stats_command(cli_env, test_graph, project_session):
     assert result.exit_code == 0
 
     # Check that key data is included in the output
-    assert "Basic Memory Project Info" in result.stdout
+    assert "Nova Memory Project Info" in result.stdout
 
 
 def test_info_stats_json(cli_env, test_graph, project_session):

@@ -4,7 +4,7 @@ import os
 from unittest.mock import patch, MagicMock
 from typer.testing import CliRunner
 
-from basic_memory.cli.main import app as cli_app
+from nova_memory.cli.main import app as cli_app
 
 
 @patch("basic_memory.cli.commands.project.asyncio.run")
@@ -134,7 +134,7 @@ def test_project_failure_exits_with_error(mock_run, cli_env):
     # All should exit with code 1 and show error message
     assert list_result.exit_code == 1
     assert "Error listing projects" in list_result.output
-    assert "Make sure the Basic Memory server is running" in list_result.output
+    assert "Make sure the Nova Memory server is running" in list_result.output
 
     assert add_result.exit_code == 1
     assert "Error adding project" in add_result.output

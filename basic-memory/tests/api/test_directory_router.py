@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
-from basic_memory.schemas.directory import DirectoryNode
+from nova_memory.schemas.directory import DirectoryNode
 
 
 @pytest.mark.asyncio

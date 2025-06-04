@@ -4,7 +4,7 @@ import os
 import pytest
 from unittest.mock import patch, MagicMock
 
-from basic_memory.mcp.server import create_auth_config
+from nova_memory.mcp.server import create_auth_config
 
 
 class TestMCPServer:

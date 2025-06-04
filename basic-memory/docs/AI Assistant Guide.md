@@ -4,12 +4,12 @@ type: note
 permalink: docs/ai-assistant-guide-1
 ---
 
-> Note: This is an optional document that can be copy/pasted into the project knowledge for an LLM to provide a full description of how it can work with Basic Memory. It is provided as a helpful resource. The tools contain extensive usage description prompts with enable the LLM to understand them. 
+> Note: This is an optional document that can be copy/pasted into the project knowledge for an LLM to provide a full description of how it can work with Nova Memory. It is provided as a helpful resource. The tools contain extensive usage description prompts with enable the LLM to understand them. 
 
 You can [download](https://github.com/basicmachines-co/basic-memory/blob/main/docs/AI%20Assistant%20Guide.md) the contents of this file from GitHub
-# AI Assistant Guide for Basic Memory
+# AI Assistant Guide for Nova Memory
 
-This guide helps you, the AI assistant, use Basic Memory tools effectively when working with users. It covers reading, writing, and navigating knowledge through the Model Context Protocol (MCP).
+This guide helps you, the AI assistant, use Nova Memory tools effectively when working with users. It covers reading, writing, and navigating knowledge through the Model Context Protocol (MCP).
 
 ## Quick Reference
 
@@ -33,7 +33,7 @@ This guide helps you, the AI assistant, use Basic Memory tools effectively when 
 
 ## Overview
 
-Basic Memory allows you and users to record context in local Markdown files, building a rich knowledge base through natural conversations. The system automatically creates a semantic knowledge graph from simple text patterns.
+Nova Memory allows you and users to record context in local Markdown files, building a rich knowledge base through natural conversations. The system automatically creates a semantic knowledge graph from simple text patterns.
 
 - **Local-First**: All data is stored in plain text files on the user's computer
 - **Real-Time**: Users see content updates immediately
@@ -43,13 +43,13 @@ Basic Memory allows you and users to record context in local Markdown files, bui
 
 ## The Importance of the Knowledge Graph
 
-Basic Memory's value comes from connections between notes, not just the notes themselves. When writing notes, your primary goal should be creating a rich, interconnected knowledge graph.
+Nova Memory's value comes from connections between notes, not just the notes themselves. When writing notes, your primary goal should be creating a rich, interconnected knowledge graph.
 
 When creating content, focus on:
 
 1. **Increasing Semantic Density**: Add multiple observations and relations to each note
 2. **Using Accurate References**: Aim to reference existing entities by their exact titles
-3. **Creating Forward References**: Feel free to reference entities that don't exist yet - Basic Memory will resolve these when they're created later
+3. **Creating Forward References**: Feel free to reference entities that don't exist yet - Nova Memory will resolve these when they're created later
 4. **Creating Bidirectional Links**: When appropriate, connect entities from both directions
 5. **Using Meaningful Categories**: Add semantic context with appropriate observation categories
 6. **Choosing Precise Relations**: Use specific relation types that convey meaning
@@ -113,7 +113,7 @@ recent_activity(timeframe="1 week")     # Check what's been updated
 
 ## memory:// URLs Explained
 
-Basic Memory uses a special URL format to reference entities in the knowledge graph:
+Nova Memory uses a special URL format to reference entities in the knowledge graph:
 
 - `memory://title` - Reference by title
 - `memory://folder/title` - Reference by folder and title 
@@ -152,14 +152,14 @@ Knowledge is encoded in standard markdown using simple patterns:
 **Protocol for recording context**:
 
 1. Identify valuable information in the conversation
-2. Ask the user: "Would you like me to record our discussion about [topic] in Basic Memory?"
+2. Ask the user: "Would you like me to record our discussion about [topic] in Nova Memory?"
 3. If they agree, use `write_note` to capture the information
 4. If they decline, continue without recording
-5. Let the user know when information has been recorded: "I've saved our discussion about [topic] to Basic Memory."
+5. Let the user know when information has been recorded: "I've saved our discussion about [topic] to Nova Memory."
 
 ## Understanding User Interactions
 
-Users will interact with Basic Memory in patterns like:
+Users will interact with Nova Memory in patterns like:
 
 1. **Creating knowledge**:
    ```
@@ -358,7 +358,7 @@ When creating relations:
 - Use fuzzy matching: search for partial titles
 
 **Forward References:**
-- These are normal! Basic Memory links them automatically when target notes are created
+- These are normal! Nova Memory links them automatically when target notes are created
 - Inform users: "I've created forward references that will be linked when you create those notes"
 
 **Sync Issues:**
@@ -372,7 +372,7 @@ When creating relations:
    - Record decisions, rationales, and conclusions
    - Link to related topics
    - Ask for permission first: "Would you like me to save our discussion about [topic]?"
-   - Confirm when complete: "I've saved our discussion to Basic Memory"
+   - Confirm when complete: "I've saved our discussion to Nova Memory"
 
 2. **Create a Rich Semantic Graph**
    - **Add meaningful observations**: Include at least 3-5 categorized observations in each note

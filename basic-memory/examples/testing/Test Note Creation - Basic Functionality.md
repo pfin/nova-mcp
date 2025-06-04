@@ -31,7 +31,7 @@ Testing basic note creation with various content types and structures.
 ```python
 # Block code
 def test_function():
-    return "Hello, Basic Memory!"
+    return "Hello, Nova Memory!"
 ```
 
 ## Special Characters

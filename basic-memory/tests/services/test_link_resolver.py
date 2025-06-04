@@ -6,9 +6,9 @@ import pytest
 
 import pytest_asyncio
 
-from basic_memory.schemas.base import Entity as EntitySchema
-from basic_memory.services.link_resolver import LinkResolver
-from basic_memory.models.knowledge import Entity as EntityModel
+from nova_memory.schemas.base import Entity as EntitySchema
+from nova_memory.services.link_resolver import LinkResolver
+from nova_memory.models.knowledge import Entity as EntityModel
 
 
 @pytest_asyncio.fixture

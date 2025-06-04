@@ -7,9 +7,9 @@
 ![](https://badge.mcpx.dev?type=dev 'MCP Dev')
 [![smithery badge](https://smithery.ai/badge/@basicmachines-co/basic-memory)](https://smithery.ai/server/@basicmachines-co/basic-memory)
 
-# Basic Memory
+# Nova Memory
 
-Basic Memory lets you build persistent knowledge through natural conversations with Large Language Models (LLMs) like
+Nova Memory lets you build persistent knowledge through natural conversations with Large Language Models (LLMs) like
 Claude, while keeping everything in simple Markdown files on your computer. It uses the Model Context Protocol (MCP) to
 enable any compatible LLM to read and write to your local knowledge base.
 
@@ -28,16 +28,16 @@ https://github.com/user-attachments/assets/a55d8238-8dd0-454a-be4c-8860dbbd0ddc
 
 ```bash
 # Install with uv (recommended)
-uv tool install basic-memory
+uv tool install nova-memory
 
 # Configure Claude Desktop (edit ~/Library/Application Support/Claude/claude_desktop_config.json)
 # Add this to your config:
 {
   "mcpServers": {
-    "basic-memory": {
+    "nova-memory": {
       "command": "uvx",
       "args": [
-        "basic-memory",
+        "nova-memory",
         "mcp"
       ]
     }
@@ -61,7 +61,7 @@ Memory for Claude Desktop:
 npx -y @smithery/cli install @basicmachines-co/basic-memory --client claude
 ```
 
-This installs and configures Basic Memory without requiring manual edits to the Claude Desktop configuration file. The
+This installs and configures Nova Memory without requiring manual edits to the Claude Desktop configuration file. The
 Smithery server hosts the MCP server component, while your data remains stored locally as Markdown files.
 
 ### Glama.ai
@@ -70,7 +70,7 @@ Smithery server hosts the MCP server component, while your data remains stored l
   <img width="380" height="200" src="https://glama.ai/mcp/servers/o90kttu9ym/badge" alt="basic-memory MCP server" />
 </a>
 
-## Why Basic Memory?
+## Why Nova Memory?
 
 Most LLM interactions are ephemeral - you ask a question, get an answer, and everything is forgotten. Each conversation
 starts fresh, without the context or knowledge from previous ones. Current workarounds have limitations:
@@ -80,7 +80,7 @@ starts fresh, without the context or knowledge from previous ones. Current worka
 - Vector databases require complex setups and often live in the cloud
 - Knowledge graphs typically need specialized tools to maintain
 
-Basic Memory addresses these problems with a simple approach: structured Markdown files that both humans and LLMs can
+Nova Memory addresses these problems with a simple approach: structured Markdown files that both humans and LLMs can
 read
 and write to. The key advantages:
 
@@ -91,7 +91,7 @@ and write to. The key advantages:
 - **Standard formats:** Works with existing editors like Obsidian
 - **Lightweight infrastructure:** Just local files indexed in a local SQLite database
 
-With Basic Memory, you can:
+With Nova Memory, you can:
 
 - Have conversations that build on previous knowledge
 - Create structured notes during natural conversations
@@ -186,7 +186,7 @@ This creates a two-way flow where:
 
 ## Technical Implementation
 
-Under the hood, Basic Memory:
+Under the hood, Nova Memory:
 
 1. Stores everything in Markdown files
 2. Uses a SQLite database for searching and indexing
@@ -267,7 +267,7 @@ For one-click installation, click one of the install buttons below...
 
 [![Install with UV in VS Code](https://img.shields.io/badge/VS_Code-UV-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=basic-memory&config=%7B%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22basic-memory%22%2C%22mcp%22%5D%7D) [![Install with UV in VS Code Insiders](https://img.shields.io/badge/VS_Code_Insiders-UV-24bfa5?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=basic-memory&config=%7B%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22basic-memory%22%2C%22mcp%22%5D%7D&quality=insiders)
 
-You can use Basic Memory with VS Code to easily retrieve and store information while coding. Click the installation buttons above for one-click setup, or follow the manual installation instructions below.
+You can use Nova Memory with VS Code to easily retrieve and store information while coding. Click the installation buttons above for one-click setup, or follow the manual installation instructions below.
 
 ### Manual Installation
 
@@ -301,9 +301,9 @@ Optionally, you can add it to a file called `.vscode/mcp.json` in your workspace
 
 ## Using with Claude Desktop
 
-Basic Memory is built using the MCP (Model Context Protocol) and works with the Claude desktop app (https://claude.ai/):
+Nova Memory is built using the MCP (Model Context Protocol) and works with the Claude desktop app (https://claude.ai/):
 
-1. Configure Claude Desktop to use Basic Memory:
+1. Configure Claude Desktop to use Nova Memory:
 
 Edit your MCP configuration file (usually located at `~/Library/Application Support/Claude/claude_desktop_config.json`
 for OS X):
@@ -344,7 +344,7 @@ config:
 
 2. Sync your knowledge:
 
-Basic Memory will sync the files in your project in real time if you make manual edits.
+Nova Memory will sync the files in your project in real time if you make manual edits.
 
 3. In Claude Desktop, the LLM can now use these tools:
 

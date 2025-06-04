@@ -385,7 +385,7 @@ This PR updates the CLAUDE.md file to document the GitHub integration capabiliti
   ([#24](https://github.com/basicmachines-co/basic-memory/pull/24),
   [`eb1e7b6`](https://github.com/basicmachines-co/basic-memory/commit/eb1e7b6088b0b3dead9c104ee44174b2baebf417))
 
-This PR adds support for deploying Basic Memory on the Smithery platform.
+This PR adds support for deploying Nova Memory on the Smithery platform.
 
 Signed-off-by: bm-claudeai <claude@basicmachines.co>
 

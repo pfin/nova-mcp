@@ -1,11 +1,11 @@
-# Supabase OAuth Setup for Basic Memory
+# Supabase OAuth Setup for Nova Memory
 
-This guide explains how to set up Supabase as the OAuth provider for Basic Memory MCP server in production.
+This guide explains how to set up Supabase as the OAuth provider for Nova Memory MCP server in production.
 
 ## Prerequisites
 
 1. A Supabase project (create one at [supabase.com](https://supabase.com))
-2. Basic Memory MCP server deployed
+2. Nova Memory MCP server deployed
 3. Environment variables configuration
 
 ## Overview

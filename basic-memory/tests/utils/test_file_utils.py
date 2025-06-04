@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from basic_memory.file_utils import (
+from nova_memory.file_utils import (
     FileError,
     FileWriteError,
     ParseError,

@@ -2,9 +2,9 @@
 
 import pytest
 
-from basic_memory.mcp.tools.move_note import move_note
-from basic_memory.mcp.tools.write_note import write_note
-from basic_memory.mcp.tools.read_note import read_note
+from nova_memory.mcp.tools.move_note import move_note
+from nova_memory.mcp.tools.write_note import write_note
+from nova_memory.mcp.tools.read_note import read_note
 
 
 @pytest.mark.asyncio

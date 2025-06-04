@@ -5,7 +5,7 @@ from unittest.mock import patch, MagicMock, AsyncMock
 
 import pytest
 
-from basic_memory.services.initialization import (
+from nova_memory.services.initialization import (
     ensure_initialization,
     initialize_app,
     initialize_database,

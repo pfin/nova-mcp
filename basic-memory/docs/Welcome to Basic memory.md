@@ -1,5 +1,5 @@
 ---
-title: Introduction to Basic Memory
+title: Introduction to Nova Memory
 type: docs
 permalink: docs/introduction-1
 tags:
@@ -10,11 +10,11 @@ tags:
 
 # BASIC MEMORY
 
-Basic Memory is a knowledge management system that allows you to build a persistent semantic graph from conversations
+Nova Memory is a knowledge management system that allows you to build a persistent semantic graph from conversations
 with AI assistants. All knowledge is stored in standard Markdown files on your computer, giving you full control and
 ownership of your data.
 
-Basic Memory connects you and AI assistants through shared knowledge:
+Nova Memory connects you and AI assistants through shared knowledge:
 
 1. **Captures knowledge** from natural conversations with AI assistants
 2. **Structures information** using simple semantic patterns in Markdown
@@ -32,14 +32,14 @@ learning environment where each conversation builds upon previous ones.
 
 ![[Claude-Obsidian-Demo.mp4]]
 
-Basic Memory uses:
+Nova Memory uses:
 
 - **Files as the source of truth** - Everything is stored in plain Markdown files
 - **Git-compatible storage** - All knowledge can be versioned, branched, and merged
 - **Local SQLite database** - For fast indexing and searching only (not primary storage)
 - **Model Context Protocol (MCP)** - For seamless AI assistant integration
 
-Basic Memory gives you complete control over your knowledge:
+Nova Memory gives you complete control over your knowledge:
 
 - **Local-first storage** - All knowledge lives on your computer
 - **Standard file formats** - Plain Markdown compatible with any editor
@@ -51,18 +51,18 @@ Changes to files automatically sync with the knowledge graph, and AI assistants 
 
 ## Documentation Map
 
-Continue exploring Basic Memory with these guides:
+Continue exploring Nova Memory with these guides:
 
-- Installation and setup [[Getting Started with Basic Memory]]
+- Installation and setup [[Getting Started with Nova Memory]]
 - Comprehensive usage instructions [[User Guide]]
 - Detailed explanation of knowledge structure [[Knowledge Format]]
 - Obsidian integration guide [[Obsidian Integration]]
 - Canvas visualization guide [[Canvas]]
 - Command line tool reference [[CLI Reference]]
-- Reference for AI assistants using Basic Memory [[AI Assistant Guide]]
+- Reference for AI assistants using Nova Memory [[AI Assistant Guide]]
 - Technical implementation details [[Technical Information]]
 
 ## Next Steps
 
-Start with the [[Getting Started with Basic Memory]] guide to install Basic Memory and configure it with your AI
+Start with the [[Getting Started with Nova Memory]] guide to install Nova Memory and configure it with your AI
 assistant.

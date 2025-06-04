@@ -11,11 +11,11 @@ tags:
 
 # Coffee Knowledge Base
 
-A comprehensive collection of coffee knowledge, from bean origins to brewing methods to tasting notes. This knowledge base demonstrates Basic Memory's ability to organize and connect information in a meaningful way.
+A comprehensive collection of coffee knowledge, from bean origins to brewing methods to tasting notes. This knowledge base demonstrates Nova Memory's ability to organize and connect information in a meaningful way.
 
 ## Overview
 
-This Coffee Knowledge Base captures key information about coffee, structured with semantic observations and relations that connect different aspects of coffee knowledge. It serves as both a useful reference for coffee enthusiasts and a demonstration of how Basic Memory organizes information.
+This Coffee Knowledge Base captures key information about coffee, structured with semantic observations and relations that connect different aspects of coffee knowledge. It serves as both a useful reference for coffee enthusiasts and a demonstration of how Nova Memory organizes information.
 
 ## Key Topics
 
@@ -61,7 +61,7 @@ This knowledge base demonstrates:
 - Building connections between related concepts
 - Creating a navigable knowledge graph
 - Structuring information in a way both humans and AI assistants can understand
-- How Basic Memory enables persistent knowledge across conversations
+- How Nova Memory enables persistent knowledge across conversations
 
 ## Relations
 
@@ -70,4 +70,4 @@ This knowledge base demonstrates:
 - contains [[Brewing Equipment]]
 - contains [[Flavor Extraction]]
 - contains [[Tasting Notes]]
-- demonstrates [[Basic Memory Capabilities]]
+- demonstrates [[Nova Memory Capabilities]]

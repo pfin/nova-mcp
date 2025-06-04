@@ -1,3 +1,4 @@
 #!/bin/bash
 cd /home/peter/nova_memory/nova-memory
-uvx basic-memory --project nova mcp "$@"
+export PYTHONPATH="/home/peter/nova_memory/nova-memory/src:$PYTHONPATH"
+exec python3 -m nova_memory.cli.main mcp "$@"

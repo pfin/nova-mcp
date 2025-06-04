@@ -7,9 +7,9 @@ import pytest
 import pytest_asyncio
 from sqlalchemy import select
 
-from basic_memory import db
-from basic_memory.models.project import Project
-from basic_memory.repository.project_repository import ProjectRepository
+from nova_memory import db
+from nova_memory.models.project import Project
+from nova_memory.repository.project_repository import ProjectRepository
 
 
 @pytest_asyncio.fixture

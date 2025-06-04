@@ -2,7 +2,7 @@
 
 import pytest
 
-from basic_memory.services.directory_service import DirectoryService
+from nova_memory.services.directory_service import DirectoryService
 
 
 @pytest.mark.asyncio

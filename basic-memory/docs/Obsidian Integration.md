@@ -1,12 +1,12 @@
 ---
 title: Obsidian Integration
 type: note
-permalink: docs/obsidian-integration
+permalink: docs/obsidian-integration-1
 ---
 
 # Obsidian Integration
 
-Basic Memory integrates seamlessly with [Obsidian](https://obsidian.md), providing powerful visualization and navigation capabilities for your knowledge graph.
+Nova Memory integrates seamlessly with [Obsidian](https://obsidian.md), providing powerful visualization and navigation capabilities for your knowledge graph.
 
 ## Setup
 
@@ -14,7 +14,7 @@ Basic Memory integrates seamlessly with [Obsidian](https://obsidian.md), providi
 
 1. Download and install [Obsidian](https://obsidian.md)
 2. Create a new vault
-3. Point it to your Basic Memory directory (~/basic-memory by default)
+3. Point it to your Nova Memory directory (~/basic-memory by default)
 4. Enable core plugins like Graph View, Backlinks, and Tags
 
 ## Visualization Features
@@ -49,7 +49,7 @@ Use tags to organize and filter content:
 
 ## Knowledge Elements
 
-Basic Memory's knowledge format works natively with Obsidian:
+Nova Memory's knowledge format works natively with Obsidian:
 
 ### Wiki Links
 
@@ -85,7 +85,7 @@ Frontmatter provides metadata for Obsidian to use in search and filtering.
 
 ## Canvas Integration
 
-Basic Memory can create [Obsidian Canvas](https://obsidian.md/canvas) files:
+Nova Memory can create [Obsidian Canvas](https://obsidian.md/canvas) files:
 
 1. Ask Claude to create a visualization:
    ```
@@ -100,7 +100,7 @@ Basic Memory can create [Obsidian Canvas](https://obsidian.md/canvas) files:
 
 ## Recommended Plugins
 
-These Obsidian plugins work especially well with Basic Memory:
+These Obsidian plugins work especially well with Nova Memory:
 
 - **Dataview**: Query your knowledge base programmatically
 - **Kanban**: Organize tasks from knowledge files
@@ -141,6 +141,6 @@ These Obsidian plugins work especially well with Basic Memory:
 ```
 
 ## Relations
-- enhances [[Introduction to Basic Memory]] (Overview of system)
+- enhances [[Introduction to Nova Memory]] (Overview of system)
 - relates_to [[Canvas]] (Visual knowledge mapping)
-- complements [[User Guide]] (Using Basic Memory)
+- complements [[User Guide]] (Using Nova Memory)

@@ -1,16 +1,16 @@
 ---
 title: Technical Information
 type: note
-permalink: docs/technical-information
+permalink: docs/technical-information-1
 ---
 
 # Technical Information
 
-This document provides technical details about Basic Memory's implementation, licensing, and integration with the Model Context Protocol (MCP).
+This document provides technical details about Nova Memory's implementation, licensing, and integration with the Model Context Protocol (MCP).
 
 ## Architecture
 
-Basic Memory consists of:
+Nova Memory consists of:
 
 1. **Core Knowledge Engine**: Parses and indexes Markdown files
 2. **SQLite Database**: Provides fast querying and search
@@ -22,10 +22,10 @@ The system follows a file-first architecture where all knowledge is represented 
 
 ## Model Context Protocol (MCP)
 
-Basic Memory implements the [Model Context Protocol](https://github.com/modelcontextprotocol/spec), an open standard for enabling AI models to access external tools:
+Nova Memory implements the [Model Context Protocol](https://github.com/modelcontextprotocol/spec), an open standard for enabling AI models to access external tools:
 
 - **Standardized Interface**: Common protocol for tool integration
-- **Tool Registration**: Basic Memory registers as a tool provider
+- **Tool Registration**: Nova Memory registers as a tool provider
 - **Asynchronous Communication**: Enables efficient interaction with AI models
 - **Standardized Schema**: Structured data exchange format
 
@@ -33,18 +33,18 @@ Integration with Claude Desktop uses the MCP to grant Claude access to your know
 
 ## Licensing
 
-Basic Memory is licensed under the [GNU Affero General Public License v3.0 (AGPL-3.0)](https://www.gnu.org/licenses/agpl-3.0.en.html):
+Nova Memory is licensed under the [GNU Affero General Public License v3.0 (AGPL-3.0)](https://www.gnu.org/licenses/agpl-3.0.en.html):
 
 - **Free Software**: You can use, study, share, and modify the software
 - **Copyleft**: Derivative works must be distributed under the same license
 - **Network Use**: Network users must be able to receive the source code
 - **Commercial Use**: Allowed, subject to license requirements
 
-The AGPL license ensures Basic Memory remains open source while protecting against proprietary forks.
+The AGPL license ensures Nova Memory remains open source while protecting against proprietary forks.
 
 ## Source Code
 
-Basic Memory is developed as an open-source project:
+Nova Memory is developed as an open-source project:
 
 - **GitHub Repository**: [https://github.com/basicmachines-co/basic-memory](https://github.com/basicmachines-co/basic-memory)
 - **Issue Tracker**: Report bugs and request features on GitHub
@@ -53,7 +53,7 @@ Basic Memory is developed as an open-source project:
 
 ## Data Storage and Privacy
 
-Basic Memory is designed with privacy as a core principle:
+Nova Memory is designed with privacy as a core principle:
 
 - **Local-First**: All data remains on your local machine
 - **No Cloud Dependency**: No remote servers or accounts required
@@ -62,7 +62,7 @@ Basic Memory is designed with privacy as a core principle:
 
 ## Implementation Details
 
-Knowledge in Basic Memory is organized as a semantic graph:
+Knowledge in Nova Memory is organized as a semantic graph:
 
 1. **Entities** - Distinct concepts represented by Markdown documents
 2. **Observations** - Categorized facts and information about entities
@@ -168,11 +168,11 @@ Becomes
 }
 ```
 
-Basic Memory understands how to build context via its semantic graph.
+Nova Memory understands how to build context via its semantic graph.
 
 ### Entity Model
 
-Basic Memory's core data model consists of:
+Nova Memory's core data model consists of:
 
 - **Entities**: Documents in your knowledge base
 - **Observations**: Facts or statements about entities
@@ -188,7 +188,7 @@ Plain Markdown files store all knowledge, making it accessible with any text edi
 ```mermaid
 flowchart TD
     User((User)) <--> |Conversation| Claude["Claude or other LLM"]
-    Claude <-->|API Calls| BMCP["Basic Memory MCP Server"]
+    Claude <-->|API Calls| BMCP["Nova Memory MCP Server"]
     
     subgraph "Local Storage"
         KnowledgeFiles["Markdown Files - Source of Truth"]

@@ -2,8 +2,8 @@
 
 import pytest
 
-from basic_memory.mcp.tools.list_directory import list_directory
-from basic_memory.mcp.tools.write_note import write_note
+from nova_memory.mcp.tools.list_directory import list_directory
+from nova_memory.mcp.tools.write_note import write_note
 
 
 @pytest.mark.asyncio

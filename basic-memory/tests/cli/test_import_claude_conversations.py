@@ -5,9 +5,9 @@ import json
 import pytest
 from typer.testing import CliRunner
 
-from basic_memory.cli.app import app
-from basic_memory.cli.commands import import_claude_conversations  # noqa
-from basic_memory.config import config
+from nova_memory.cli.app import app
+from nova_memory.cli.commands import import_claude_conversations  # noqa
+from nova_memory.config import config
 
 # Set up CLI runner
 runner = CliRunner()

@@ -10,7 +10,7 @@ tags:
 
 # Canvas Visualizations
 
-Basic Memory can create visual knowledge maps using Obsidian's Canvas feature. These visualizations help you understand relationships between concepts, map out processes, and visualize your knowledge structure.
+Nova Memory can create visual knowledge maps using Obsidian's Canvas feature. These visualizations help you understand relationships between concepts, map out processes, and visualize your knowledge structure.
 
 ## Creating Canvas Visualizations
 
@@ -28,7 +28,7 @@ You: "Can you make a canvas diagram of the perfect pour over method?"
 
 ## Types of Visualizations
 
-Basic Memory can create several types of visual maps:
+Nova Memory can create several types of visual maps:
 
 ### Document Maps
 Visualize connections between your notes and documents
@@ -72,7 +72,7 @@ You: "Create a visual map showing how different philosophical schools relate to 
 ## Visualization Workflow
 
 1. **Request a visualization** by describing what you want to see
-2. **Claude creates the canvas file** in your Basic Memory directory
+2. **Claude creates the canvas file** in your Nova Memory directory
 3. **Open the file in Obsidian** to view the visualization
 4. **Refine the visualization** by asking Claude for adjustments:
    ```
@@ -102,6 +102,6 @@ The resulting file is fully compatible with Obsidian's Canvas feature and can be
 - **Provide context** about what documents or concepts to include
 
 ## Relations
-- enhances [[Obsidian Integration]] (Using Basic Memory with Obsidian)
+- enhances [[Obsidian Integration]] (Using Nova Memory with Obsidian)
 - visualizes [[Knowledge Format]] (The structure of your knowledge)
-- complements [[User Guide]] (Ways to use Basic Memory)
+- complements [[User Guide]] (Ways to use Nova Memory)

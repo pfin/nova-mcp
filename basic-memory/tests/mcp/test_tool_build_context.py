@@ -5,8 +5,8 @@ from datetime import datetime
 
 from mcp.server.fastmcp.exceptions import ToolError
 
-from basic_memory.mcp.tools import build_context
-from basic_memory.schemas.memory import (
+from nova_memory.mcp.tools import build_context
+from nova_memory.schemas.memory import (
     GraphContext,
 )
 

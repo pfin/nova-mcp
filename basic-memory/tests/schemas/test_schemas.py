@@ -3,7 +3,7 @@
 import pytest
 from pydantic import ValidationError, BaseModel
 
-from basic_memory.schemas import (
+from nova_memory.schemas import (
     Entity,
     EntityResponse,
     Relation,
@@ -11,8 +11,8 @@ from basic_memory.schemas import (
     GetEntitiesRequest,
     RelationResponse,
 )
-from basic_memory.schemas.request import EditEntityRequest
-from basic_memory.schemas.base import to_snake_case, TimeFrame
+from nova_memory.schemas.request import EditEntityRequest
+from nova_memory.schemas.base import to_snake_case, TimeFrame
 
 
 def test_entity_project_name():

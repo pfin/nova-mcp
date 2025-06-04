@@ -1,6 +1,6 @@
 # OAuth Quick Start
 
-Basic Memory supports OAuth authentication for secure access control. For detailed documentation, see [OAuth Authentication Guide](docs/OAuth%20Authentication%20Guide.md).
+Nova Memory supports OAuth authentication for secure access control. For detailed documentation, see [OAuth Authentication Guide](docs/OAuth%20Authentication%20Guide.md).
 
 ## Quick Test with MCP Inspector
 

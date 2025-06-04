@@ -6,7 +6,7 @@ from mcp.server.auth.provider import AuthorizationParams
 from mcp.shared.auth import OAuthClientInformationFull
 from pydantic import AnyHttpUrl
 
-from basic_memory.mcp.auth_provider import (
+from nova_memory.mcp.auth_provider import (
     BasicMemoryOAuthProvider,
     BasicMemoryAccessToken,
     BasicMemoryRefreshToken,
@@ -221,7 +221,7 @@ class TestBasicMemoryOAuthProvider:
 
         # Create auth code with past expiration
         auth_code = "expired-code"
-        from basic_memory.mcp.auth_provider import BasicMemoryAuthorizationCode
+        from nova_memory.mcp.auth_provider import BasicMemoryAuthorizationCode
 
         provider.authorization_codes[auth_code] = BasicMemoryAuthorizationCode(
             code=auth_code,

@@ -8,12 +8,12 @@ from fastapi import FastAPI
 from httpx import AsyncClient, ASGITransport
 from mcp.server import FastMCP
 
-from basic_memory.api.app import app as fastapi_app
-from basic_memory.deps import get_project_config, get_engine_factory, get_app_config
-from basic_memory.services.search_service import SearchService
-from basic_memory.mcp.server import mcp as mcp_server
+from nova_memory.api.app import app as fastapi_app
+from nova_memory.deps import get_project_config, get_engine_factory, get_app_config
+from nova_memory.services.search_service import SearchService
+from nova_memory.mcp.server import mcp as mcp_server
 
-from basic_memory.config import app_config as basic_memory_app_config  # noqa: F401
+from nova_memory.config import app_config as basic_memory_app_config  # noqa: F401
 
 
 @pytest.fixture(scope="function")

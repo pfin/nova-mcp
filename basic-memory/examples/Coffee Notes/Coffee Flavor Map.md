@@ -11,7 +11,7 @@ tags:
 
 # Coffee Flavor Map
 
-A visual mapping of coffee flavor attributes, brewing methods, and their relationships. This note describes a canvas visualization that could be generated to demonstrate Basic Memory's visualization capabilities.
+A visual mapping of coffee flavor attributes, brewing methods, and their relationships. This note describes a canvas visualization that could be generated to demonstrate Nova Memory's visualization capabilities.
 
 ## Overview
 
@@ -46,7 +46,7 @@ The Coffee Flavor Map provides a visual representation of how different brewing 
 - Understand how equipment changes can modify flavor outcomes
 - Visualize the complex interplay between all coffee variables
 
-### As a Basic Memory Demo
+### As a Nova Memory Demo
 - Demonstrates Canvas visualization capabilities
 - Shows how relations can be visually mapped
 - Illustrates complex knowledge organization
@@ -60,7 +60,7 @@ In a conversation with Claude, you could request:
 Please create a canvas visualization mapping the relationships between coffee brewing methods, origins, and flavor outcomes. Show how different equipment and techniques influence extraction and resulting flavor profiles.
 ```
 
-This would generate a `.canvas` file in your Basic Memory directory that could be opened with Obsidian for an interactive visualization of these coffee relationships.
+This would generate a `.canvas` file in your Nova Memory directory that could be opened with Obsidian for an interactive visualization of these coffee relationships.
 
 ## Example Visualization Snippets
 

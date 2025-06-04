@@ -1,6 +1,6 @@
-# Contributing to Basic Memory
+# Contributing to Nova Memory
 
-Thank you for considering contributing to Basic Memory! This document outlines the process for contributing to the
+Thank you for considering contributing to Nova Memory! This document outlines the process for contributing to the
 project and how to get started as a developer.
 
 ## Getting Started
@@ -146,7 +146,7 @@ agreement to the DCO.
 
 ## Release Process
 
-Basic Memory uses automatic versioning based on git tags with `uv-dynamic-versioning`. Here's how releases work:
+Nova Memory uses automatic versioning based on git tags with `uv-dynamic-versioning`. Here's how releases work:
 
 ### Version Management
 - **Development versions**: Automatically generated from git commits (e.g., `0.12.4.dev26+468a22f`)
@@ -194,4 +194,4 @@ All contributors must follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Thank You!
 
-Your contributions help make Basic Memory better. We appreciate your time and effort!
+Your contributions help make Nova Memory better. We appreciate your time and effort!

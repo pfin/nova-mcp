@@ -1,12 +1,12 @@
-# Manual Testing Suite for Basic Memory
+# Manual Testing Suite for Nova Memory
 
-This document outlines a comprehensive manual testing approach where an AI assistant (Claude) executes real-world usage scenarios using Basic Memory's MCP tools. The unique aspect: **Basic Memory tests itself** - all test observations and results are recorded as notes in a dedicated test project.
+This document outlines a comprehensive manual testing approach where an AI assistant (Claude) executes real-world usage scenarios using Nova Memory's MCP tools. The unique aspect: **Nova Memory tests itself** - all test observations and results are recorded as notes in a dedicated test project.
 
 ## Philosophy
 
 - **Integration over Isolation**: Test the full MCP→API→DB→File stack
 - **Real Usage Patterns**: Creative exploration, not just checklist validation
-- **Self-Documenting**: Use Basic Memory to record all test observations
+- **Self-Documenting**: Use Nova Memory to record all test observations
 - **Living Documentation**: Test results become part of the knowledge base
 
 ## Setup Instructions
@@ -216,7 +216,7 @@ During testing, create a dedicated test project:
 
 ### Test Observation Format
 
-Record all observations as Basic Memory notes using this structure:
+Record all observations as Nova Memory notes using this structure:
 
 ```markdown
 ---
@@ -288,7 +288,7 @@ tags: [testing, session, v0.13.0]
 
 ## Test Reporting
 
-All test results will be captured in the Basic Memory test project, creating a living knowledge base of:
+All test results will be captured in the Nova Memory test project, creating a living knowledge base of:
 
 - Test execution logs with detailed observations
 - Bug reports with reproduction steps
@@ -297,7 +297,7 @@ All test results will be captured in the Basic Memory test project, creating a l
 - Knowledge graphs showing test coverage relationships
 - Summary reports for development team review
 
-This approach ensures that the testing process itself validates Basic Memory's core value proposition: effectively capturing, organizing, and connecting knowledge through natural interaction patterns.
+This approach ensures that the testing process itself validates Nova Memory's core value proposition: effectively capturing, organizing, and connecting knowledge through natural interaction patterns.
 
 ## Things to note
 

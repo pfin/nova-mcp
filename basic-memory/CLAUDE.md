@@ -1,8 +1,8 @@
-# CLAUDE.md - Basic Memory Project Guide
+# CLAUDE.md - Nova Memory Project Guide
 
 ## Project Overview
 
-Basic Memory is a local-first knowledge management system built on the Model Context Protocol (MCP). It enables
+Nova Memory is a local-first knowledge management system built on the Model Context Protocol (MCP). It enables
 bidirectional communication between LLMs (like Claude) and markdown files, creating a personal knowledge graph that can
 be traversed using links between documents.
 
@@ -80,20 +80,20 @@ See the [README.md](README.md) file for a project overview.
     - Relations with WikiLinks [[Entity]]
     - Frontmatter with metadata
 
-### Basic Memory Commands
+### Nova Memory Commands
 
-- Sync knowledge: `basic-memory sync` or `basic-memory sync --watch`
-- Import from Claude: `basic-memory import claude conversations`
-- Import from ChatGPT: `basic-memory import chatgpt`
-- Import from Memory JSON: `basic-memory import memory-json`
-- Check sync status: `basic-memory status`
-- Tool access: `basic-memory tools` (provides CLI access to MCP tools)
-    - Guide: `basic-memory tools basic-memory-guide`
-    - Continue: `basic-memory tools continue-conversation --topic="search"`
+- Sync knowledge: `nova-memory sync` or `nova-memory sync --watch`
+- Import from Claude: `nova-memory import claude conversations`
+- Import from ChatGPT: `nova-memory import chatgpt`
+- Import from Memory JSON: `nova-memory import memory-json`
+- Check sync status: `nova-memory status`
+- Tool access: `nova-memory tools` (provides CLI access to MCP tools)
+    - Guide: `nova-memory tools nova-memory-guide`
+    - Continue: `nova-memory tools continue-conversation --topic="search"`
 
 ### MCP Capabilities
 
-- Basic Memory exposes these MCP tools to LLMs:
+- Nova Memory exposes these MCP tools to LLMs:
 
   **Content Management:**
     - `write_note(title, content, folder, tags)` - Create/update markdown notes with semantic observations and relations
@@ -114,7 +114,7 @@ See the [README.md](README.md) file for a project overview.
     - `canvas(nodes, edges, title, folder)` - Generate Obsidian canvas files for knowledge graph visualization
 
 - MCP Prompts for better AI interaction:
-    - `ai_assistant_guide()` - Guidance on effectively using Basic Memory tools for AI assistants
+    - `ai_assistant_guide()` - Guidance on effectively using Nova Memory tools for AI assistants
     - `continue_conversation(topic, timeframe)` - Continue previous conversations with relevant historical context
     - `search_notes(query, after_date)` - Search with detailed, formatted results for better context understanding
     - `recent_activity(timeframe)` - View recently changed items with formatted output
@@ -122,12 +122,12 @@ See the [README.md](README.md) file for a project overview.
 
 ## AI-Human Collaborative Development
 
-Basic Memory emerged from and enables a new kind of development process that combines human and AI capabilities. Instead
+Nova Memory emerged from and enables a new kind of development process that combines human and AI capabilities. Instead
 of using AI just for code generation, we've developed a true collaborative workflow:
 
 1. AI (LLM) writes initial implementation based on specifications and context
 2. Human reviews, runs tests, and commits code with any necessary adjustments
-3. Knowledge persists across conversations using Basic Memory's knowledge graph
+3. Knowledge persists across conversations using Nova Memory's knowledge graph
 4. Development continues seamlessly across different AI sessions with consistent context
 5. Results improve through iterative collaboration and shared understanding
 
@@ -136,7 +136,7 @@ could achieve independently.
 
 ## GitHub Integration
 
-Basic Memory uses Claude directly into the development workflow through GitHub:
+Nova Memory uses Claude directly into the development workflow through GitHub:
 
 ### GitHub MCP Tools
 
@@ -176,9 +176,9 @@ With this integration, the AI assistant is a full-fledged team member rather tha
 snippets.
 
 
-### Basic Memory Pro
+### Nova Memory Pro
 
-Basic Memory Pro is a desktop GUI application that wraps the basic-memory CLI/MCP tools:
+Nova Memory Pro is a desktop GUI application that wraps the nova-memory CLI/MCP tools:
 
 - Built with Tauri (Rust), React (TypeScript), and a Python FastAPI sidecar
 - Provides visual knowledge graph exploration and project management
@@ -186,12 +186,9 @@ Basic Memory Pro is a desktop GUI application that wraps the basic-memory CLI/MC
 - Project configuration is shared between CLI and Pro versions
 - Multiple project support with visual switching interface
 
-local repo: /Users/phernandez/dev/basicmachines/basic-memory-pro
-github: https://github.com/basicmachines-co/basic-memory-pro
-
 ## Release and Version Management
 
-Basic Memory uses `uv-dynamic-versioning` for automatic version management based on git tags:
+Nova Memory uses `uv-dynamic-versioning` for automatic version management based on git tags:
 
 ### Version Types
 - **Development versions**: Automatically generated from commits (e.g., `0.12.4.dev26+468a22f`)

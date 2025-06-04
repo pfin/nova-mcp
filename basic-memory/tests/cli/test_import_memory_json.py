@@ -5,9 +5,9 @@ import json
 import pytest
 from typer.testing import CliRunner
 
-from basic_memory.cli.app import import_app
-from basic_memory.cli.commands import import_memory_json  # noqa
-from basic_memory.markdown import MarkdownProcessor
+from nova_memory.cli.app import import_app
+from nova_memory.cli.commands import import_memory_json  # noqa
+from nova_memory.markdown import MarkdownProcessor
 
 # Set up CLI runner
 runner = CliRunner()

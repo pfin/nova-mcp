@@ -2,7 +2,7 @@
 
 ## Overview
 
-Basic Memory v0.13.0 is a **major release** that transforms Basic Memory into a true multi-project knowledge management system. This release introduces fluid project switching, advanced note editing capabilities, robust file management, and production-ready OAuth authentication - all while maintaining full backward compatibility.
+Nova Memory v0.13.0 is a **major release** that transforms Nova Memory into a true multi-project knowledge management system. This release introduces fluid project switching, advanced note editing capabilities, robust file management, and production-ready OAuth authentication - all while maintaining full backward compatibility.
 
 **What's New for Users:**
 - 🎯 **Switch between projects instantly** during conversations with Claude
@@ -150,7 +150,7 @@ All existing tools now support:
 
 ### Installation Options
 
-**Multiple ways to install and test Basic Memory:**
+**Multiple ways to install and test Nova Memory:**
 
 ```bash
 # Stable release

@@ -5,11 +5,11 @@ from urllib.parse import quote
 import pytest
 from httpx import AsyncClient
 
-from basic_memory.schemas import (
+from nova_memory.schemas import (
     Entity,
     EntityResponse,
 )
-from basic_memory.schemas.search import SearchItemType, SearchResponse
+from nova_memory.schemas.search import SearchItemType, SearchResponse
 
 
 @pytest.mark.asyncio

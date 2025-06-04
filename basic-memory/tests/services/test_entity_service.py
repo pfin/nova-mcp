@@ -6,15 +6,15 @@ from textwrap import dedent
 import pytest
 import yaml
 
-from basic_memory.config import ProjectConfig, BasicMemoryConfig
-from basic_memory.markdown import EntityParser
-from basic_memory.models import Entity as EntityModel
-from basic_memory.repository import EntityRepository
-from basic_memory.schemas import Entity as EntitySchema
-from basic_memory.services import FileService
-from basic_memory.services.entity_service import EntityService
-from basic_memory.services.exceptions import EntityCreationError, EntityNotFoundError
-from basic_memory.utils import generate_permalink
+from nova_memory.config import ProjectConfig, NovaMemoryConfig
+from nova_memory.markdown import EntityParser
+from nova_memory.models import Entity as EntityModel
+from nova_memory.repository import EntityRepository
+from nova_memory.schemas import Entity as EntitySchema
+from nova_memory.services import FileService
+from nova_memory.services.entity_service import EntityService
+from nova_memory.services.exceptions import EntityCreationError, EntityNotFoundError
+from nova_memory.utils import generate_permalink
 
 
 @pytest.mark.asyncio
@@ -1226,7 +1226,7 @@ async def test_move_entity_success(
     assert await file_service.exists(original_path)
 
     # Create app config with permalinks disabled
-    app_config = BasicMemoryConfig(update_permalinks_on_move=False)
+    app_config = NovaMemoryConfig(update_permalinks_on_move=False)
 
     # Move entity
     assert entity.permalink == "original/test-note"
@@ -1273,7 +1273,7 @@ async def test_move_entity_with_permalink_update(
     original_permalink = entity.permalink
 
     # Create app config with permalinks enabled
-    app_config = BasicMemoryConfig(update_permalinks_on_move=True)
+    app_config = NovaMemoryConfig(update_permalinks_on_move=True)
 
     # Move entity
     await entity_service.move_entity(
@@ -1311,7 +1311,7 @@ async def test_move_entity_creates_destination_directory(
         )
     )
 
-    app_config = BasicMemoryConfig(update_permalinks_on_move=False)
+    app_config = NovaMemoryConfig(update_permalinks_on_move=False)
 
     # Move to deeply nested path that doesn't exist
     await entity_service.move_entity(
@@ -1333,7 +1333,7 @@ async def test_move_entity_not_found(
     project_config: ProjectConfig,
 ):
     """Test moving non-existent entity raises error."""
-    app_config = BasicMemoryConfig(update_permalinks_on_move=False)
+    app_config = NovaMemoryConfig(update_permalinks_on_move=False)
 
     with pytest.raises(EntityNotFoundError, match="Entity not found: non-existent"):
         await entity_service.move_entity(
@@ -1365,7 +1365,7 @@ async def test_move_entity_source_file_missing(
     file_path = file_service.get_entity_path(entity)
     file_path.unlink()
 
-    app_config = BasicMemoryConfig(update_permalinks_on_move=False)
+    app_config = NovaMemoryConfig(update_permalinks_on_move=False)
 
     with pytest.raises(ValueError, match="Source file not found:"):
         await entity_service.move_entity(
@@ -1402,7 +1402,7 @@ async def test_move_entity_destination_exists(
         )
     )
 
-    app_config = BasicMemoryConfig(update_permalinks_on_move=False)
+    app_config = NovaMemoryConfig(update_permalinks_on_move=False)
 
     # Try to move entity1 to entity2's location
     with pytest.raises(ValueError, match="Destination already exists:"):
@@ -1430,7 +1430,7 @@ async def test_move_entity_invalid_destination_path(
         )
     )
 
-    app_config = BasicMemoryConfig(update_permalinks_on_move=False)
+    app_config = NovaMemoryConfig(update_permalinks_on_move=False)
 
     # Test absolute path
     with pytest.raises(ValueError, match="Invalid destination path:"):
@@ -1456,7 +1456,7 @@ async def test_move_entity_by_title(
     entity_service: EntityService,
     file_service: FileService,
     project_config: ProjectConfig,
-    app_config: BasicMemoryConfig,
+    app_config: NovaMemoryConfig,
 ):
     """Test moving entity by title instead of permalink."""
     # Create test entity
@@ -1469,7 +1469,7 @@ async def test_move_entity_by_title(
         )
     )
 
-    app_config = BasicMemoryConfig(update_permalinks_on_move=False)
+    app_config = NovaMemoryConfig(update_permalinks_on_move=False)
 
     # Move by title
     await entity_service.move_entity(
@@ -1518,7 +1518,7 @@ async def test_move_entity_preserves_observations_and_relations(
     assert len(entity.observations) == 1
     assert len(entity.relations) == 1
 
-    app_config = BasicMemoryConfig(update_permalinks_on_move=False)
+    app_config = NovaMemoryConfig(update_permalinks_on_move=False)
 
     # Move entity
     await entity_service.move_entity(
@@ -1564,7 +1564,7 @@ async def test_move_entity_rollback_on_database_failure(
     original_path = file_service.get_entity_path(entity)
     assert await file_service.exists(original_path)
 
-    app_config = BasicMemoryConfig(update_permalinks_on_move=False)
+    app_config = NovaMemoryConfig(update_permalinks_on_move=False)
 
     # Mock repository update to fail
     original_update = entity_repository.update
@@ -1625,7 +1625,7 @@ async def test_move_entity_with_complex_observations(
     assert len(entity.observations) == 2
     assert len(entity.relations) == 3  # 1 explicit + 2 wikilinks
 
-    app_config = BasicMemoryConfig(update_permalinks_on_move=False)
+    app_config = NovaMemoryConfig(update_permalinks_on_move=False)
 
     # Move entity
     await entity_service.move_entity(

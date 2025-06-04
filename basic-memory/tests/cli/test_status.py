@@ -3,15 +3,15 @@
 import pytest
 from typer.testing import CliRunner
 
-from basic_memory.cli.app import app
-from basic_memory.cli.commands.status import (
+from nova_memory.cli.app import app
+from nova_memory.cli.commands.status import (
     add_files_to_tree,
     build_directory_summary,
     group_changes_by_directory,
     display_changes,
 )
-from basic_memory.config import config
-from basic_memory.sync.sync_service import SyncReport
+from nova_memory.config import config
+from nova_memory.sync.sync_service import SyncReport
 
 # Set up CLI runner
 runner = CliRunner()

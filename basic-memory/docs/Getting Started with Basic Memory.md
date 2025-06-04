@@ -1,15 +1,15 @@
 ---
-title: Getting Started with Basic Memory
+title: Getting Started with Nova Memory
 type: note
 permalink: docs/getting-started-1
 ---
 
-# Getting Started with Basic Memory
+# Getting Started with Nova Memory
 
-This guide will help you install Basic Memory, configure it with Claude Desktop, and create your first knowledge notes
+This guide will help you install Nova Memory, configure it with Claude Desktop, and create your first knowledge notes
 through conversations.
 
-Basic Memory uses the [Model Context Protocol](https://modelcontextprotocol.io/introduction) (MCP) to connect with LLMs.
+Nova Memory uses the [Model Context Protocol](https://modelcontextprotocol.io/introduction) (MCP) to connect with LLMs.
 It can be used with any service that supports the MCP, but Claude Desktop works especially well.
 
 ## Installation
@@ -18,7 +18,7 @@ It can be used with any service that supports the MCP, but Claude Desktop works 
 
 The easiest way to install basic memory is via `uv`. See the [uv installation guide](https://docs.astral.sh/uv/getting-started/installation/).
 
-### 1. Install Basic Memory
+### 1. Install Nova Memory
 
 **v0.13.0 offers multiple installation options:**
 
@@ -39,7 +39,7 @@ pip install basic-memory --pre --force-reinstall
 - **Beta**: Pre-release versions (e.g., `0.13.0b1`) 
 - **Development**: Auto-published from git commits (e.g., `0.12.4.dev26+468a22f`)
 
-> **Important**: You need to install Basic Memory using one of the commands above to use the command line tools.
+> **Important**: You need to install Nova Memory using one of the commands above to use the command line tools.
 
 Using `uv tool install` will install the basic-memory package in a standalone virtual environment. See the [UV docs](https://docs.astral.sh/uv/concepts/tools/) for more info.
 
@@ -61,7 +61,7 @@ Edit your Claude Desktop config, located at `~/Library/Application Support/Clau
 }
 ```
 
-**Restart Claude Desktop**. You should see Basic Memory tools available in the "tools" menu in Claude Desktop (the little hammer icon in the bottom-right corner of the chat interface). Click it to view available tools.
+**Restart Claude Desktop**. You should see Nova Memory tools available in the "tools" menu in Claude Desktop (the little hammer icon in the bottom-right corner of the chat interface). Click it to view available tools.
 #### Fix Path to uv
 
 If you get an error that says `ENOENT` , this most likely means Claude Desktop could not find your `uv` installation. Make sure that you have `uv` installed per the instructions above, then:
@@ -107,7 +107,7 @@ Close and reopen Claude Desktop for the changes to take effect.
 To disable realtime sync, you can update the config. See [[CLI Reference#sync]].
 ### 4. Staying Updated
 
-To update Basic Memory when new versions are released:
+To update Nova Memory when new versions are released:
 
 ```bash
 # Update stable release
@@ -131,7 +131,7 @@ pip install --upgrade basic-memory --pre --force-reinstall
 
 ### 5. Multi-Project Setup (Enhanced in v0.13.0)
 
-By default, Basic Memory creates a project in `~/basic-memory`. v0.13.0 introduces **fluid project management** - switch between projects instantly during conversations.
+By default, Nova Memory creates a project in `~/basic-memory`. v0.13.0 introduces **fluid project management** - switch between projects instantly during conversations.
 
 ```  
 # Create a new project
@@ -157,12 +157,12 @@ basic-memory project info
 
 ### Common Issues
 
-#### Claude Says "No Basic Memory Tools Available"
+#### Claude Says "No Nova Memory Tools Available"
 
-If Claude cannot find Basic Memory tools:
+If Claude cannot find Nova Memory tools:
 
 1. **Check absolute paths**: Ensure you're using complete absolute paths to uvx in the Claude Desktop configuration
-2. **Verify installation**: Run `basic-memory --version` in Terminal to confirm Basic Memory is installed
+2. **Verify installation**: Run `basic-memory --version` in Terminal to confirm Nova Memory is installed
 3. **Restart applications**: Restart both Terminal and Claude Desktop after making configuration changes
 4. **Check sync status**: You can view the sync status by running `basic-memory status
 .
@@ -170,7 +170,7 @@ If Claude cannot find Basic Memory tools:
 
 If you encounter permission errors:
 
-1. Check that Basic Memory has access to create files in your home directory
+1. Check that Nova Memory has access to create files in your home directory
 2. Ensure Claude Desktop has permission to execute the uvx command
 
 ## Creating Your First Knowledge Note
@@ -218,7 +218,7 @@ If you encounter permission errors:
 
 ## Using Special Prompts
 
-Basic Memory includes special prompts that help you start conversations with context from your knowledge base:
+Nova Memory includes special prompts that help you start conversations with context from your knowledge base:
 
 ### Continue Conversation
 
@@ -282,7 +282,7 @@ You: "Take a look at memory://coffee-brewing-methods and let's discuss how to im
 
 ### Building On Previous Knowledge (Enhanced in v0.13.0)
 
-Basic Memory enables continuous knowledge building:
+Nova Memory enables continuous knowledge building:
 
 1. **Reference previous discussions** in new conversations
 2. **Edit notes incrementally** without rewriting entire documents
@@ -329,7 +329,7 @@ After importing, changes sync automatically in real-time. You can see project st
 ## Quick Tips
 
 ### General Usage
-- Basic Memory syncs changes in real-time (no manual sync needed)
+- Nova Memory syncs changes in real-time (no manual sync needed)
 - Use special prompts (Continue Conversation, Recent Activity, Search) to start contextual discussions
 - Build connections between notes for a richer knowledge graph
 - Use direct `memory://` URLs with permalinks for precise context

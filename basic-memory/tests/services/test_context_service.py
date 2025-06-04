@@ -5,10 +5,10 @@ from datetime import datetime, timedelta, UTC
 import pytest
 import pytest_asyncio
 
-from basic_memory.repository.search_repository import SearchIndexRow
-from basic_memory.schemas.memory import memory_url, memory_url_path
-from basic_memory.schemas.search import SearchItemType
-from basic_memory.services.context_service import ContextService
+from nova_memory.repository.search_repository import SearchIndexRow
+from nova_memory.schemas.memory import memory_url, memory_url_path
+from nova_memory.schemas.search import SearchItemType
+from nova_memory.services.context_service import ContextService
 
 
 @pytest_asyncio.fixture

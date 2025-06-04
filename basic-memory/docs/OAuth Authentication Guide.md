@@ -1,6 +1,6 @@
 # OAuth Authentication Guide
 
-Basic Memory MCP server supports OAuth 2.1 authentication for secure access control. This guide covers setup, testing, and production deployment.
+Nova Memory MCP server supports OAuth 2.1 authentication for secure access control. This guide covers setup, testing, and production deployment.
 
 ## Quick Start
 

@@ -5,7 +5,7 @@ from unittest.mock import patch, AsyncMock, MagicMock
 from typer.testing import CliRunner
 from pydantic import AnyHttpUrl
 
-from basic_memory.cli.commands.auth import auth_app
+from nova_memory.cli.commands.auth import auth_app
 from mcp.shared.auth import OAuthClientInformationFull
 
 
@@ -74,7 +74,7 @@ class TestAuthCommands:
             assert captured_client_info.redirect_uris == [
                 AnyHttpUrl("http://localhost:8000/callback")
             ]
-            assert captured_client_info.client_name == "Basic Memory OAuth Client"
+            assert captured_client_info.client_name == "Nova Memory OAuth Client"
             assert captured_client_info.grant_types == ["authorization_code", "refresh_token"]
 
     def test_register_client_custom_values(self, runner, mock_provider):

@@ -5,8 +5,8 @@ from unittest.mock import patch
 
 import pytest
 
-from basic_memory.services.exceptions import FileOperationError
-from basic_memory.services.file_service import FileService
+from nova_memory.services.exceptions import FileOperationError
+from nova_memory.services.file_service import FileService
 
 
 @pytest.mark.asyncio

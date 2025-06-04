@@ -1,7 +1,7 @@
 ---
 title: Knowledge Format
 type: note
-permalink: docs/knowledge-format
+permalink: docs/knowledge-format-1
 tags:
 - architecture
 - patterns
@@ -11,11 +11,11 @@ tags:
 
 # Knowledge Format
 
-Basic Memory uses standard Markdown with simple semantic patterns to create a knowledge graph. This document details the file structure and patterns used to organize knowledge.
+Nova Memory uses standard Markdown with simple semantic patterns to create a knowledge graph. This document details the file structure and patterns used to organize knowledge.
 
 ## File-First Architecture
 
-All knowledge in Basic Memory is stored in plain text Markdown files:
+All knowledge in Nova Memory is stored in plain text Markdown files:
 
 - Files are the source of truth for all knowledge
 - Changes to files automatically update the knowledge graph
@@ -115,7 +115,7 @@ Common relation types include:
 
 ## Knowledge Graph
 
-Basic Memory automatically builds a knowledge graph from your document connections:
+Nova Memory automatically builds a knowledge graph from your document connections:
 
 - Each document becomes a node in the graph
 - Relations create edges between nodes
@@ -126,7 +126,7 @@ This graph enables rich context building and navigation across your knowledge ba
 
 ## Permalinks and memory:// URLs
 
-Every document in Basic Memory has a unique permalink that serves as its stable identifier:
+Every document in Nova Memory has a unique permalink that serves as its stable identifier:
 
 ### How Permalinks Work
 
@@ -148,7 +148,7 @@ If not specified, one will be generated automatically from the title, if the not
 
 By default a  notes' permalink value will not change if the file is moved. It's a **stable** identifier :). But if you'd rather permalinks are always updated when a file moves, you can set the config setting in the global config. 
 
-The config file for Basic Memory is in the home directory under `.basic-memory/config.json`.
+The config file for Nova Memory is in the home directory under `.basic-memory/config.json`.
 
 To change the behavior, set the following value:
 ```
@@ -203,5 +203,5 @@ The system will build the semantic knowledge graph regardless of how you organiz
 
 ## Relations
 - implemented_by [[User Guide]] (How to work with this format)
-- relates_to [[Getting Started with Basic Memory]] (Setup instructions)
-- explained_in [[Introduction to Basic Memory]] (Overview of the system)
+- relates_to [[Getting Started with Nova Memory]] (Setup instructions)
+- explained_in [[Introduction to Nova Memory]] (Overview of the system)

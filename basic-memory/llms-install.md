@@ -1,11 +1,11 @@
-# Basic Memory Installation Guide for LLMs
+# Nova Memory Installation Guide for LLMs
 
-This guide is specifically designed to help AI assistants like Cline install and configure Basic Memory. Follow these
+This guide is specifically designed to help AI assistants like Cline install and configure Nova Memory. Follow these
 steps in order.
 
 ## Installation Steps
 
-### 1. Install Basic Memory Package
+### 1. Install Nova Memory Package
 
 Use one of the following package managers to install:
 
@@ -105,7 +105,7 @@ basic-memory import memory-json path/to/memory.json
 
 If you encounter issues:
 
-1. Check that Basic Memory is properly installed:
+1. Check that Nova Memory is properly installed:
    ```bash
    basic-memory --version
    ```

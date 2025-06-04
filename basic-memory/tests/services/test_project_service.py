@@ -4,14 +4,14 @@ import os
 
 import pytest
 
-from basic_memory.schemas import (
+from nova_memory.schemas import (
     ProjectInfoResponse,
     ProjectStatistics,
     ActivityMetrics,
     SystemStatus,
 )
-from basic_memory.services.project_service import ProjectService
-from basic_memory.config import ConfigManager
+from nova_memory.services.project_service import ProjectService
+from nova_memory.config import ConfigManager
 
 
 def test_projects_property(project_service: ProjectService):
@@ -444,7 +444,7 @@ async def test_synchronize_projects_calls_ensure_single_default(
 
     try:
         # Add project to config only (simulating unsynchronized state)
-        from basic_memory.config import config_manager
+        from nova_memory.config import config_manager
 
         config_manager.add_project(test_project_name, test_project_path)
 

@@ -43,8 +43,8 @@ Repository = "https://github.com/pfin/nova-mcp"
 Documentation = "https://github.com/pfin/nova-mcp#readme"
 
 [project.scripts]
-nova-memory = "basic_memory.cli.main:app"
-nm = "basic_memory.cli.main:app"
+nova-memory = "nova_memory.cli.main:app"
+nm = "nova_memory.cli.main:app"
 
 [build-system]
 requires = ["hatchling", "uv-dynamic-versioning>=0.7.0"]
@@ -130,4 +130,4 @@ omit = [
 ignore_no_config = true
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/basic_memory"]
+packages = ["src/nova_memory"]

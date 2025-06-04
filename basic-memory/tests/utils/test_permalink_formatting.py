@@ -4,10 +4,10 @@ from pathlib import Path
 
 import pytest
 
-from basic_memory.config import ProjectConfig
-from basic_memory.services import EntityService
-from basic_memory.sync.sync_service import SyncService
-from basic_memory.utils import generate_permalink
+from nova_memory.config import ProjectConfig
+from nova_memory.services import EntityService
+from nova_memory.sync.sync_service import SyncService
+from nova_memory.utils import generate_permalink
 
 
 async def create_test_file(path: Path, content: str = "test content") -> None:

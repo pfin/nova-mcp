@@ -209,7 +209,7 @@ async def test_set_default_project_operation(mcp_server, app):
         # Should show success message and restart instructions
         assert "✓" in default_text  # Success indicator
         assert "test-project" in default_text
-        assert "Restart Basic Memory for this change to take effect" in default_text
+        assert "Restart Nova Memory for this change to take effect" in default_text
         assert "basic-memory mcp" in default_text
         assert "Project: test-project" in default_text  # Project metadata
 

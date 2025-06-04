@@ -3,16 +3,16 @@
 import pytest
 from typer.testing import CliRunner
 
-from basic_memory.cli.app import app
-from basic_memory.cli.commands.sync import (
+from nova_memory.cli.app import app
+from nova_memory.cli.commands.sync import (
     display_sync_summary,
     display_detailed_sync_results,
     run_sync,
     group_issues_by_directory,
     ValidationIssue,
 )
-from basic_memory.config import config
-from basic_memory.sync.sync_service import SyncReport
+from nova_memory.config import config
+from nova_memory.sync.sync_service import SyncReport
 
 # Set up CLI runner
 runner = CliRunner()

@@ -3,8 +3,8 @@
 import pytest
 from datetime import datetime, timedelta
 
-from basic_memory.mcp.tools import write_note
-from basic_memory.mcp.tools.search import search_notes
+from nova_memory.mcp.tools import write_note
+from nova_memory.mcp.tools.search import search_notes
 
 
 @pytest.mark.asyncio

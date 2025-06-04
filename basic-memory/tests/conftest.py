@@ -10,31 +10,31 @@ import pytest
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
-import basic_memory.mcp.project_session
-from basic_memory import db
-from basic_memory.config import ProjectConfig, BasicMemoryConfig, ConfigManager
-from basic_memory.db import DatabaseType
-from basic_memory.markdown import EntityParser
-from basic_memory.markdown.markdown_processor import MarkdownProcessor
-from basic_memory.models import Base
-from basic_memory.models.knowledge import Entity
-from basic_memory.models.project import Project
-from basic_memory.repository.entity_repository import EntityRepository
-from basic_memory.repository.observation_repository import ObservationRepository
-from basic_memory.repository.project_repository import ProjectRepository
-from basic_memory.repository.relation_repository import RelationRepository
-from basic_memory.repository.search_repository import SearchRepository
-from basic_memory.schemas.base import Entity as EntitySchema
-from basic_memory.services import (
+import nova_memory.mcp.project_session
+from nova_memory import db
+from nova_memory.config import ProjectConfig, NovaMemoryConfig, ConfigManager
+from nova_memory.db import DatabaseType
+from nova_memory.markdown import EntityParser
+from nova_memory.markdown.markdown_processor import MarkdownProcessor
+from nova_memory.models import Base
+from nova_memory.models.knowledge import Entity
+from nova_memory.models.project import Project
+from nova_memory.repository.entity_repository import EntityRepository
+from nova_memory.repository.observation_repository import ObservationRepository
+from nova_memory.repository.project_repository import ProjectRepository
+from nova_memory.repository.relation_repository import RelationRepository
+from nova_memory.repository.search_repository import SearchRepository
+from nova_memory.schemas.base import Entity as EntitySchema
+from nova_memory.services import (
     EntityService,
     ProjectService,
 )
-from basic_memory.services.directory_service import DirectoryService
-from basic_memory.services.file_service import FileService
-from basic_memory.services.link_resolver import LinkResolver
-from basic_memory.services.search_service import SearchService
-from basic_memory.sync.sync_service import SyncService
-from basic_memory.sync.watch_service import WatchService
+from nova_memory.services.directory_service import DirectoryService
+from nova_memory.services.file_service import FileService
+from nova_memory.services.link_resolver import LinkResolver
+from nova_memory.services.search_service import SearchService
+from nova_memory.sync.sync_service import SyncService
+from nova_memory.sync.watch_service import WatchService
 
 
 @pytest.fixture
@@ -55,11 +55,11 @@ def config_home(tmp_path, monkeypatch) -> Path:
 
 
 @pytest.fixture(scope="function", autouse=True)
-def app_config(config_home, tmp_path, monkeypatch) -> BasicMemoryConfig:
+def app_config(config_home, tmp_path, monkeypatch) -> NovaMemoryConfig:
     """Create test app configuration."""
     # Create a basic config without depending on test_project to avoid circular dependency
     projects = {"test-project": str(config_home)}
-    app_config = BasicMemoryConfig(
+    app_config = NovaMemoryConfig(
         env="test",
         projects=projects,
         default_project="test-project",
@@ -73,7 +73,7 @@ def app_config(config_home, tmp_path, monkeypatch) -> BasicMemoryConfig:
 
 @pytest.fixture(autouse=True)
 def config_manager(
-    app_config: BasicMemoryConfig, project_config: ProjectConfig, config_home: Path, monkeypatch
+    app_config: NovaMemoryConfig, project_config: ProjectConfig, config_home: Path, monkeypatch
 ) -> ConfigManager:
     # Create a new ConfigManager that uses the test home directory
     config_manager = ConfigManager()
@@ -144,7 +144,7 @@ def project_config(test_project, monkeypatch):
 class TestConfig:
     config_home: Path
     project_config: ProjectConfig
-    app_config: BasicMemoryConfig
+    app_config: NovaMemoryConfig
     config_manager: ConfigManager
 
 
@@ -156,7 +156,7 @@ def test_config(config_home, project_config, app_config, config_manager) -> Test
     class TestConfig:
         config_home: Path
         project_config: ProjectConfig
-        app_config: BasicMemoryConfig
+        app_config: NovaMemoryConfig
         config_manager: ConfigManager
 
     return TestConfig(config_home, project_config, app_config, config_manager)
@@ -286,7 +286,7 @@ def entity_parser(project_config):
 
 @pytest_asyncio.fixture
 async def sync_service(
-    app_config: BasicMemoryConfig,
+    app_config: NovaMemoryConfig,
     entity_service: EntityService,
     entity_parser: EntityParser,
     entity_repository: EntityRepository,
@@ -478,7 +478,7 @@ async def test_graph(
 
 
 @pytest.fixture
-def watch_service(app_config: BasicMemoryConfig, project_repository) -> WatchService:
+def watch_service(app_config: NovaMemoryConfig, project_repository) -> WatchService:
     return WatchService(app_config=app_config, project_repository=project_repository)
 
 
