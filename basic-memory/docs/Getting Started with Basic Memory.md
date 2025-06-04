@@ -1,7 +1,7 @@
 ---
 title: Getting Started with Basic Memory
 type: note
-permalink: docs/getting-started
+permalink: docs/getting-started-1
 ---
 
 # Getting Started with Basic Memory

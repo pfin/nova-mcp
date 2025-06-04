@@ -1,7 +1,7 @@
 ---
 title: Coffee Flavor Map
 type: note
-permalink: coffee/coffee-flavor-map
+permalink: coffee/coffee-flavor-map-1
 tags:
 - '#coffee'
 - '#visualization'

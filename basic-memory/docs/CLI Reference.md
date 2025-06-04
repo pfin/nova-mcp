@@ -1,7 +1,7 @@
 ---
 title: CLI Reference
 type: note
-permalink: docs/cli-reference
+permalink: docs/cli-reference-1
 ---
 
 # CLI Reference

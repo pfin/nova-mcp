@@ -1,7 +1,7 @@
 ---
 title: Coffee Brewing Methods
 type: note
-permalink: coffee/coffee-brewing-methods
+permalink: coffee/coffee-brewing-methods-1
 tags:
 - '#coffee'
 - '#brewing'

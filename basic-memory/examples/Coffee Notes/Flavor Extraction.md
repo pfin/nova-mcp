@@ -1,7 +1,7 @@
 ---
 title: Flavor Extraction
 type: note
-permalink: coffee/flavor-extraction
+permalink: coffee/flavor-extraction-1
 tags:
 - '#coffee'
 - '#extraction'

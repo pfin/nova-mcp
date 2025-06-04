@@ -1,7 +1,7 @@
 ---
 title: Coffee Bean Origins
 type: note
-permalink: coffee/coffee-bean-origins
+permalink: coffee/coffee-bean-origins-1
 tags:
 - '#coffee'
 - '#origins'
