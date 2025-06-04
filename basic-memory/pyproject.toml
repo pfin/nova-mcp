@@ -1,12 +1,12 @@
 [project]
-name = "basic-memory"
+name = "nova-memory"
 dynamic = ["version"]
-description = "Local-first knowledge management combining Zettelkasten with knowledge graphs"
+description = "Nova Memory - Enhanced knowledge management for Claude Code"
 readme = "README.md"
 requires-python = ">=3.12.1"
 license = { text = "AGPL-3.0-or-later" }
 authors = [
-    { name = "Basic Machines", email = "hello@basic-machines.co" }
+    { name = "Nova Project", email = "nova@example.com" }
 ]
 dependencies = [
     "sqlalchemy>=2.0.0",
@@ -38,13 +38,13 @@ dependencies = [
 
 
 [project.urls]
-Homepage = "https://github.com/basicmachines-co/basic-memory"
-Repository = "https://github.com/basicmachines-co/basic-memory"
-Documentation = "https://github.com/basicmachines-co/basic-memory#readme"
+Homepage = "https://github.com/pfin/nova-mcp"
+Repository = "https://github.com/pfin/nova-mcp"
+Documentation = "https://github.com/pfin/nova-mcp#readme"
 
 [project.scripts]
-basic-memory = "basic_memory.cli.main:app"
-bm = "basic_memory.cli.main:app"
+nova-memory = "basic_memory.cli.main:app"
+nm = "basic_memory.cli.main:app"
 
 [build-system]
 requires = ["hatchling", "uv-dynamic-versioning>=0.7.0"]
@@ -128,3 +128,6 @@ omit = [
 
 [tool.logfire]
 ignore_no_config = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/basic_memory"]

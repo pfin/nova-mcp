@@ -1,11 +1,11 @@
 ---
 title: Introduction to Basic Memory
 type: docs
-permalink: docs/introduction-1
+permalink: docs/introduction
 tags:
-- documentation
-- index
-- overview
+  - documentation
+  - index
+  - overview
 ---
 
 # BASIC MEMORY

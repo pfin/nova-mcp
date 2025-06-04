@@ -1,7 +1,7 @@
 ---
 title: Obsidian Integration
 type: note
-permalink: docs/obsidian-integration-1
+permalink: docs/obsidian-integration
 ---
 
 # Obsidian Integration

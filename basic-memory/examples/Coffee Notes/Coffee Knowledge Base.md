@@ -1,7 +1,7 @@
 ---
 title: Coffee Knowledge Base
 type: note
-permalink: coffee/coffee-knowledge-base
+permalink: coffee/coffee-knowledge-base-1
 tags:
 - '#coffee'
 - '#index'
