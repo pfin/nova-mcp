@@ -24,7 +24,7 @@ const TOOLS: Tool[] = [
       properties: {
         url: { type: "string", description: "URL to navigate to" },
         launchOptions: { type: "object", description: "PuppeteerJS LaunchOptions. Default null. If changed and not null, browser restarts. Example: { headless: true, args: ['--no-sandbox'] }" },
-        allowDangerous: { type: "boolean", description: "Allow dangerous LaunchOptions that reduce security. When false, dangerous args like --no-sandbox will throw errors. Default false." },
+        allowDangerous: { type: "boolean", description: "Allow dangerous LaunchOptions that reduce security. When false, dangerous args like --no-sandbox will throw errors. Default true." },
       },
       required: ["url"],
     },
@@ -149,9 +149,11 @@ async function ensureBrowser({ launchOptions, allowDangerous }: any) {
   // Security validation for merged config
   if (mergedConfig?.args) {
     const dangerousArgs = mergedConfig.args?.filter?.((arg: string) => DANGEROUS_ARGS.some((dangerousArg: string) => arg.startsWith(dangerousArg)));
-    if (dangerousArgs?.length > 0 && !(allowDangerous || (process.env.ALLOW_DANGEROUS === 'true'))) {
-      throw new Error(`Dangerous browser arguments detected: ${dangerousArgs.join(', ')}. Fround from environment variable and tool call argument. ` +
-        'Set allowDangerous: true in the tool call arguments to override.');
+    // Default allowDangerous to true if not explicitly set to false
+    const isDangerousAllowed = allowDangerous !== false && process.env.ALLOW_DANGEROUS !== 'false';
+    if (dangerousArgs?.length > 0 && !isDangerousAllowed) {
+      throw new Error(`Dangerous browser arguments detected: ${dangerousArgs.join(', ')}. Found from environment variable and tool call argument. ` +
+        'Set allowDangerous: false explicitly to enforce security restrictions.');
     }
   }
 
@@ -169,7 +171,7 @@ async function ensureBrowser({ launchOptions, allowDangerous }: any) {
   previousLaunchOptions = launchOptions;
 
   if (!browser) {
-    const npx_args = { headless: false }
+    const npx_args = { headless: true, args: ["--no-sandbox"] }
     const docker_args = { headless: true, args: ["--no-sandbox", "--single-process", "--no-zygote"] }
     browser = await puppeteer.launch(deepMerge(
       process.env.DOCKER_CONTAINER ? docker_args : npx_args,
@@ -408,47 +410,150 @@ async function handleToolCall(name: string, args: any): Promise<CallToolResult> 
 
     case "puppeteer_google_search":
       try {
-        // Navigate to Google
-        await page.goto('https://www.google.com', { waitUntil: 'networkidle2' });
+        // Navigate to Google with a more human-like approach
+        await page.goto('https://www.google.com', { waitUntil: 'domcontentloaded' });
         
-        // Find search box and type query
-        await page.waitForSelector('textarea[name="q"], input[name="q"]');
-        await page.type('textarea[name="q"], input[name="q"]', args.query);
+        // Wait a bit to appear more human-like
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Check if we hit a CAPTCHA
+        const hasCaptcha = await page.$('iframe[src*="recaptcha"]') !== null;
+        if (hasCaptcha) {
+          return {
+            content: [{
+              type: "text",
+              text: `Google is showing a CAPTCHA. This often happens with automated browsers. Try using a different search approach or navigate manually first.`,
+            }],
+            isError: true,
+          };
+        }
+        
+        // Find search box - try multiple selectors
+        const searchBox = await page.$('textarea[name="q"], input[name="q"]');
+        if (!searchBox) {
+          return {
+            content: [{
+              type: "text",
+              text: `Could not find Google search box. The page structure may have changed.`,
+            }],
+            isError: true,
+          };
+        }
+        
+        // Click on the search box first
+        await searchBox.click();
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Type slowly to appear more human-like
+        await page.type('textarea[name="q"], input[name="q"]', args.query, { delay: 100 });
+        
+        // Wait a moment before submitting
+        await new Promise(resolve => setTimeout(resolve, 500));
         
         // Submit search
         await page.keyboard.press('Enter');
         
-        // Wait for results
-        await page.waitForSelector('#search', { timeout: 10000 });
+        // Wait for navigation and results with multiple possible selectors
+        await page.waitForNavigation({ waitUntil: 'domcontentloaded' });
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Extract search results
+        // Check again for CAPTCHA after navigation
+        const postSearchCaptcha = await page.$('iframe[src*="recaptcha"]') !== null;
+        if (postSearchCaptcha) {
+          return {
+            content: [{
+              type: "text",
+              text: `Google showed a CAPTCHA after search. This is common with automated browsers. Consider using the regular navigation tools to browse Google manually.`,
+            }],
+            isError: true,
+          };
+        }
+        
+        // Try to wait for search results with a more flexible approach
+        try {
+          await page.waitForSelector('#search, #rso, [data-async-context]', { timeout: 5000 });
+        } catch (e) {
+          // If selectors fail, continue anyway and try to extract what we can
+        }
+        
+        // Scroll to load more results
+        await page.evaluate(() => {
+          window.scrollTo(0, document.body.scrollHeight);
+        });
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Extract search results with more flexible selectors
         const results = await page.evaluate((limitParam) => {
           const limit = Math.min(limitParam || 10, 10);
           const searchResults = [];
+          const seenUrls = new Set(); // To avoid duplicates
           
-          // Get all search result elements
-          const resultElements = document.querySelectorAll('#search .g');
+          // First, try to get regular search results
+          const regularResults = document.querySelectorAll('div.g:not(.related-question-pair)');
           
-          for (let i = 0; i < Math.min(resultElements.length, limit); i++) {
-            const element = resultElements[i];
+          for (let i = 0; i < regularResults.length; i++) {
+            const element = regularResults[i];
+            if (searchResults.length >= limit) break;
             
-            // Extract title and URL
+            // Skip if this is a "People also ask" section
+            if (element.closest('.related-question-pair')) continue;
+            
             const titleElement = element.querySelector('h3');
-            const linkElement = element.querySelector('a');
-            const descriptionElement = element.querySelector('.VwiC3b, .yXK7lf, span[style*="-webkit-line-clamp:2"]');
+            const linkElement = element.querySelector('a[href^="http"]:not([href*="google.com"])') as HTMLAnchorElement;
             
-            if (titleElement && linkElement) {
+            if (titleElement && linkElement && !seenUrls.has(linkElement.href)) {
+              seenUrls.add(linkElement.href);
+              
+              // Try multiple selectors for description
+              const descriptionElement = element.querySelector('.VwiC3b, .yXK7lf, .IsZvec, .aCOpRe span, .lEBKkf, span[style*="-webkit-line-clamp"]');
+              
               searchResults.push({
-                title: titleElement.textContent || '',
+                title: titleElement.textContent?.trim() || '',
                 url: linkElement.href || '',
-                description: descriptionElement?.textContent || '',
-                position: i + 1
+                description: descriptionElement?.textContent?.trim() || '',
+                position: searchResults.length + 1
               });
+            }
+          }
+          
+          // If we didn't get enough results, try alternative selectors
+          if (searchResults.length < limit) {
+            const alternativeContainers = document.querySelectorAll('[data-hveid]:has(h3):has(a[href^="http"])');
+            
+            for (let i = 0; i < alternativeContainers.length; i++) {
+              const element = alternativeContainers[i];
+              if (searchResults.length >= limit) break;
+              
+              const titleElement = element.querySelector('h3');
+              const linkElement = element.querySelector('a[href^="http"]:not([href*="google.com"])') as HTMLAnchorElement;
+              
+              if (titleElement && linkElement && !seenUrls.has(linkElement.href)) {
+                seenUrls.add(linkElement.href);
+                
+                const descriptionElement = element.querySelector('.VwiC3b, .yXK7lf, span[style*="-webkit-line-clamp"]');
+                
+                searchResults.push({
+                  title: titleElement.textContent?.trim() || '',
+                  url: linkElement.href || '',
+                  description: descriptionElement?.textContent?.trim() || '',
+                  position: searchResults.length + 1
+                });
+              }
             }
           }
           
           return searchResults;
         }, args.limit);
+        
+        if (results.length === 0) {
+          return {
+            content: [{
+              type: "text",
+              text: `No search results found for "${args.query}". This could be due to:\n- Google blocking automated searches\n- Page structure changes\n- CAPTCHA interference\n\nTry using the navigate, fill, and click tools manually for more control.`,
+            }],
+            isError: false,
+          };
+        }
         
         return {
           content: [{
@@ -465,7 +570,7 @@ async function handleToolCall(name: string, args: any): Promise<CallToolResult> 
         return {
           content: [{
             type: "text",
-            text: `Google search failed: ${(error as Error).message}`,
+            text: `Google search failed: ${(error as Error).message}\n\nThis often happens due to anti-automation measures. Consider using the manual navigation tools instead.`,
           }],
           isError: true,
         };

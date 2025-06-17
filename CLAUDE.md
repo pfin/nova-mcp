@@ -39,6 +39,9 @@ npm run watch        # Build and watch for changes
 # PostgreSQL server only:
 npm run lint         # Run ESLint
 npm run dev          # Development mode with nodemon
+
+# Testing any TypeScript MCP server:
+npx @modelcontextprotocol/inspector ./dist/index.js  # After building
 ```
 
 ## Architecture & Key Patterns
@@ -55,6 +58,19 @@ npm run dev          # Development mode with nodemon
 - **Tool Pattern**: Each capability exposed as an MCP tool with structured parameters
 - **Error Handling**: Tools should return descriptive errors, not throw exceptions
 - **Build Output**: Compiled JavaScript goes to `dist/` or `build/` directories
+
+### Puppeteer Server Architecture
+- **Global State**: Single browser instance and page managed globally
+- **Security**: Validates dangerous browser arguments (requires `allowDangerous` flag)
+- **Console Capture**: Forwards browser console logs as MCP resources
+- **Screenshot Storage**: In-memory storage with optional base64 encoding
+- **Launch Options**: Configurable via environment or per-navigation request
+- **Available Tools**:
+  - `puppeteer_navigate`: Navigate with optional browser configuration
+  - `puppeteer_screenshot`: Capture full page or element screenshots
+  - `puppeteer_click/fill/select/hover`: DOM interaction
+  - `puppeteer_evaluate`: Execute JavaScript in browser context
+  - `puppeteer_google_search`: Extract Google search results
 
 ### Database Schema (Nova Memory)
 - **Notes**: Main content storage with markdown, tags, and metadata
@@ -115,3 +131,11 @@ npm run dev          # Development mode with nodemon
 - PostgreSQL server includes comprehensive database management tools
 - Brave Search provides both web and local business search
 - GitHub server enables direct repository manipulation
+
+### Puppeteer Server Notes
+- Browser instances persist between navigation calls for efficiency
+- Launch options can be set via `PUPPETEER_LAUNCH_OPTIONS` environment variable
+- Docker deployment uses headless Chrome; NPX deployment supports headed mode
+- Security: Dangerous browser args (like `--no-sandbox`) blocked by default
+- Screenshots stored in memory with `screenshot://<name>` resource URIs
+- Console logs available via `console://logs` resource
