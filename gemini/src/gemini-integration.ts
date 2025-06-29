@@ -12,12 +12,12 @@ export class GeminiIntegration {
 
   constructor(config: Partial<GeminiConfig> = {}) {
     this.config = {
-      enabled: config.enabled ?? (process.env.GEMINI_ENABLED === 'true'),
-      autoConsult: config.autoConsult ?? (process.env.GEMINI_AUTO_CONSULT === 'true'),
+      enabled: config.enabled ?? (process.env.GEMINI_ENABLED !== 'false'),
+      autoConsult: config.autoConsult ?? (process.env.GEMINI_AUTO_CONSULT !== 'false'),
       cliCommand: config.cliCommand ?? process.env.GEMINI_CLI_COMMAND ?? 'gemini',
       timeout: config.timeout ?? parseInt(process.env.GEMINI_TIMEOUT ?? '60'),
       rateLimitDelay: config.rateLimitDelay ?? parseInt(process.env.GEMINI_RATE_LIMIT ?? '2'),
-      model: config.model ?? process.env.GEMINI_MODEL ?? 'gemini-2.0-flash-exp',
+      model: config.model ?? process.env.GEMINI_MODEL ?? 'gemini-2.5-pro',
       maxContext: config.maxContext ?? (process.env.GEMINI_MAX_CONTEXT ? parseInt(process.env.GEMINI_MAX_CONTEXT) : undefined),
       debug: config.debug ?? (process.env.GEMINI_DEBUG === 'true'),
     };
