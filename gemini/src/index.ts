@@ -9,6 +9,7 @@ import {
   ErrorCode,
 } from '@modelcontextprotocol/sdk/types.js';
 import { GeminiIntegration } from './gemini-integration.js';
+import { GeminiStreamingIntegration } from './gemini-streaming.js';
 import {
   consultGeminiTool,
   handleConsultGemini,
@@ -16,11 +17,16 @@ import {
   handleGeminiStatus,
   toggleAutoConsultTool,
   handleToggleAutoConsult,
+  consultGeminiStreamTool,
+  handleConsultGeminiStream,
+  webSearchTool,
+  handleWebSearch,
 } from './tools/index.js';
 import { z } from 'zod';
 
-// Initialize Gemini integration
+// Initialize Gemini integrations
 const gemini = new GeminiIntegration();
+const geminiStreaming = new GeminiStreamingIntegration();
 
 // Create MCP server
 const server = new Server(
@@ -42,6 +48,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       consultGeminiTool,
       geminiStatusTool,
       toggleAutoConsultTool,
+      consultGeminiStreamTool,
+      webSearchTool,
     ],
   };
 });
@@ -69,6 +77,22 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           enable: z.boolean(),
         }).parse(args);
         return await handleToggleAutoConsult(input, gemini);
+      }
+
+      case 'consult_gemini_stream': {
+        const input = z.object({
+          query: z.string(),
+          context: z.string().optional(),
+        }).parse(args);
+        return await handleConsultGeminiStream(input, geminiStreaming);
+      }
+
+      case 'web_search': {
+        const input = z.object({
+          query: z.string(),
+          count: z.number().optional().default(10),
+        }).parse(args);
+        return await handleWebSearch(input);
       }
 
       default:

@@ -11,6 +11,8 @@ Based on the Python implementation from [this GitHub Gist](https://gist.github.c
 - ⚡ **Manual & Automatic Modes**: Consult on-demand or automatically when uncertainty is detected
 - 🛡️ **Rate Limiting**: Built-in rate limiting to respect API quotas
 - 📊 **Status Monitoring**: Track consultation statistics and configuration
+- 🚀 **Streaming Support**: Real-time streaming responses from Gemini CLI
+- 🌐 **Web Search Integration**: Built-in web search capabilities (requires Brave Search MCP)
 
 ## Prerequisites
 
@@ -50,7 +52,10 @@ GEMINI_AUTO_CONSULT=true              # Auto-consult on uncertainty
 GEMINI_CLI_COMMAND=gemini             # CLI command to use
 GEMINI_TIMEOUT=60                     # Query timeout in seconds
 GEMINI_RATE_LIMIT=2                   # Seconds between API calls
-GEMINI_MODEL=gemini-2.0-flash-exp    # Gemini model to use
+GEMINI_MODEL=gemini-2.5-pro          # Gemini model to use
+GEMINI_ENABLE_STREAMING=true          # Enable streaming responses
+GEMINI_ENABLE_TOOL_CHAINING=false     # Enable recursive tool calls (experimental)
+GEMINI_MAX_RECURSION_DEPTH=5          # Max depth for recursive calls
 ```
 
 ### Claude Code Configuration
@@ -103,6 +108,27 @@ Enable or disable automatic consultation when uncertainty is detected.
 
 **Parameters:**
 - `enable` (boolean): true to enable, false to disable
+
+### 4. `consult_gemini_stream`
+Get a streaming response from Gemini for real-time feedback.
+
+**Parameters:**
+- `query` (required): The question to ask Gemini
+- `context` (optional): Additional context for the query
+
+**Features:**
+- Real-time streaming of Gemini's response
+- Lower latency for first token
+- Better user experience for long responses
+
+### 5. `web_search`
+Search the web for information (placeholder for future Brave Search integration).
+
+**Parameters:**
+- `query` (required): The search query
+- `count` (optional): Number of results (default: 10)
+
+**Note:** This tool currently returns instructions to use Brave Search MCP directly. Full integration coming soon.
 
 ## Uncertainty Detection
 

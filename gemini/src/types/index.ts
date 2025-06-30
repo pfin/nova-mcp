@@ -7,6 +7,9 @@ export interface GeminiConfig {
   model: string;
   maxContext?: number;
   debug?: boolean;
+  enableStreaming?: boolean;
+  enableToolChaining?: boolean;
+  maxRecursionDepth?: number;
 }
 
 export interface ConsultationResult {
@@ -33,4 +36,21 @@ export interface UncertaintyDetection {
   hasUncertainty: boolean;
   uncertaintyType?: 'basic' | 'complex_decision' | 'critical_operation';
   matches: string[];
+}
+
+export interface StreamingOptions {
+  onData: (chunk: string) => void;
+  onError?: (error: Error) => void;
+  onEnd?: () => void;
+}
+
+export interface ToolChainRequest {
+  steps: Array<{
+    id: string;
+    tool: string;
+    params: any;
+    dependsOn?: string[];
+  }>;
+  context?: string;
+  maxDepth?: number;
 }
