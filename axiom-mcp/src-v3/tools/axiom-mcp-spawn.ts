@@ -75,7 +75,7 @@ async function executeWithPty(prompt: string, taskId: string, systemPrompt?: str
   
   // Execute using Claude CLI directly through PTY
   const claudeCommand = 'claude';
-  const claudeArgs = ['--print'];
+  const claudeArgs = []; // No --print flag to enable direct execution
   
   console.error(`[PTY] Executing task ${taskId} with prompt length: ${fullPrompt.length}`);
   

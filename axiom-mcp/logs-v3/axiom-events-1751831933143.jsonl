@@ -1,0 +1,3 @@
+{"taskId":"system","workerId":"main","event":"task_start","payload":{"message":"Event bus initialized"},"timestamp":"2025-07-06T19:58:53.143Z"}
+{"taskId":"test","workerId":"main","event":"tool_call","payload":{"tool":"axiom_test_v3","args":{"prompt":"bash date"}},"timestamp":"2025-07-06T19:58:53.150Z"}
+{"taskId":"5fd73333-d1b6-4c4e-942a-f8426bbc893a","workerId":"main","event":"task_start","payload":{"prompt":"bash date","title":"bash date","depth":0},"timestamp":"2025-07-06T19:58:53.153Z"}

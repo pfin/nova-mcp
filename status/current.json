@@ -590,7 +590,149 @@
         "taskType": "General",
         "systemPrompt": "You are completing a research task. Please:\n1. Be thorough and specific\n2. Use appropriate tools to gather information\n3. Verify your findings\n4. Provide concrete evidence\n5. Test any code you write"
       }
+    ],
+    [
+      "cac71ee6-f293-4646-a514-e0b6e27e8e72",
+      {
+        "id": "cac71ee6-f293-4646-a514-e0b6e27e8e72",
+        "prompt": "Write a simple Python function that calculates the factorial of a number and save it to factorial.py",
+        "status": "completed",
+        "startTime": "2025-07-06T21:21:05.305Z",
+        "temporalStartTime": "Sun Jul  6 17:21:05 EDT 2025",
+        "depth": 0,
+        "childTasks": [
+          "9a7566d8-0ecf-4eca-b182-1d0b0690e766"
+        ],
+        "taskType": "General",
+        "systemPrompt": "You are completing a research task. Please:\n1. Be thorough and specific\n2. Use appropriate tools to gather information\n3. Verify your findings\n4. Provide concrete evidence\n5. Test any code you write",
+        "mctsStats": {
+          "visits": 0,
+          "totalReward": 0,
+          "averageReward": 0,
+          "untriedActions": [
+            "Step-by-step implementation",
+            "Phase-based approach",
+            "Incremental development",
+            "Waterfall methodology"
+          ],
+          "lastVisited": "2025-07-06T21:21:05.305Z"
+        },
+        "output": "[\"Write a Python function that calculates the factorial of a number and save it to factorial.py\"]",
+        "temporalEndTime": "Sun Jul  6 17:21:13 EDT 2025",
+        "endTime": "2025-07-06T21:21:13.332Z",
+        "duration": 8027
+      }
+    ],
+    [
+      "9a7566d8-0ecf-4eca-b182-1d0b0690e766",
+      {
+        "id": "9a7566d8-0ecf-4eca-b182-1d0b0690e766",
+        "prompt": "Write a Python function that calculates the factorial of a number and save it to factorial.py",
+        "status": "pending",
+        "startTime": "2025-07-06T21:21:13.327Z",
+        "temporalStartTime": "Sun Jul  6 17:21:13 EDT 2025",
+        "depth": 1,
+        "parentTask": "cac71ee6-f293-4646-a514-e0b6e27e8e72",
+        "childTasks": [],
+        "taskType": "General",
+        "systemPrompt": "You are completing a research task. Please:\n1. Be thorough and specific\n2. Use appropriate tools to gather information\n3. Verify your findings\n4. Provide concrete evidence\n5. Test any code you write"
+      }
+    ],
+    [
+      "caaefe03-061f-4ed9-af4c-4b48c74a143b",
+      {
+        "id": "caaefe03-061f-4ed9-af4c-4b48c74a143b",
+        "prompt": "Create a web scraper system with a Python backend that fetches data and a TypeScript frontend that displays it. The Python script should scrape quotes from quotes.toscrape.com and save them to a JSON file. The TypeScript code should read this JSON and create a simple HTML display with proper types.",
+        "status": "completed",
+        "startTime": "2025-07-06T21:21:38.977Z",
+        "temporalStartTime": "Sun Jul  6 17:21:38 EDT 2025",
+        "depth": 0,
+        "childTasks": [
+          "a9b5a0fc-0d47-4462-8ac2-0fb9136b39c4",
+          "a969f5c8-1304-4f0e-86ea-02a2eae907a9",
+          "57505d80-0df8-4eb2-80eb-35d238a96ad3",
+          "a3735595-2b02-4f94-95e8-94ef4d5956e6"
+        ],
+        "taskType": "General",
+        "systemPrompt": "You are completing a research task. Please:\n1. Be thorough and specific\n2. Use appropriate tools to gather information\n3. Verify your findings\n4. Provide concrete evidence\n5. Test any code you write",
+        "mctsStats": {
+          "visits": 0,
+          "totalReward": 0,
+          "averageReward": 0,
+          "untriedActions": [
+            "Break into functional components",
+            "Separate by concerns",
+            "Divide by complexity",
+            "Split by dependencies"
+          ],
+          "lastVisited": "2025-07-06T21:21:38.977Z"
+        },
+        "output": "[\"Create a Python web scraper using requests and BeautifulSoup to fetch quotes, authors, and tags from quotes.toscrape.com\", \"Process the scraped data and save it to a quotes.json file with proper structure including quote text, author, and tags array\", \"Set up a TypeScript project with proper type definitions for Quote interface matching the JSON structure\", \"Implement TypeScript code to read quotes.json and generate an HTML page displaying quotes in a formatted layout with author and tags\"]",
+        "temporalEndTime": "Sun Jul  6 17:21:54 EDT 2025",
+        "endTime": "2025-07-06T21:21:54.751Z",
+        "duration": 15774
+      }
+    ],
+    [
+      "a9b5a0fc-0d47-4462-8ac2-0fb9136b39c4",
+      {
+        "id": "a9b5a0fc-0d47-4462-8ac2-0fb9136b39c4",
+        "prompt": "Create a Python web scraper using requests and BeautifulSoup to fetch quotes, authors, and tags from quotes.toscrape.com",
+        "status": "pending",
+        "startTime": "2025-07-06T21:21:54.738Z",
+        "temporalStartTime": "Sun Jul  6 17:21:54 EDT 2025",
+        "depth": 1,
+        "parentTask": "caaefe03-061f-4ed9-af4c-4b48c74a143b",
+        "childTasks": [],
+        "taskType": "General",
+        "systemPrompt": "You are completing a research task. Please:\n1. Be thorough and specific\n2. Use appropriate tools to gather information\n3. Verify your findings\n4. Provide concrete evidence\n5. Test any code you write"
+      }
+    ],
+    [
+      "a969f5c8-1304-4f0e-86ea-02a2eae907a9",
+      {
+        "id": "a969f5c8-1304-4f0e-86ea-02a2eae907a9",
+        "prompt": "Process the scraped data and save it to a quotes.json file with proper structure including quote text, author, and tags array",
+        "status": "pending",
+        "startTime": "2025-07-06T21:21:54.741Z",
+        "temporalStartTime": "Sun Jul  6 17:21:54 EDT 2025",
+        "depth": 1,
+        "parentTask": "caaefe03-061f-4ed9-af4c-4b48c74a143b",
+        "childTasks": [],
+        "taskType": "General",
+        "systemPrompt": "You are completing a research task. Please:\n1. Be thorough and specific\n2. Use appropriate tools to gather information\n3. Verify your findings\n4. Provide concrete evidence\n5. Test any code you write"
+      }
+    ],
+    [
+      "57505d80-0df8-4eb2-80eb-35d238a96ad3",
+      {
+        "id": "57505d80-0df8-4eb2-80eb-35d238a96ad3",
+        "prompt": "Set up a TypeScript project with proper type definitions for Quote interface matching the JSON structure",
+        "status": "pending",
+        "startTime": "2025-07-06T21:21:54.743Z",
+        "temporalStartTime": "Sun Jul  6 17:21:54 EDT 2025",
+        "depth": 1,
+        "parentTask": "caaefe03-061f-4ed9-af4c-4b48c74a143b",
+        "childTasks": [],
+        "taskType": "General",
+        "systemPrompt": "You are completing a research task. Please:\n1. Be thorough and specific\n2. Use appropriate tools to gather information\n3. Verify your findings\n4. Provide concrete evidence\n5. Test any code you write"
+      }
+    ],
+    [
+      "a3735595-2b02-4f94-95e8-94ef4d5956e6",
+      {
+        "id": "a3735595-2b02-4f94-95e8-94ef4d5956e6",
+        "prompt": "Implement TypeScript code to read quotes.json and generate an HTML page displaying quotes in a formatted layout with author and tags",
+        "status": "pending",
+        "startTime": "2025-07-06T21:21:54.746Z",
+        "temporalStartTime": "Sun Jul  6 17:21:54 EDT 2025",
+        "depth": 1,
+        "parentTask": "caaefe03-061f-4ed9-af4c-4b48c74a143b",
+        "childTasks": [],
+        "taskType": "General",
+        "systemPrompt": "You are completing a research task. Please:\n1. Be thorough and specific\n2. Use appropriate tools to gather information\n3. Verify your findings\n4. Provide concrete evidence\n5. Test any code you write"
+      }
     ]
   ],
-  "lastSaved": "2025-07-06T20:31:53.136Z"
+  "lastSaved": "2025-07-06T21:21:54.751Z"
 }
