@@ -32,6 +32,8 @@ import { axiomMcpImplementTool, handleAxiomMcpImplement } from '../src/tools/axi
 import { axiomMcpVisualizeTool, handleAxiomMcpVisualize } from '../src/tools/axiom-mcp-visualize.js';
 import { axiomMcpVerifyTool, handleAxiomMcpVerify } from '../src/tools/axiom-mcp-verify.js';
 import { axiomMcpDocsTool, handleAxiomMcpDocs } from '../src/tools/axiom-mcp-docs.js';
+// Import v3 test tool
+import { axiomTestV3Tool, handleAxiomTestV3 } from './tools/axiom-test-v3.js';
 import { EventBus, EventType } from './core/event-bus.js';
 import { z } from 'zod';
 import { StatusManager } from '../src/status-manager.js';
@@ -88,6 +90,7 @@ const tools = [
     axiomMcpVisualizeTool,
     axiomMcpVerifyTool,
     axiomMcpDocsTool,
+    axiomTestV3Tool,
 ];
 // Handler map
 const handlers = {
@@ -108,6 +111,7 @@ const handlers = {
     axiom_mcp_visualize: handleAxiomMcpVisualize,
     axiom_mcp_verify: handleAxiomMcpVerify,
     axiom_mcp_docs: handleAxiomMcpDocs,
+    axiom_test_v3: handleAxiomTestV3,
 };
 // Handle tool listing
 server.setRequestHandler(ListToolsRequestSchema, async () => {
