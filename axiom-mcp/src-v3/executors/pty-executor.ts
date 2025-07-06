@@ -41,103 +41,125 @@ export class PtyExecutor extends EventEmitter {
     super();
   }
   
+  cleanup(): void {
+    if (this.heartbeatTimer) {
+      clearInterval(this.heartbeatTimer);
+      this.heartbeatTimer = null;
+    }
+    if (this.ptyProcess) {
+      this.ptyProcess.kill();
+      this.ptyProcess = null;
+    }
+    this.isRunning = false;
+  }
+  
   async execute(command: string, args: string[], taskId: string): Promise<void> {
     if (this.isRunning) {
       throw new Error('Executor already running');
     }
     
     this.isRunning = true;
+    console.error(`[PTY] Starting execution: ${command} ${args.slice(0, 2).join(' ')}...`);
     
-    try {
-      // CRITICAL: Use exact configuration from GoodIdeas
-      this.ptyProcess = pty.spawn(command, args, {
-        name: 'xterm-color',
-        cols: this.options.cols || 120,
-        rows: this.options.rows || 40,
-        cwd: this.options.cwd || process.cwd(),
-        env: { 
-          ...process.env, 
-          ...this.options.env,
-          FORCE_COLOR: '0' // Disable color to avoid ANSI escape sequences
-        }
-      });
-      
-      // Set up monitoring pipeline if enabled
-      if (this.options.enableMonitoring) {
-        this.streamInterceptor = createMonitoringPipeline(
-          taskId,
-          this.options.enableIntervention ?? true,
-          (intervention) => {
-            // Inject intervention command into PTY
-            console.error(`[INTERVENTION] ${taskId}: ${intervention}`);
-            this.write(intervention);
-            this.emit('intervention', {
+    return new Promise<void>((resolve, reject) => {
+      try {
+        // CRITICAL: Use exact configuration from GoodIdeas
+        this.ptyProcess = pty.spawn(command, args, {
+          name: 'xterm-color',
+          cols: this.options.cols || 120,
+          rows: this.options.rows || 40,
+          cwd: this.options.cwd || process.cwd(),
+          env: { 
+            ...process.env, 
+            ...this.options.env,
+            FORCE_COLOR: '0' // Disable color to avoid ANSI escape sequences
+          }
+        });
+        
+        console.error(`[PTY] Process spawned successfully`);
+        
+        // Set up monitoring pipeline if enabled
+        if (this.options.enableMonitoring) {
+          this.streamInterceptor = createMonitoringPipeline(
+            taskId,
+            this.options.enableIntervention ?? true,
+            (intervention) => {
+              // Inject intervention command into PTY
+              console.error(`[INTERVENTION] ${taskId}: ${intervention}`);
+              this.write(intervention);
+              this.emit('intervention', {
+                taskId,
+                timestamp: Date.now(),
+                type: 'intervention',
+                payload: intervention
+              });
+            }
+          );
+          
+          // Subscribe to violation events
+          this.streamInterceptor.onInterceptorEvent('violation', (violation: any) => {
+            this.emit('violation', {
               taskId,
               timestamp: Date.now(),
-              type: 'intervention',
-              payload: intervention
+              type: 'violation',
+              payload: violation
             });
-          }
-        );
-        
-        // Subscribe to violation events
-        this.streamInterceptor.onInterceptorEvent('violation', (violation: any) => {
-          this.emit('violation', {
-            taskId,
-            timestamp: Date.now(),
-            type: 'violation',
-            payload: violation
           });
-        });
-      }
-      
-      // Notify if callback provided (for interactive controller)
-      if (this.options.onExecutorCreated) {
-        this.options.onExecutorCreated(this);
-      }
-      
-      // Stream output character by character
-      this.ptyProcess.onData((data) => {
-        this.outputBuffer += data;
-        
-        // Pass through monitoring pipeline if enabled
-        if (this.streamInterceptor) {
-          this.streamInterceptor.write(data);
         }
         
-        this.emit('data', {
-          taskId,
-          timestamp: Date.now(),
-          type: 'data',
-          payload: data
-        } as ExecutorEvent);
-      });
-      
-      // Start heartbeat to prevent timeout
-      this.startHeartbeat(taskId);
-      
-      // Handle process exit
-      this.ptyProcess.onExit(({ exitCode, signal }) => {
-        this.stopHeartbeat();
+        // Notify if callback provided (for interactive controller)
+        if (this.options.onExecutorCreated) {
+          this.options.onExecutorCreated(this);
+        }
+        
+        // Stream output character by character
+        this.ptyProcess.onData((data) => {
+          console.error(`[PTY] Received data: ${data.length} bytes`);
+          this.outputBuffer += data;
+          
+          // Pass through monitoring pipeline if enabled
+          if (this.streamInterceptor) {
+            this.streamInterceptor.write(data);
+          }
+          
+          this.emit('data', {
+            taskId,
+            timestamp: Date.now(),
+            type: 'data',
+            payload: data
+          } as ExecutorEvent);
+        });
+        
+        // Start heartbeat to prevent timeout
+        this.startHeartbeat(taskId);
+        
+        // Handle process exit - THIS RESOLVES THE PROMISE
+        this.ptyProcess.onExit(({ exitCode, signal }) => {
+          console.error(`[PTY] Process exited: exitCode=${exitCode}, signal=${signal}`);
+          this.stopHeartbeat();
+          this.isRunning = false;
+          this.emit('exit', {
+            taskId,
+            timestamp: Date.now(),
+            type: 'exit',
+            payload: { exitCode, signal }
+          } as ExecutorEvent);
+          
+          // Resolve the promise when process exits
+          resolve();
+        });
+        
+      } catch (error) {
         this.isRunning = false;
-        this.emit('exit', {
+        this.emit('error', {
           taskId,
           timestamp: Date.now(),
-          type: 'exit',
-          payload: { exitCode, signal }
+          type: 'error',
+          payload: error
         } as ExecutorEvent);
-      });
-      
-    } catch (error) {
-      this.isRunning = false;
-      this.emit('error', {
-        taskId,
-        timestamp: Date.now(),
-        type: 'error',
-        payload: error
-      } as ExecutorEvent);
-      throw error;
-    }
+        reject(error);
+      }
+    });
   }
   
   /**
