@@ -25,8 +25,10 @@ import { dirname } from 'path';
 
 // Import v3 components ONLY
 import { axiomMcpSpawnTool, handleAxiomMcpSpawn } from './tools/axiom-mcp-spawn.js';
+import { axiomMcpObserveTool, handleAxiomMcpObserve } from './tools/axiom-mcp-observe.js';
 import { StatusManager } from './managers/status-manager.js';
 import { EventLogger } from './logging/event-logger.js';
+import { ConversationDB } from './database/conversation-db.js';
 
 // Get current directory
 const __filename = fileURLToPath(import.meta.url);
@@ -35,6 +37,14 @@ const __dirname = dirname(__filename);
 // Initialize components
 const statusManager = new StatusManager();
 const eventLogger = new EventLogger();
+const conversationDB = new ConversationDB();
+
+// Initialize database
+conversationDB.initialize().then(() => {
+  console.error('[AXIOM v3] Database initialized');
+}).catch(err => {
+  console.error('[AXIOM v3] Database initialization failed:', err);
+});
 
 // Log startup
 console.error('[AXIOM v3] Starting Axiom MCP v3 Standalone Server');
@@ -58,6 +68,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: [
       axiomMcpSpawnTool,
+      axiomMcpObserveTool,
       // We'll add more v3 tools as we build them
       {
         name: 'axiom_mcp_status',
@@ -97,7 +108,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   try {
     switch (name) {
       case 'axiom_mcp_spawn':
-        return await handleAxiomMcpSpawn(args as any, statusManager);
+        return await handleAxiomMcpSpawn(args as any, statusManager, conversationDB);
+        
+      case 'axiom_mcp_observe':
+        return await handleAxiomMcpObserve(args as any, conversationDB);
         
       case 'axiom_mcp_status':
         return handleAxiomMcpStatusV3(args as any, statusManager);

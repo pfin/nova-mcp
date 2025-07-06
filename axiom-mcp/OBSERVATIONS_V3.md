@@ -104,3 +104,51 @@ User Request → axiom_mcp_spawn → Task Decomposition → Task Tree → PTY Ex
 - Fixed by removing `--print` flag from claudeArgs
 - Rebuilt v3 with fix
 - Ready to test execution
+
+### 17:30 - Built Observability System
+- Created SQLite conversation database
+- Implemented stream parser for PTY output
+- Added axiom_mcp_observe tool with modes:
+  - `all` - show all active conversations
+  - `tree` - show specific conversation tree
+  - `recent` - show last N actions
+  - `live` - placeholder for future streaming
+- Integrated database with spawn tool
+- Real-time stream parsing and storage
+- Parent-child relationship tracking
+- Built and ready to test
+
+---
+
+## Observability System Design
+
+### Requirements (Per User Request)
+1. **Multiple Conversations**: Track N conversations (not hardcoded to 3)
+2. **Arbitrary Depth**: Support parent-child relationships at any depth
+3. **Flexible Observation**:
+   - Master view (all conversations)
+   - Focused view (specific branch)
+   - Last N actions view
+4. **Database Storage**: Use SQLite, not LLM context
+5. **Stream Parsing**: Convert PTY output to structured data
+
+### Proposed SQLite Schema
+```sql
+-- Core tables
+conversations (id, parent_id, started_at, status, depth, prompt, task_type)
+actions (id, conversation_id, timestamp, type, content, metadata)
+streams (id, conversation_id, chunk, parsed_data, timestamp)
+observations (id, name, filter_json, created_at)
+
+-- Indexes for performance
+idx_conversations_parent (parent_id)
+idx_actions_conversation (conversation_id, timestamp)
+idx_streams_conversation (conversation_id, timestamp)
+```
+
+### Component Design
+- **ConversationDB**: SQLite wrapper with async operations
+- **StreamParser**: Parse PTY chunks into structured events
+- **ConversationTracker**: Manage parent-child relationships
+- **ObservationEngine**: Query interface for different views
+- **RealtimeEmitter**: Push updates to observers

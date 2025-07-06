@@ -7,6 +7,8 @@ import { detectTaskType, getSystemPrompt } from '../config/task-types.js';
 import { execSync } from 'child_process';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { ConversationDB } from '../database/conversation-db.js';
+import { StreamParser } from '../parsers/stream-parser.js';
 
 export const axiomMcpSpawnSchema = z.object({
   parentPrompt: z.string().describe('The main task that will spawn subtasks'),
@@ -49,7 +51,12 @@ async function captureFileState(dir: string): Promise<Set<string>> {
 }
 
 // Helper to execute with PTY
-async function executeWithPty(prompt: string, taskId: string, systemPrompt?: string): Promise<string> {
+async function executeWithPty(
+  prompt: string, 
+  taskId: string, 
+  systemPrompt?: string,
+  conversationDB?: ConversationDB
+): Promise<string> {
   const executor = new PtyExecutor({
     cwd: process.cwd(),
     enableMonitoring: true,
@@ -58,16 +65,56 @@ async function executeWithPty(prompt: string, taskId: string, systemPrompt?: str
   
   let output = '';
   let hasError = false;
+  const streamParser = new StreamParser();
   
   executor.on('data', (event) => {
     if (event.type === 'data') {
       output += event.payload;
+      
+      // Parse stream and store in database
+      if (conversationDB) {
+        const events = streamParser.parse(event.payload);
+        
+        // Store raw stream chunk
+        conversationDB.createStream({
+          id: uuidv4(),
+          conversation_id: taskId,
+          chunk: event.payload,
+          parsed_data: events.length > 0 ? { events } : undefined,
+          timestamp: new Date().toISOString(),
+        }).catch(err => console.error('[DB] Stream storage error:', err));
+        
+        // Store significant events as actions
+        for (const evt of events) {
+          if (evt.type !== 'output_chunk') {
+            conversationDB.createAction({
+              id: uuidv4(),
+              conversation_id: taskId,
+              timestamp: evt.timestamp,
+              type: evt.type,
+              content: evt.content,
+              metadata: evt.metadata,
+            }).catch(err => console.error('[DB] Action storage error:', err));
+          }
+        }
+      }
     }
   });
   
   executor.on('error', (event) => {
     hasError = true;
     console.error(`[PTY ERROR] ${event.payload}`);
+    
+    if (conversationDB) {
+      conversationDB.createAction({
+        id: uuidv4(),
+        conversation_id: taskId,
+        timestamp: new Date().toISOString(),
+        type: 'error',
+        content: event.payload,
+        metadata: { errorType: 'pty_error' }
+      }).catch(err => console.error('[DB] Error storage failed:', err));
+    }
   });
   
   // Build the full command with system prompt
@@ -102,7 +149,8 @@ async function executeWithPty(prompt: string, taskId: string, systemPrompt?: str
 
 export async function handleAxiomMcpSpawn(
   input: AxiomMcpSpawnInput,
-  statusManager: StatusManager
+  statusManager: StatusManager,
+  conversationDB?: ConversationDB
 ): Promise<{ content: Array<{ type: string; text: string }> }> {
   try {
     // Get temporal context
@@ -128,6 +176,24 @@ export async function handleAxiomMcpSpawn(
     };
     
     statusManager.addTask(rootTask);
+    
+    // Create conversation in database
+    if (conversationDB) {
+      await conversationDB.createConversation({
+        id: rootTaskId,
+        parent_id: undefined,
+        started_at: new Date().toISOString(),
+        status: 'active',
+        depth: 0,
+        prompt: input.parentPrompt,
+        task_type: detectedTaskType?.name || 'General',
+        metadata: {
+          spawnPattern: input.spawnPattern,
+          spawnCount: input.spawnCount,
+          maxDepth: input.maxDepth,
+        }
+      });
+    }
     
     // Capture initial file state
     const filesBefore = await captureFileState(process.cwd());
@@ -218,7 +284,7 @@ Requirements:
     
     // Execute the spawning prompt with PTY
     console.error(`[SPAWN] Executing parent task with PTY to generate ${input.spawnCount} subtasks...`);
-    const spawnResult = await executeWithPty(spawnPrompt, rootTaskId, systemPrompt);
+    const spawnResult = await executeWithPty(spawnPrompt, rootTaskId, systemPrompt, conversationDB);
     
     // Check if any files were created
     const filesAfter = await captureFileState(process.cwd());
@@ -319,6 +385,20 @@ Requirements:
       
       statusManager.addTask(childTask);
       
+      // Create child conversation in database
+      if (conversationDB) {
+        await conversationDB.createConversation({
+          id: childId,
+          parent_id: rootTaskId,
+          started_at: new Date().toISOString(),
+          status: 'active',
+          depth: childTask.depth,
+          prompt: subtask,
+          task_type: rootTask.taskType,
+          metadata: { index: i }
+        });
+      }
+      
       if (input.autoExecute && childTask.depth < input.maxDepth) {
         // Execute child tasks
         console.error(`[SPAWN] Executing child task ${i + 1}/${subtasks.length}: ${subtask.substring(0, 50)}...`);
@@ -326,7 +406,8 @@ Requirements:
         const childPromise = executeWithPty(
           `CRITICAL: You must implement actual code, not just describe.\n\n${subtask}`,
           childId,
-          systemPrompt
+          systemPrompt,
+          conversationDB
         ).then(output => {
           const endDate = execSync('date', { encoding: 'utf-8' }).trim();
           statusManager.updateTask(childId, {
@@ -334,6 +415,13 @@ Requirements:
             output: output,
             temporalEndTime: endDate,
           });
+          
+          // Update database status
+          if (conversationDB) {
+            conversationDB.updateConversationStatus(childId, 'completed')
+              .catch(err => console.error('[DB] Status update failed:', err));
+          }
+          
           return output;
         }).catch(error => {
           const endDate = execSync('date', { encoding: 'utf-8' }).trim();
@@ -342,6 +430,13 @@ Requirements:
             error: error.message,
             temporalEndTime: endDate,
           });
+          
+          // Update database status
+          if (conversationDB) {
+            conversationDB.updateConversationStatus(childId, 'failed')
+              .catch(err => console.error('[DB] Status update failed:', err));
+          }
+          
           throw error;
         });
         
@@ -369,6 +464,11 @@ Requirements:
       status: 'completed',
       temporalEndTime: endDate,
     });
+    
+    // Update root task status in database
+    if (conversationDB) {
+      await conversationDB.updateConversationStatus(rootTaskId, 'completed');
+    }
     
     // Build comprehensive output
     let output = `# Axiom MCP Spawn Execution Report\n\n`;
