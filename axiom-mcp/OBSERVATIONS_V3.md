@@ -118,6 +118,42 @@ User Request → axiom_mcp_spawn → Task Decomposition → Task Tree → PTY Ex
 - Parent-child relationship tracking
 - Built and ready to test
 
+### 17:51 - Test Results & Key Learning
+- **CRITICAL FINDING**: Removing `--print` flag wasn't enough
+- **Root Cause**: Claude CLI without flags still doesn't execute directly
+- **Evidence**: 
+  - Parent task "completed" in 11s
+  - Child task remains "pending"
+  - No factorial.py file created
+  - Database integration working (would need reload to test observe tool)
+
+### What We Learned:
+1. **Claude CLI Behavior**: 
+   - With `--print`: Asks permission before showing output
+   - Without flags: Still doesn't execute code directly
+   - Need different approach for actual execution
+
+2. **Observability Success**:
+   - Status tracking works perfectly
+   - Can see task hierarchy and timing
+   - Database ready but tool not loaded yet
+
+3. **Architecture Issue**:
+   - PTY executor is connected
+   - Commands are sent correctly
+   - But Claude CLI itself is the bottleneck
+
+### Possible Solutions:
+1. **Use stdin piping**: `echo "prompt" | claude` might work differently
+2. **Try --yes flag**: If it exists, might auto-confirm
+3. **Alternative executor**: Use direct API calls instead of CLI
+4. **Mock execution**: For testing, simulate file creation
+
+### Next Priority:
+- Find a way to make Claude CLI actually execute code
+- Test observability tools after reload
+- Consider alternative execution strategies
+
 ---
 
 ## Observability System Design

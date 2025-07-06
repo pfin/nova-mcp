@@ -186,6 +186,51 @@ AXIOM_PROMPT_CONFIG=./custom-prompts.json  # Custom prompts
 4. **Intervention Over Failure** - Fix immediately > let problems compound
 5. **Synthesis Over Selection** - Combine best parts > pick single winner
 
+## 📊 Before/After: Why Axiom MCP Matters
+
+### Before: Traditional AI Coding Assistant
+```
+User: "Build a REST API"
+AI: "I would create an Express server with the following structure..."
+Result: 
+- ❌ No files created
+- ❌ No code executed  
+- ❌ Just descriptions
+- ❌ TODOs everywhere
+- ❌ No way to verify claims
+```
+
+### After: Axiom MCP Execution Observatory
+```
+User: "Build a REST API" 
+Axiom: [Creates 5 parallel implementations]
+Result:
+- ✅ Real files created: server.js, routes/, models/
+- ✅ Observable execution traces
+- ✅ Verified working code
+- ✅ No TODOs - only implementation
+- ✅ Complete audit trail in database
+```
+
+### Why This Changes Everything
+
+1. **Verifiable Truth**: Every claim backed by file system evidence
+2. **Real-time Compliance**: Universal principles enforced during execution
+3. **Observable Progress**: Watch implementations unfold character by character
+4. **No More Lies**: If the file doesn't exist, it didn't happen
+5. **Learning System**: Failed attempts inform successful ones
+
+### The Proof Is In The Files
+```bash
+# Before Axiom
+$ ls api/
+ls: cannot access 'api/': No such file or directory
+
+# After Axiom  
+$ ls api/
+server.js  package.json  routes/  models/  tests/  README.md
+```
+
 ## 🛠️ Development
 
 ### Building
