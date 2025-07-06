@@ -6,10 +6,21 @@
   "type": "module",
   "scripts": {
     "build": "tsc && chmod +x dist/index.js",
+    "build:v2": "tsc -p tsconfig.v2.json",
+    "build:v3": "tsc -p tsconfig.v3.json",
     "dev": "tsc --watch",
+    "dev:v2": "tsc -p tsconfig.v2.json --watch",
+    "dev:v3": "tsc -p tsconfig.v3.json --watch",
     "start": "node dist/index.js",
+    "start:v2": "node dist-v2/index.js",
+    "start:v3": "node dist-v3/index.js",
     "master": "node dist/master-terminal.js",
-    "axiom-master": "npm run build && node dist/master-terminal.js"
+    "axiom-master": "npm run build && node dist/master-terminal.js",
+    "test": "jest --config jest.config.v3.js",
+    "test:sprint0": "npm run build:v2 && node dist-v2/test-sprint0.js",
+    "inspect:v2": "npx @modelcontextprotocol/inspector ./dist-v2/index.js",
+    "inspect:v3": "npx @modelcontextprotocol/inspector ./dist-v3/index.js",
+    "inspect:v3-simple": "npx @modelcontextprotocol/inspector ./dist-v3/index-simple.js"
   },
   "keywords": [
     "mcp",
@@ -21,18 +32,27 @@
   "author": "Nova MCP",
   "license": "MIT",
   "dependencies": {
+    "@anthropic-ai/claude-code": "^1.0.43",
     "@modelcontextprotocol/sdk": "^1.15.0",
+    "@types/ws": "^8.18.1",
+    "chokidar": "^3.6.0",
     "express": "^4.18.2",
+    "node-pty": "^1.0.0",
+    "simple-git": "^3.24.0",
     "uuid": "^11.0.5",
-    "ws": "^8.16.0",
+    "ws": "^8.18.3",
     "zod": "^3.23.8",
     "zod-to-json-schema": "^3.23.5"
   },
   "devDependencies": {
+    "@jest/globals": "^30.0.4",
     "@types/chalk": "^0.4.31",
+    "@types/jest": "^30.0.0",
     "@types/node": "^22.10.5",
     "@types/uuid": "^10.0.0",
     "chalk": "^5.4.1",
+    "jest": "^30.0.4",
+    "ts-jest": "^29.4.0",
     "typescript": "^5.7.3"
   }
 }

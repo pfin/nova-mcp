@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axiom MCP v3 Monitor</title>
+    <style>
+        body {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #569cd6;
+            margin-bottom: 20px;
+        }
+        
+        .status {
+            background: #2d2d30;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .connected {
+            color: #4ec9b0;
+        }
+        
+        .disconnected {
+            color: #f44747;
+        }
+        
+        .stream-container {
+            background: #2d2d30;
+            border: 1px solid #3e3e42;
+            border-radius: 4px;
+            height: 500px;
+            overflow-y: auto;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .event {
+            margin-bottom: 8px;
+            padding: 4px 8px;
+            border-left: 3px solid #3e3e42;
+        }
+        
+        .event.task_start {
+            border-left-color: #569cd6;
+        }
+        
+        .event.task_complete {
+            border-left-color: #4ec9b0;
+        }
+        
+        .event.task_failed {
+            border-left-color: #f44747;
+        }
+        
+        .event.verification_pass {
+            border-left-color: #4ec9b0;
+            background: rgba(78, 201, 176, 0.1);
+        }
+        
+        .event.verification_fail {
+            border-left-color: #f44747;
+            background: rgba(244, 71, 71, 0.1);
+        }
+        
+        .event.tool_call {
+            border-left-color: #dcdcaa;
+        }
+        
+        .event.intervention {
+            border-left-color: #c586c0;
+        }
+        
+        .timestamp {
+            color: #858585;
+            font-size: 12px;
+        }
+        
+        .task-id {
+            color: #9cdcfe;
+            font-weight: bold;
+        }
+        
+        .intervention-form {
+            background: #2d2d30;
+            padding: 20px;
+            border-radius: 4px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        input[type="text"] {
+            background: #1e1e1e;
+            border: 1px solid #3e3e42;
+            color: #d4d4d4;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: inherit;
+            flex: 1;
+        }
+        
+        button {
+            background: #569cd6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        
+        button:hover {
+            background: #4e8cc5;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: #2d2d30;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #569cd6;
+        }
+        
+        .stat-label {
+            color: #858585;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Axiom MCP v3 Real-Time Monitor</h1>
+        
+        <div class="status">
+            Status: <span id="status" class="disconnected">Disconnected</span> | 
+            Client ID: <span id="clientId">-</span>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="totalEvents">0</div>
+                <div class="stat-label">Total Events</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="activeTasks">0</div>
+                <div class="stat-label">Active Tasks</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="verificationRate">0%</div>
+                <div class="stat-label">Verification Rate</div>
+            </div>
+        </div>
+        
+        <div class="stream-container" id="stream">
+            <div class="event">Waiting for connection...</div>
+        </div>
+        
+        <div class="intervention-form">
+            <input type="text" id="taskId" placeholder="Task ID">
+            <input type="text" id="prompt" placeholder="Intervention command...">
+            <button onclick="sendIntervention()">Send Intervention</button>
+            <button onclick="clearStream()">Clear</button>
+        </div>
+    </div>
+    
+    <script>
+        let ws = null;
+        let clientId = null;
+        let eventCount = 0;
+        let activeTasks = new Set();
+        let verificationStats = { passed: 0, failed: 0 };
+        
+        function connect() {
+            ws = new WebSocket('ws://localhost:8080');
+            
+            ws.onopen = () => {
+                document.getElementById('status').textContent = 'Connected';
+                document.getElementById('status').className = 'connected';
+                addEvent('system', null, 'Connected to Axiom MCP v3');
+            };
+            
+            ws.onclose = () => {
+                document.getElementById('status').textContent = 'Disconnected';
+                document.getElementById('status').className = 'disconnected';
+                addEvent('system', null, 'Disconnected from server');
+                
+                // Reconnect after 3 seconds
+                setTimeout(connect, 3000);
+            };
+            
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                addEvent('error', null, 'Connection error');
+            };
+            
+            ws.onmessage = (event) => {
+                try {
+                    const message = JSON.parse(event.data);
+                    handleMessage(message);
+                } catch (error) {
+                    console.error('Failed to parse message:', error);
+                }
+            };
+        }
+        
+        function handleMessage(message) {
+            // Update stats
+            eventCount++;
+            document.getElementById('totalEvents').textContent = eventCount;
+            
+            switch (message.type) {
+                case 'system':
+                    if (message.data.clientId) {
+                        clientId = message.data.clientId;
+                        document.getElementById('clientId').textContent = clientId;
+                    }
+                    addEvent('system', message.taskId, message.data.message);
+                    break;
+                    
+                case 'stream':
+                    const eventType = message.data.event;
+                    const payload = message.data.payload;
+                    
+                    // Track active tasks
+                    if (eventType === 'task_start') {
+                        activeTasks.add(message.taskId);
+                    } else if (eventType === 'task_complete' || eventType === 'task_failed') {
+                        activeTasks.delete(message.taskId);
+                    }
+                    
+                    // Track verification stats
+                    if (eventType === 'verification_pass') {
+                        verificationStats.passed++;
+                    } else if (eventType === 'verification_fail') {
+                        verificationStats.failed++;
+                    }
+                    
+                    // Update UI
+                    document.getElementById('activeTasks').textContent = activeTasks.size;
+                    const total = verificationStats.passed + verificationStats.failed;
+                    const rate = total > 0 ? Math.round((verificationStats.passed / total) * 100) : 0;
+                    document.getElementById('verificationRate').textContent = rate + '%';
+                    
+                    // Add event to stream
+                    addEvent(eventType, message.taskId, JSON.stringify(payload, null, 2));
+                    break;
+                    
+                case 'task_update':
+                    addEvent('task_update', message.taskId, `Status: ${message.data.status}`);
+                    break;
+                    
+                case 'verification':
+                    addEvent(
+                        message.data.passed ? 'verification_pass' : 'verification_fail',
+                        message.taskId,
+                        JSON.stringify(message.data.verification, null, 2)
+                    );
+                    break;
+                    
+                case 'error':
+                    addEvent('error', message.taskId, message.data.message);
+                    break;
+            }
+        }
+        
+        function addEvent(type, taskId, content) {
+            const stream = document.getElementById('stream');
+            const event = document.createElement('div');
+            event.className = 'event ' + type;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            const taskIdHtml = taskId ? `<span class="task-id">[${taskId.substr(0, 8)}]</span> ` : '';
+            
+            event.innerHTML = `
+                <span class="timestamp">${timestamp}</span> 
+                ${taskIdHtml}
+                <span>${content}</span>
+            `;
+            
+            stream.appendChild(event);
+            stream.scrollTop = stream.scrollHeight;
+            
+            // Keep only last 1000 events
+            while (stream.children.length > 1000) {
+                stream.removeChild(stream.firstChild);
+            }
+        }
+        
+        function sendIntervention() {
+            const taskId = document.getElementById('taskId').value;
+            const prompt = document.getElementById('prompt').value;
+            
+            if (!taskId || !prompt) {
+                alert('Please enter both Task ID and intervention command');
+                return;
+            }
+            
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: 'intervene',
+                    taskId: taskId,
+                    prompt: prompt
+                }));
+                
+                // Clear inputs
+                document.getElementById('prompt').value = '';
+                
+                addEvent('intervention', taskId, `Sent: ${prompt}`);
+            } else {
+                alert('Not connected to server');
+            }
+        }
+        
+        function clearStream() {
+            document.getElementById('stream').innerHTML = '';
+            eventCount = 0;
+            document.getElementById('totalEvents').textContent = '0';
+        }
+        
+        // Connect on load
+        connect();
+        
+        // Handle Enter key in prompt field
+        document.getElementById('prompt').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendIntervention();
+            }
+        });
+    </script>
+</body>
+</html>
