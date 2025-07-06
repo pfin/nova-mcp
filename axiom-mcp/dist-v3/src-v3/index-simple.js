@@ -65,13 +65,19 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             }
             else {
                 // Test regular execution
-                const result = await claudeCode.execute(input.prompt);
-                return {
+                console.error('[TEST-TOOL] Starting execution...');
+                const result = await claudeCode.execute(input.prompt, {
+                    systemPrompt: 'You are a helpful assistant. Execute the user\'s request directly.'
+                });
+                console.error('[TEST-TOOL] Execution completed, preparing response...');
+                const response = {
                     content: [{
                             type: 'text',
                             text: `Task completed!\nDuration: ${result.duration}ms\nNo timeout occurred!\n\nResult:\n${result.response}`
                         }]
                 };
+                console.error('[TEST-TOOL] Returning response');
+                return response;
             }
         }
         catch (error) {

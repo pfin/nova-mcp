@@ -16,19 +16,19 @@ export declare const axiomMcpStatusSchema: z.ZodObject<{
         taskType?: string | undefined;
         status?: "pending" | "running" | "completed" | "failed" | undefined;
         parentTask?: string | undefined;
+        maxDepth?: number | undefined;
         hasErrors?: boolean | undefined;
         minDepth?: number | undefined;
-        maxDepth?: number | undefined;
     }, {
         taskType?: string | undefined;
         status?: "pending" | "running" | "completed" | "failed" | undefined;
         parentTask?: string | undefined;
+        maxDepth?: number | undefined;
         hasErrors?: boolean | undefined;
         minDepth?: number | undefined;
-        maxDepth?: number | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
-    action: "system" | "task" | "recent" | "tree" | "clear" | "most_recent";
+    action: "system" | "recent" | "task" | "tree" | "clear" | "most_recent";
     limit: number;
     daysToKeep: number;
     taskId?: string | undefined;
@@ -36,12 +36,12 @@ export declare const axiomMcpStatusSchema: z.ZodObject<{
         taskType?: string | undefined;
         status?: "pending" | "running" | "completed" | "failed" | undefined;
         parentTask?: string | undefined;
+        maxDepth?: number | undefined;
         hasErrors?: boolean | undefined;
         minDepth?: number | undefined;
-        maxDepth?: number | undefined;
     } | undefined;
 }, {
-    action: "system" | "task" | "recent" | "tree" | "clear" | "most_recent";
+    action: "system" | "recent" | "task" | "tree" | "clear" | "most_recent";
     taskId?: string | undefined;
     limit?: number | undefined;
     daysToKeep?: number | undefined;
@@ -49,9 +49,9 @@ export declare const axiomMcpStatusSchema: z.ZodObject<{
         taskType?: string | undefined;
         status?: "pending" | "running" | "completed" | "failed" | undefined;
         parentTask?: string | undefined;
+        maxDepth?: number | undefined;
         hasErrors?: boolean | undefined;
         minDepth?: number | undefined;
-        maxDepth?: number | undefined;
     } | undefined;
 }>;
 export type axiomMcpStatusInput = z.infer<typeof axiomMcpStatusSchema>;

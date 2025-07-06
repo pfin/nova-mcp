@@ -8,16 +8,16 @@ export declare const axiomMcpSpawnSchema: z.ZodObject<{
     maxDepth: z.ZodDefault<z.ZodNumber>;
     autoExecute: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    maxDepth: number;
     parentPrompt: string;
-    spawnPattern: "parallel" | "recursive" | "decompose" | "sequential";
+    spawnPattern: "decompose" | "parallel" | "sequential" | "recursive";
     spawnCount: number;
+    maxDepth: number;
     autoExecute: boolean;
 }, {
     parentPrompt: string;
-    spawnPattern: "parallel" | "recursive" | "decompose" | "sequential";
-    maxDepth?: number | undefined;
+    spawnPattern: "decompose" | "parallel" | "sequential" | "recursive";
     spawnCount?: number | undefined;
+    maxDepth?: number | undefined;
     autoExecute?: boolean | undefined;
 }>;
 export type axiomMcpSpawnInput = z.infer<typeof axiomMcpSpawnSchema>;

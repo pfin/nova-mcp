@@ -94,6 +94,9 @@ export class ClaudeCodeSubprocessV3 {
     // Build the prompt with complete system prompt
     const completeSystemPrompt = getCompleteSystemPrompt(options.systemPrompt, options.taskType);
     let fullPrompt = `${completeSystemPrompt}\n\n${prompt}`;
+    
+    console.error(`[V3] Full prompt length: ${fullPrompt.length} characters`);
+    console.error(`[V3] First 200 chars of prompt: ${fullPrompt.substring(0, 200)}...`);
 
     // Build command args
     const args = ['--dangerously-skip-permissions', '-p', fullPrompt];
@@ -195,24 +198,30 @@ export class ClaudeCodeSubprocessV3 {
       });
     }
 
+    // Set up completion promise BEFORE starting execution
+    const completionPromise = new Promise<void>((resolve, reject) => {
+      executor.on('exit', (event) => {
+        if (event.payload.exitCode !== 0) {
+          reject(new Error(`Claude exited with code ${event.payload.exitCode}`));
+        } else {
+          resolve();
+        }
+      });
+
+      executor.on('error', (event) => {
+        reject(event.payload);
+      });
+    });
+
     try {
-      // Execute with PTY
+      // Execute with PTY - now the handlers are already set up
+      console.error(`[V3] Starting PTY execution...`);
       await executor.execute('claude', args, id);
+      console.error(`[V3] PTY execution started, waiting for completion...`);
 
       // Wait for completion
-      await new Promise<void>((resolve, reject) => {
-        executor.on('exit', (event) => {
-          if (event.payload.exitCode !== 0) {
-            reject(new Error(`Claude exited with code ${event.payload.exitCode}`));
-          } else {
-            resolve();
-          }
-        });
-
-        executor.on('error', (event) => {
-          reject(event.payload);
-        });
-      });
+      await completionPromise;
+      console.error(`[V3] PTY execution completed!`);
 
       // Get bash date at end
       const endDateResult = execSync('date', { encoding: 'utf-8' }).trim();
@@ -222,10 +231,13 @@ export class ClaudeCodeSubprocessV3 {
       console.error(`[TEMPORAL] Task end: ${endDateResult}`);
       console.error(`[V3] NO TIMEOUT! Task ran for ${Math.floor(duration / 1000)}s`);
 
+      // Clean up control characters from output
+      const cleanOutput = output.replace(/\x00/g, '').replace(/\[\?25h/g, '').trim();
+
       const result: ClaudeCodeResult = {
         id,
         prompt,
-        response: output.trim(),
+        response: cleanOutput,
         duration,
         timestamp: new Date(),
         startTime: startDateResult,
@@ -247,6 +259,7 @@ export class ClaudeCodeSubprocessV3 {
         }
       }
 
+      console.error(`[V3] Returning result for task ${id}`);
       return result;
 
     } catch (error: any) {
@@ -257,10 +270,12 @@ export class ClaudeCodeSubprocessV3 {
       console.error(`[${new Date().toISOString()}] Task ${id} failed after ${duration}ms`);
       console.error(`[V3] Error:`, error.message);
 
+      const cleanOutput = output.replace(/\x00/g, '').replace(/\[\?25h/g, '').trim();
+
       return {
         id,
         prompt,
-        response: output || '',
+        response: cleanOutput || '',
         error: error.message,
         duration,
         timestamp: new Date(),

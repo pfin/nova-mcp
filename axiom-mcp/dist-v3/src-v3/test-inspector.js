@@ -4,6 +4,7 @@
  */
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 const server = new Server({
     name: 'axiom-mcp-test',
     version: '0.1.0'
@@ -13,7 +14,7 @@ const server = new Server({
     }
 });
 // Add a simple test tool
-server.setRequestHandler('tools/list', async () => {
+server.setRequestHandler(ListToolsRequestSchema, async () => {
     return {
         tools: [{
                 name: 'test_connection',
@@ -27,7 +28,7 @@ server.setRequestHandler('tools/list', async () => {
             }]
     };
 });
-server.setRequestHandler('tools/call', async (request) => {
+server.setRequestHandler(CallToolRequestSchema, async (request) => {
     if (request.params.name === 'test_connection') {
         return {
             content: [{

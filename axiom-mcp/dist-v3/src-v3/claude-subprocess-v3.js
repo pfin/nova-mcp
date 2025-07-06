@@ -54,6 +54,8 @@ export class ClaudeCodeSubprocessV3 {
         // Build the prompt with complete system prompt
         const completeSystemPrompt = getCompleteSystemPrompt(options.systemPrompt, options.taskType);
         let fullPrompt = `${completeSystemPrompt}\n\n${prompt}`;
+        console.error(`[V3] Full prompt length: ${fullPrompt.length} characters`);
+        console.error(`[V3] First 200 chars of prompt: ${fullPrompt.substring(0, 200)}...`);
         // Build command args
         const args = ['--dangerously-skip-permissions', '-p', fullPrompt];
         // Add model if specified
@@ -157,9 +159,12 @@ export class ClaudeCodeSubprocessV3 {
         });
         try {
             // Execute with PTY - now the handlers are already set up
+            console.error(`[V3] Starting PTY execution...`);
             await executor.execute('claude', args, id);
+            console.error(`[V3] PTY execution started, waiting for completion...`);
             // Wait for completion
             await completionPromise;
+            console.error(`[V3] PTY execution completed!`);
             // Get bash date at end
             const endDateResult = execSync('date', { encoding: 'utf-8' }).trim();
             const duration = Date.now() - startTime;
@@ -189,6 +194,7 @@ export class ClaudeCodeSubprocessV3 {
                     throw new Error(`Verification Failed: No implementation detected\n${result.verificationReport}`);
                 }
             }
+            console.error(`[V3] Returning result for task ${id}`);
             return result;
         }
         catch (error) {

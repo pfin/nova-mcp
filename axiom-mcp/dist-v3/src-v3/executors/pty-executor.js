@@ -21,91 +21,108 @@ export class PtyExecutor extends EventEmitter {
         super();
         this.options = options;
     }
+    cleanup() {
+        if (this.heartbeatTimer) {
+            clearInterval(this.heartbeatTimer);
+            this.heartbeatTimer = null;
+        }
+        if (this.ptyProcess) {
+            this.ptyProcess.kill();
+            this.ptyProcess = null;
+        }
+        this.isRunning = false;
+    }
     async execute(command, args, taskId) {
         if (this.isRunning) {
             throw new Error('Executor already running');
         }
         this.isRunning = true;
         console.error(`[PTY] Starting execution: ${command} ${args.slice(0, 2).join(' ')}...`);
-        try {
-            // CRITICAL: Use exact configuration from GoodIdeas
-            this.ptyProcess = pty.spawn(command, args, {
-                name: 'xterm-color',
-                cols: this.options.cols || 120,
-                rows: this.options.rows || 40,
-                cwd: this.options.cwd || process.cwd(),
-                env: {
-                    ...process.env,
-                    ...this.options.env,
-                    FORCE_COLOR: '0' // Disable color to avoid ANSI escape sequences
+        return new Promise((resolve, reject) => {
+            try {
+                // CRITICAL: Use exact configuration from GoodIdeas
+                this.ptyProcess = pty.spawn(command, args, {
+                    name: 'xterm-color',
+                    cols: this.options.cols || 120,
+                    rows: this.options.rows || 40,
+                    cwd: this.options.cwd || process.cwd(),
+                    env: {
+                        ...process.env,
+                        ...this.options.env,
+                        FORCE_COLOR: '0' // Disable color to avoid ANSI escape sequences
+                    }
+                });
+                console.error(`[PTY] Process spawned successfully`);
+                // Set up monitoring pipeline if enabled
+                if (this.options.enableMonitoring) {
+                    this.streamInterceptor = createMonitoringPipeline(taskId, this.options.enableIntervention ?? true, (intervention) => {
+                        // Inject intervention command into PTY
+                        console.error(`[INTERVENTION] ${taskId}: ${intervention}`);
+                        this.write(intervention);
+                        this.emit('intervention', {
+                            taskId,
+                            timestamp: Date.now(),
+                            type: 'intervention',
+                            payload: intervention
+                        });
+                    });
+                    // Subscribe to violation events
+                    this.streamInterceptor.onInterceptorEvent('violation', (violation) => {
+                        this.emit('violation', {
+                            taskId,
+                            timestamp: Date.now(),
+                            type: 'violation',
+                            payload: violation
+                        });
+                    });
                 }
-            });
-            console.error(`[PTY] Process spawned successfully`);
-            // Set up monitoring pipeline if enabled
-            if (this.options.enableMonitoring) {
-                this.streamInterceptor = createMonitoringPipeline(taskId, this.options.enableIntervention ?? true, (intervention) => {
-                    // Inject intervention command into PTY
-                    console.error(`[INTERVENTION] ${taskId}: ${intervention}`);
-                    this.write(intervention);
-                    this.emit('intervention', {
+                // Notify if callback provided (for interactive controller)
+                if (this.options.onExecutorCreated) {
+                    this.options.onExecutorCreated(this);
+                }
+                // Stream output character by character
+                this.ptyProcess.onData((data) => {
+                    console.error(`[PTY] Received data: ${data.length} bytes`);
+                    this.outputBuffer += data;
+                    // Pass through monitoring pipeline if enabled
+                    if (this.streamInterceptor) {
+                        this.streamInterceptor.write(data);
+                    }
+                    this.emit('data', {
                         taskId,
                         timestamp: Date.now(),
-                        type: 'intervention',
-                        payload: intervention
+                        type: 'data',
+                        payload: data
                     });
                 });
-                // Subscribe to violation events
-                this.streamInterceptor.onInterceptorEvent('violation', (violation) => {
-                    this.emit('violation', {
+                // Start heartbeat to prevent timeout
+                this.startHeartbeat(taskId);
+                // Handle process exit - THIS RESOLVES THE PROMISE
+                this.ptyProcess.onExit(({ exitCode, signal }) => {
+                    console.error(`[PTY] Process exited: exitCode=${exitCode}, signal=${signal}`);
+                    this.stopHeartbeat();
+                    this.isRunning = false;
+                    this.emit('exit', {
                         taskId,
                         timestamp: Date.now(),
-                        type: 'violation',
-                        payload: violation
+                        type: 'exit',
+                        payload: { exitCode, signal }
                     });
+                    // Resolve the promise when process exits
+                    resolve();
                 });
             }
-            // Notify if callback provided (for interactive controller)
-            if (this.options.onExecutorCreated) {
-                this.options.onExecutorCreated(this);
-            }
-            // Stream output character by character
-            this.ptyProcess.onData((data) => {
-                this.outputBuffer += data;
-                // Pass through monitoring pipeline if enabled
-                if (this.streamInterceptor) {
-                    this.streamInterceptor.write(data);
-                }
-                this.emit('data', {
-                    taskId,
-                    timestamp: Date.now(),
-                    type: 'data',
-                    payload: data
-                });
-            });
-            // Start heartbeat to prevent timeout
-            this.startHeartbeat(taskId);
-            // Handle process exit
-            this.ptyProcess.onExit(({ exitCode, signal }) => {
-                this.stopHeartbeat();
+            catch (error) {
                 this.isRunning = false;
-                this.emit('exit', {
+                this.emit('error', {
                     taskId,
                     timestamp: Date.now(),
-                    type: 'exit',
-                    payload: { exitCode, signal }
+                    type: 'error',
+                    payload: error
                 });
-            });
-        }
-        catch (error) {
-            this.isRunning = false;
-            this.emit('error', {
-                taskId,
-                timestamp: Date.now(),
-                type: 'error',
-                payload: error
-            });
-            throw error;
-        }
+                reject(error);
+            }
+        });
     }
     /**
      * Write data to the PTY stdin

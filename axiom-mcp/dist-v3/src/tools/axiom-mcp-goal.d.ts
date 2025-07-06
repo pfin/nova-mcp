@@ -5,13 +5,13 @@ export declare const axiomMcpGoalSchema: z.ZodObject<{
     context: z.ZodOptional<z.ZodString>;
     depth: z.ZodDefault<z.ZodEnum<["quick", "standard", "deep"]>>;
 }, "strip", z.ZodTypeAny, {
-    goal: string;
     depth: "quick" | "standard" | "deep";
+    goal: string;
     context?: string | undefined;
 }, {
     goal: string;
-    context?: string | undefined;
     depth?: "quick" | "standard" | "deep" | undefined;
+    context?: string | undefined;
 }>;
 export type axiomMcpGoalInput = z.infer<typeof axiomMcpGoalSchema>;
 export declare const axiomMcpGoalTool: {

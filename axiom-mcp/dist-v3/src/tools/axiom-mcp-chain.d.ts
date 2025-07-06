@@ -8,8 +8,8 @@ export declare const axiomMcpChainSchema: z.ZodObject<{
     parentContext: z.ZodOptional<z.ZodString>;
     autoDecompose: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    goal: string;
     maxDepth: number;
+    goal: string;
     strategy: "breadth-first" | "depth-first";
     autoDecompose: boolean;
     parentContext?: string | undefined;

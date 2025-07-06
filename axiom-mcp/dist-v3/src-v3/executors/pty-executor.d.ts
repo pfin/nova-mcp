@@ -32,6 +32,7 @@ export declare class PtyExecutor extends EventEmitter {
     private isRunning;
     private streamInterceptor;
     constructor(options?: PtyExecutorOptions);
+    cleanup(): void;
     execute(command: string, args: string[], taskId: string): Promise<void>;
     /**
      * Write data to the PTY stdin
