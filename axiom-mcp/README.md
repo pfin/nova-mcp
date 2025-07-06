@@ -1,21 +1,21 @@
-# Axiom MCP - Code-First Agent Orchestration System
+# Axiom MCP v3 - Code-First Agent Orchestration System
 
 Axiom MCP (Model Context Protocol) is an **implementation-focused** agent orchestration system that uses Claude Code as parallel workers to create recursive task trees that actually write, test, and verify code - not just plan it.
 
-> **⚠️ Current Status**: Axiom MCP is undergoing a major redesign to address the fundamental issue that it only performs research without implementation. See [AXIOM_MCP_FEEDBACK.md](../AXIOM_MCP_FEEDBACK.md) for details on the limitations of the current version.
+> **✅ v3.0 Released**: Major architecture overhaul based on expert analysis. Axiom MCP now **actually executes tasks** instead of just claiming to. See [AXIOM_V3_SUMMARY.md](AXIOM_V3_SUMMARY.md) for full details.
 
-## Planned Features (v2.0 Redesign)
+## 🚀 v3.0 Features - Now Implemented!
 
-Based on [2025 AI agent research](https://www.emergence.ai/blog/towards-autonomous-agents-and-recursive-intelligence) and [user feedback](../AXIOM_MCP_FEEDBACK.md), the next version will include:
+Based on expert analysis from [GoodIdeasFromOtherModels.txt](GoodIdeasFromOtherModels.txt) and [GoodIdeasFromChatGPTo3.txt](GoodIdeasFromChatGPTo3.txt):
 
-- 💻 **Code-First Execution**: Actually write and execute code, not just plan it
-- 🔄 **Hierarchical Task DAG**: Recursive task decomposition with dependency tracking
-- ✅ **Implementation Verification**: Test and validate all generated code
-- 🛡️ **Security Validation**: Scan for vulnerabilities (51% of AI code has issues)
-- 📊 **Context-Aware Generation**: Maintain full project context to avoid degradation
-- 🎯 **Quality Gates**: Reject theoretical outputs, require concrete implementations
-- ⚡ **Streaming Architecture**: Real-time output from parallel executions
-- 🔍 **Agent2Agent Protocol**: Cross-framework interoperability
+- 💻 **PTY-Based Execution**: No more 30-second timeouts! Uses node-pty with heartbeat
+- 🔄 **Worker Thread Parallelism**: True concurrent execution without blocking
+- ✅ **System-Level Verification**: Filesystem-based proof, not LLM claims
+- 🛡️ **Real-Time Streaming**: Character-by-character output via WebSocket
+- 📊 **Event Ledger**: JSONL append-only log with millisecond timestamps
+- 🎯 **Intervention Capabilities**: Send commands to running tasks mid-execution
+- ⚡ **Master Controller**: Manages worker pool, task queue, and port allocation
+- 🔍 **Deception Detection**: Catches when LLMs claim success without doing work
 
 ## Current Features (v0.5 - Research Only)
 
@@ -129,12 +129,40 @@ cd axiom-mcp
 # Install dependencies
 npm install
 
-# Build the project
-npm run build
+# Build v3 (recommended - actually executes tasks!)
+npm run build:v3
 
-# Add to Claude MCP
+# Add v3 to Claude MCP
+claude mcp add axiom-mcp -- node /path/to/axiom-mcp/dist-v3/src-v3/index.js
+
+# Or build v1 (legacy - research only)
+npm run build
 claude mcp add axiom-mcp -- node /path/to/axiom-mcp/dist/index.js
 ```
+
+### Testing v3 Installation
+
+```bash
+# Test PTY streaming (should see "Hello from PTY!")
+node dist-v3/src-v3/test-pty-basic.js
+
+# Test Claude execution (creates real files!)
+node dist-v3/src-v3/test-claude-pty.js
+
+# Test WebSocket streaming
+node dist-v3/src-v3/test-websocket-simple.js
+
+# Launch with MCP inspector
+npx @modelcontextprotocol/inspector ./dist-v3/src-v3/index.js
+```
+
+### v3 Monitoring Dashboard
+
+Open `src-v3/client/monitor.html` in a browser for:
+- Real-time task output streaming
+- Worker pool status
+- Intervention controls
+- Event history viewer
 
 ## Quick Start
 
