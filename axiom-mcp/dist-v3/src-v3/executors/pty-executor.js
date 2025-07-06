@@ -26,6 +26,7 @@ export class PtyExecutor extends EventEmitter {
             throw new Error('Executor already running');
         }
         this.isRunning = true;
+        console.error(`[PTY] Starting execution: ${command} ${args.slice(0, 2).join(' ')}...`);
         try {
             // CRITICAL: Use exact configuration from GoodIdeas
             this.ptyProcess = pty.spawn(command, args, {
@@ -39,6 +40,7 @@ export class PtyExecutor extends EventEmitter {
                     FORCE_COLOR: '0' // Disable color to avoid ANSI escape sequences
                 }
             });
+            console.error(`[PTY] Process spawned successfully`);
             // Set up monitoring pipeline if enabled
             if (this.options.enableMonitoring) {
                 this.streamInterceptor = createMonitoringPipeline(taskId, this.options.enableIntervention ?? true, (intervention) => {
