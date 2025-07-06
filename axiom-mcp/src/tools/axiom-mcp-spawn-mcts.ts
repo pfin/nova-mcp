@@ -118,15 +118,6 @@ export async function handleAxiomMcpSpawnMcts(
         output += '\n... (truncated)';
       }
       output += '\n```\n\n';
-      
-      if (bestNode.implementation.security) {
-        output += `### Security Analysis\n`;
-        output += `- **Passed**: ${bestNode.implementation.security.passed ? '✅' : '❌'}\n`;
-        output += `- **Critical Issues**: ${bestNode.implementation.security.summary.critical}\n`;
-        output += `- **High Issues**: ${bestNode.implementation.security.summary.high}\n`;
-        output += `- **Medium Issues**: ${bestNode.implementation.security.summary.medium}\n`;
-        output += `- **Low Issues**: ${bestNode.implementation.security.summary.low}\n\n`;
-      }
     }
     
     // Show exploration path

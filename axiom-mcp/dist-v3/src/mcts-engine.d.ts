@@ -1,5 +1,4 @@
 import { ClaudeCodeSubprocess } from './claude-subprocess.js';
-import { SecurityScanResult } from './security-scanner.js';
 export interface MCTSNode {
     id: string;
     task: string;
@@ -14,7 +13,6 @@ export interface MCTSNode {
         code: string;
         output: string;
         reward: number;
-        security: SecurityScanResult;
     };
     created: Date;
     lastVisited?: Date;
@@ -34,7 +32,6 @@ export interface RewardComponents {
     hasCode: boolean;
     syntaxValid: boolean;
     testsPass: boolean;
-    securityScore: number;
     completeness: number;
     complexity: number;
 }
@@ -114,10 +111,6 @@ export declare class MCTSEngine {
      * Get transposition table key
      */
     private getTranspositionKey;
-    /**
-     * Scan code for security issues
-     */
-    private scanSecurity;
     /**
      * Get tree statistics
      */

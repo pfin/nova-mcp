@@ -12,13 +12,13 @@ export declare const axiomMcpGoalsSchema: z.ZodObject<{
     }, "strip", z.ZodTypeAny, {
         objective: string;
         successCriteria: string[];
-        priority: "low" | "medium" | "high" | "critical";
+        priority: "critical" | "high" | "medium" | "low";
         constraints?: string[] | undefined;
     }, {
         objective: string;
         successCriteria: string[];
         constraints?: string[] | undefined;
-        priority?: "low" | "medium" | "high" | "critical" | undefined;
+        priority?: "critical" | "high" | "medium" | "low" | undefined;
     }>>;
     propagationStrategy: z.ZodOptional<z.ZodEnum<["inherit", "decompose", "transform"]>>;
 }, "strip", z.ZodTypeAny, {
@@ -27,7 +27,7 @@ export declare const axiomMcpGoalsSchema: z.ZodObject<{
     goalDefinition?: {
         objective: string;
         successCriteria: string[];
-        priority: "low" | "medium" | "high" | "critical";
+        priority: "critical" | "high" | "medium" | "low";
         constraints?: string[] | undefined;
     } | undefined;
     propagationStrategy?: "inherit" | "decompose" | "transform" | undefined;
@@ -38,7 +38,7 @@ export declare const axiomMcpGoalsSchema: z.ZodObject<{
         objective: string;
         successCriteria: string[];
         constraints?: string[] | undefined;
-        priority?: "low" | "medium" | "high" | "critical" | undefined;
+        priority?: "critical" | "high" | "medium" | "low" | undefined;
     } | undefined;
     propagationStrategy?: "inherit" | "decompose" | "transform" | undefined;
 }>;

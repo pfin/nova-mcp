@@ -1,5 +1,4 @@
 import { v4 as uuidv4 } from 'uuid';
-import { scanCodeSecurity } from './security-scanner.js';
 import { calculateMetaCognitiveScore } from './base-system-prompt.js';
 export class MCTSEngine {
     claudeCode;
@@ -188,7 +187,6 @@ export class MCTSEngine {
             code: result.response,
             output: result.response,
             reward,
-            security: await this.scanSecurity(result.response),
         };
         // Cache in transposition table
         this.transpositionTable.set(cacheKey, node);
@@ -263,13 +261,7 @@ This is a FULL IMPLEMENTATION - write all code, test it, verify it works.`;
                     reward += 0.05;
                 }
             }
-            // Security and quality (10%)
-            if (isFullSimulation && result.response) {
-                const security = await this.scanSecurity(result.response);
-                const securityScore = security.passed ? 1.0 :
-                    1.0 - (security.summary.critical * 0.5 + security.summary.high * 0.3);
-                reward += securityScore * 0.1;
-            }
+            // Security removed - no auth required in MCP
             // Penalize deceptive patterns heavily
             const hasDeceptivePatterns = /would\s+(create|implement|write)|could\s+be|should\s+implement/i.test(result.response);
             if (hasDeceptivePatterns && !proof.hasImplementation) {
@@ -291,7 +283,6 @@ This is a FULL IMPLEMENTATION - write all code, test it, verify it works.`;
             hasCode: /```[\s\S]+```/.test(result.response),
             syntaxValid: !result.error && result.response.length > 100,
             testsPass: /test.*pass|✓|success/i.test(result.response),
-            securityScore: 1.0,
             completeness: 0,
             complexity: 0,
         };
@@ -308,12 +299,7 @@ This is a FULL IMPLEMENTATION - write all code, test it, verify it works.`;
             components.completeness += 0.25;
         if (components.testsPass)
             components.completeness += 0.25;
-        // Security check for full simulations
-        if (isFullSimulation && components.hasCode) {
-            const security = await this.scanSecurity(result.response);
-            components.securityScore = security.passed ? 1.0 :
-                1.0 - (security.summary.critical * 0.5 + security.summary.high * 0.3);
-        }
+        // Security removed - no auth required in MCP
         // Calculate weighted reward
         let reward = 0;
         if (isFullSimulation) {
@@ -321,8 +307,7 @@ This is a FULL IMPLEMENTATION - write all code, test it, verify it works.`;
             reward = ((components.hasCode ? 1 : 0) * 0.2 +
                 (components.syntaxValid ? 1 : 0) * 0.1 +
                 (components.testsPass ? 1 : 0) * 0.3 +
-                components.securityScore * 0.2 +
-                components.completeness * 0.2);
+                components.completeness * 0.4);
         }
         else {
             // Fast simulation weights - structure focused
@@ -388,12 +373,6 @@ This is a FULL IMPLEMENTATION - write all code, test it, verify it works.`;
             .replace(/\s+/g, ' ')
             .replace(/[^\w\s]/g, '')
             .trim();
-    }
-    /**
-     * Scan code for security issues
-     */
-    async scanSecurity(code) {
-        return scanCodeSecurity(code);
     }
     /**
      * Get tree statistics

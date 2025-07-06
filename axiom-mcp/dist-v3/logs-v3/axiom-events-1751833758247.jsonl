@@ -1,0 +1,2 @@
+{"type":"tool_call","tool":"axiom_mcp_spawn","arguments":{"parentPrompt":"Create a TypeScript function that calculates fibonacci numbers with memoization","spawnPattern":"decompose","spawnCount":2,"autoExecute":false},"timestamp":1751833758255,"timestampMicro":"141962053706677"}
+{"type":"tool_call","tool":"axiom_mcp_status","arguments":{"action":"stats"},"timestamp":1751833758814,"timestampMicro":"141962612314773"}
