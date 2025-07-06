@@ -96,6 +96,12 @@ import {
   handleAxiomMcpDocs
 } from '../src/tools/axiom-mcp-docs.js';
 
+// Import v3 test tool
+import {
+  axiomTestV3Tool,
+  handleAxiomTestV3
+} from './tools/axiom-test-v3.js';
+
 // Import v2 components
 import { PtyExecutor } from './executors/pty-executor.js';
 import { EventBus, EventType } from './core/event-bus.js';
@@ -162,6 +168,7 @@ const tools = [
   axiomMcpVisualizeTool,
   axiomMcpVerifyTool,
   axiomMcpDocsTool,
+  axiomTestV3Tool,
 ];
 
 // Handler map
@@ -183,6 +190,7 @@ const handlers = {
   axiom_mcp_visualize: handleAxiomMcpVisualize,
   axiom_mcp_verify: handleAxiomMcpVerify,
   axiom_mcp_docs: handleAxiomMcpDocs,
+  axiom_test_v3: handleAxiomTestV3,
 };
 
 // Handle tool listing
