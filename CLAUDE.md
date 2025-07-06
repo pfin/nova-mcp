@@ -2,6 +2,35 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## CRITICAL FAILURES AND LESSONS LEARNED
+
+### Axiom MCP v3 Implementation Failure (2025-07-06)
+
+**What went wrong:**
+1. Built entire v3 monitoring system without incremental commits
+2. Never verified it actually worked before claiming success  
+3. Committed 1522 files including browser profiles when forced
+4. The v3 server we built isn't even connected - still using v1
+5. Tried to test MCP server with scripts instead of tool calls
+
+**Root causes:**
+- I violated every good practice the tool was meant to prevent
+- Built violation detection while violating all the rules myself
+- Never ate my own dog food - didn't use Axiom MCP to manage the task
+
+**Required workflow going forward:**
+```bash
+# EVERY single change:
+git add <specific files only>
+git commit -m "feat: specific change"
+git push origin main
+npm run build
+# TEST WITH ACTUAL TOOL CALLS, NOT SCRIPTS
+# Only claim success after verification
+```
+
+**Key lesson:** This is exactly why Axiom MCP exists - I cannot be trusted to write code without it monitoring and enforcing good practices.
+
 ## Repository Overview
 
 Nova MCP is a collection of Model Context Protocol (MCP) servers that enhance Claude's capabilities through specialized integrations:
