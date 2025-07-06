@@ -20,6 +20,8 @@ export interface ClaudeCodeOptions {
     includeDate?: boolean;
     requireImplementation?: boolean;
     eventBus?: EventBus;
+    enableMonitoring?: boolean;
+    enableIntervention?: boolean;
 }
 export interface ClaudeCodeResult {
     id: string;

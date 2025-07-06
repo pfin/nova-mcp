@@ -39,7 +39,7 @@ export class ClaudeCodeSubprocessV3 {
         console.error(`[TEMPORAL] Task start: ${startDateResult}`);
         console.error(`[V3] Using PTY executor - no timeout!`);
         // Build the prompt with complete system prompt
-        const completeSystemPrompt = getCompleteSystemPrompt(options.systemPrompt);
+        const completeSystemPrompt = getCompleteSystemPrompt(options.systemPrompt, options.taskType);
         let fullPrompt = `${completeSystemPrompt}\n\n${prompt}`;
         // Build command args
         const args = ['--dangerously-skip-permissions', '-p', fullPrompt];
@@ -67,10 +67,12 @@ export class ClaudeCodeSubprocessV3 {
             verification = new SystemVerification();
             console.error(`[VERIFICATION] System-level verification enabled for task ${id}`);
         }
-        // Create PTY executor
+        // Create PTY executor with monitoring if enabled
         const executor = new PtyExecutor({
             cwd: process.cwd(),
             heartbeatInterval: 180_000, // 3 minutes
+            enableMonitoring: options.enableMonitoring ?? false,
+            enableIntervention: options.enableIntervention ?? false,
         });
         // Collect output
         let output = '';
@@ -104,6 +106,27 @@ export class ClaudeCodeSubprocessV3 {
                 payload: event.payload
             });
         });
+        // Handle violations and interventions if monitoring is enabled
+        if (options.enableMonitoring) {
+            executor.on('violation', (event) => {
+                console.error(`[VIOLATION] ${event.payload.ruleName}: ${event.payload.match}`);
+                this.eventBus.logEvent({
+                    taskId: id,
+                    workerId: 'main',
+                    event: EventType.CODE_VIOLATION,
+                    payload: event.payload
+                });
+            });
+            executor.on('intervention', (event) => {
+                console.error(`[INTERVENTION] Injecting correction: ${event.payload}`);
+                this.eventBus.logEvent({
+                    taskId: id,
+                    workerId: 'main',
+                    event: EventType.INTERVENTION,
+                    payload: event.payload
+                });
+            });
+        }
         try {
             // Execute with PTY
             await executor.execute('claude', args, id);
@@ -182,7 +205,7 @@ export class ClaudeCodeSubprocessV3 {
         const options = { ...this.options, ...customOptions };
         // Similar setup as execute()
         const startDateResult = execSync('date', { encoding: 'utf-8' }).trim();
-        const completeSystemPrompt = getCompleteSystemPrompt(options.systemPrompt);
+        const completeSystemPrompt = getCompleteSystemPrompt(options.systemPrompt, options.taskType);
         let fullPrompt = `${completeSystemPrompt}\n\n${prompt}`;
         const args = ['--dangerously-skip-permissions', '-p', fullPrompt];
         if (options.model)

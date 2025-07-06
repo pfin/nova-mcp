@@ -49,14 +49,17 @@ export enum EventType {
   TEST_FAIL = 'test_fail',
   COVERAGE_REPORT = 'coverage_report',
   
+  // Monitoring & intervention
+  CODE_VIOLATION = 'code_violation',
+  INTERVENTION = 'intervention',
+  HEARTBEAT = 'heartbeat',
+  
   // Verification
   VERIFICATION_START = 'verification_start',
   VERIFICATION_PASS = 'verification_pass',
   VERIFICATION_FAIL = 'verification_fail',
   
   // System events
-  HEARTBEAT = 'heartbeat',
-  INTERVENTION = 'intervention',
   ERROR = 'error',
   
   // Worker events

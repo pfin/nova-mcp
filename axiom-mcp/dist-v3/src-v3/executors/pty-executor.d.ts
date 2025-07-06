@@ -14,6 +14,8 @@ export interface PtyExecutorOptions {
     cols?: number;
     rows?: number;
     heartbeatInterval?: number;
+    enableMonitoring?: boolean;
+    enableIntervention?: boolean;
 }
 export interface ExecutorEvent {
     taskId: string;
@@ -27,6 +29,7 @@ export declare class PtyExecutor extends EventEmitter {
     private outputBuffer;
     private heartbeatTimer;
     private isRunning;
+    private streamInterceptor;
     constructor(options?: PtyExecutorOptions);
     execute(command: string, args: string[], taskId: string): Promise<void>;
     /**
@@ -51,6 +54,14 @@ export declare class PtyExecutor extends EventEmitter {
      * Get the accumulated output buffer
      */
     getOutput(): string;
+    /**
+     * Get violation report if monitoring is enabled
+     */
+    getViolations(): any[];
+    /**
+     * Force an intervention with a custom message
+     */
+    forceIntervention(message: string): void;
     /**
      * Check if process is running
      */

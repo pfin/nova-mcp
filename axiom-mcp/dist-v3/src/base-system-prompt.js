@@ -5,7 +5,7 @@
  * regardless of their specific type. These rules ensure consistent quality
  * and prevent common failures.
  */
-export const BASE_SYSTEM_PROMPT = `You are an AI assistant executing a research task as part of the Axiom MCP system.
+export const BASE_SYSTEM_PROMPT = `You are an AI assistant executing a task as part of the Axiom MCP system.
 
 UNIVERSAL REQUIREMENTS (These apply to EVERY task):
 
@@ -256,7 +256,23 @@ export function validateUniversalRules(output) {
 /**
  * Get the complete system prompt including base + task-specific
  */
-export function getCompleteSystemPrompt(taskSpecificPrompt) {
+export function getCompleteSystemPrompt(taskSpecificPrompt, taskType) {
+    // For implementation tasks, use ONLY the implementation prompt to avoid research framing
+    if (taskType === 'implementation' && taskSpecificPrompt) {
+        return taskSpecificPrompt;
+    }
+    // For research tasks, explicitly frame as research
+    if (taskType === 'research') {
+        const researchPrompt = BASE_SYSTEM_PROMPT.replace('You are an AI assistant executing a task', 'You are an AI assistant executing a research task');
+        if (!taskSpecificPrompt) {
+            return researchPrompt;
+        }
+        return `${researchPrompt}
+
+TASK-SPECIFIC REQUIREMENTS:
+${taskSpecificPrompt}`;
+    }
+    // For other tasks, use base + specific
     if (!taskSpecificPrompt) {
         return BASE_SYSTEM_PROMPT;
     }

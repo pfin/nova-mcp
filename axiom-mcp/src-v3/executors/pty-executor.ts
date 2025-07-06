@@ -10,6 +10,7 @@
 
 import * as pty from 'node-pty';
 import { EventEmitter } from 'events';
+import { createMonitoringPipeline, StreamInterceptor } from '../monitors/stream-interceptor.js';
 
 export interface PtyExecutorOptions {
   cwd?: string;
@@ -17,6 +18,8 @@ export interface PtyExecutorOptions {
   cols?: number;
   rows?: number;
   heartbeatInterval?: number;
+  enableMonitoring?: boolean;
+  enableIntervention?: boolean;
 }
 
 export interface ExecutorEvent {
@@ -31,6 +34,7 @@ export class PtyExecutor extends EventEmitter {
   private outputBuffer: string = '';
   private heartbeatTimer: NodeJS.Timeout | null = null;
   private isRunning: boolean = false;
+  private streamInterceptor: StreamInterceptor | null = null;
   
   constructor(private options: PtyExecutorOptions = {}) {
     super();
@@ -57,9 +61,44 @@ export class PtyExecutor extends EventEmitter {
         }
       });
       
+      // Set up monitoring pipeline if enabled
+      if (this.options.enableMonitoring) {
+        this.streamInterceptor = createMonitoringPipeline(
+          taskId,
+          this.options.enableIntervention ?? true,
+          (intervention) => {
+            // Inject intervention command into PTY
+            console.error(`[INTERVENTION] ${taskId}: ${intervention}`);
+            this.write(intervention);
+            this.emit('intervention', {
+              taskId,
+              timestamp: Date.now(),
+              type: 'intervention',
+              payload: intervention
+            });
+          }
+        );
+        
+        // Subscribe to violation events
+        this.streamInterceptor.onInterceptorEvent('violation', (violation: any) => {
+          this.emit('violation', {
+            taskId,
+            timestamp: Date.now(),
+            type: 'violation',
+            payload: violation
+          });
+        });
+      }
+      
       // Stream output character by character
       this.ptyProcess.onData((data) => {
         this.outputBuffer += data;
+        
+        // Pass through monitoring pipeline if enabled
+        if (this.streamInterceptor) {
+          this.streamInterceptor.write(data);
+        }
+        
         this.emit('data', {
           taskId,
           timestamp: Date.now(),
@@ -154,6 +193,25 @@ export class PtyExecutor extends EventEmitter {
    */
   getOutput(): string {
     return this.outputBuffer;
+  }
+  
+  /**
+   * Get violation report if monitoring is enabled
+   */
+  getViolations(): any[] {
+    if (this.streamInterceptor) {
+      return this.streamInterceptor.getViolations();
+    }
+    return [];
+  }
+  
+  /**
+   * Force an intervention with a custom message
+   */
+  forceIntervention(message: string): void {
+    if (this.streamInterceptor) {
+      this.streamInterceptor.forceIntervention(message);
+    }
   }
   
   /**

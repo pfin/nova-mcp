@@ -58,7 +58,7 @@ export class ClaudeCodeSubprocess {
     console.error(`[TEMPORAL] Task start: ${startDateResult}`);
 
     // Build the prompt with complete system prompt (base + task-specific)
-    const completeSystemPrompt = getCompleteSystemPrompt(options.systemPrompt);
+    const completeSystemPrompt = getCompleteSystemPrompt(options.systemPrompt, options.taskType);
     let fullPrompt = `${completeSystemPrompt}\n\n${prompt}`;
     
     // Note: Temporal instruction is already included in BASE_SYSTEM_PROMPT
@@ -196,7 +196,7 @@ export class ClaudeCodeSubprocess {
     console.error(`[TEMPORAL] Task start: ${startDateResult}`);
 
     // Build the prompt with complete system prompt (base + task-specific)
-    const completeSystemPrompt = getCompleteSystemPrompt(options.systemPrompt);
+    const completeSystemPrompt = getCompleteSystemPrompt(options.systemPrompt, options.taskType);
     let fullPrompt = `${completeSystemPrompt}\n\n${prompt}`;
     
     // Note: Temporal instruction is already included in BASE_SYSTEM_PROMPT

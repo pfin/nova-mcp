@@ -33,13 +33,15 @@ export var EventType;
     EventType["TEST_PASS"] = "test_pass";
     EventType["TEST_FAIL"] = "test_fail";
     EventType["COVERAGE_REPORT"] = "coverage_report";
+    // Monitoring & intervention
+    EventType["CODE_VIOLATION"] = "code_violation";
+    EventType["INTERVENTION"] = "intervention";
+    EventType["HEARTBEAT"] = "heartbeat";
     // Verification
     EventType["VERIFICATION_START"] = "verification_start";
     EventType["VERIFICATION_PASS"] = "verification_pass";
     EventType["VERIFICATION_FAIL"] = "verification_fail";
     // System events
-    EventType["HEARTBEAT"] = "heartbeat";
-    EventType["INTERVENTION"] = "intervention";
     EventType["ERROR"] = "error";
     // Worker events
     EventType["WORKER_SPAWNED"] = "worker_spawned";

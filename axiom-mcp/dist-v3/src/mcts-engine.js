@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { scanCodeSecurity } from './security-scanner.js';
+import { calculateMetaCognitiveScore } from './base-system-prompt.js';
 export class MCTSEngine {
     claudeCode;
     config;
@@ -8,7 +9,7 @@ export class MCTSEngine {
     startTime = 0;
     iterations = 0;
     constructor(claudeCode, config = {
-        explorationConstant: Math.sqrt(2),
+        explorationConstant: 0.5, // Lower = more exploitation (implementation) vs exploration (research)
         maxDepth: 5,
         maxIterations: 100,
         maxTime: 600000, // 10 minutes
@@ -16,7 +17,7 @@ export class MCTSEngine {
         parallelWorkers: 1,
         fastSimulationTimeout: 30000,
         fullRolloutTimeout: 300000,
-        minQualityThreshold: 0.7,
+        minQualityThreshold: 0.8, // Higher = require better implementations
     }) {
         this.claudeCode = claudeCode;
         this.config = config;
@@ -228,6 +229,8 @@ This is a FULL IMPLEMENTATION - write all code, test it, verify it works.`;
         return await this.claudeCode.execute(prompt, {
             timeout: this.config.fullRolloutTimeout,
             systemPrompt: `You are an implementation-focused agent. Write ACTUAL CODE that works, not descriptions.`,
+            taskType: 'implementation', // Critical: Set task type to avoid research framing
+            requireImplementation: true, // Enable system verification
             allowedTools: ['Read', 'Write', 'Edit', 'Bash'],
         });
     }
@@ -235,6 +238,55 @@ This is a FULL IMPLEMENTATION - write all code, test it, verify it works.`;
      * Calculate reward for a simulation result
      */
     async calculateReward(result, isFullSimulation) {
+        // Use SystemVerification if available (unhackable proof)
+        if (result.verification) {
+            const proof = result.verification;
+            // Implementation-focused reward based on actual system artifacts
+            let reward = 0;
+            // Core implementation proof (40%)
+            if (proof.hasImplementation) {
+                reward += 0.4;
+                // Bonus for multiple code files
+                const codeFileCount = proof.filesCreated.filter(f => f.isCode).length;
+                if (codeFileCount > 1)
+                    reward += 0.05;
+            }
+            // Test implementation proof (20%)
+            if (proof.hasTests) {
+                reward += 0.2;
+            }
+            // Tests passing proof (30%)
+            if (proof.testsPass) {
+                reward += 0.3;
+                // Bonus for high test count
+                if (proof.testResults && proof.testResults.passed > 5) {
+                    reward += 0.05;
+                }
+            }
+            // Security and quality (10%)
+            if (isFullSimulation && result.response) {
+                const security = await this.scanSecurity(result.response);
+                const securityScore = security.passed ? 1.0 :
+                    1.0 - (security.summary.critical * 0.5 + security.summary.high * 0.3);
+                reward += securityScore * 0.1;
+            }
+            // Penalize deceptive patterns heavily
+            const hasDeceptivePatterns = /would\s+(create|implement|write)|could\s+be|should\s+implement/i.test(result.response);
+            if (hasDeceptivePatterns && !proof.hasImplementation) {
+                reward *= 0.5; // Halve reward for deceptive language without actual implementation
+            }
+            // Apply meta-cognitive multiplier (BEFORE/AFTER/HOW compliance)
+            const metaCognitive = calculateMetaCognitiveScore(result.response);
+            const metaCognitiveMultiplier = 0.8 + (metaCognitive.score * 0.2);
+            reward *= metaCognitiveMultiplier;
+            // Log meta-cognitive components for debugging
+            if (metaCognitive.score < 1.0) {
+                console.error(`[MCTS] Meta-cognitive penalty applied: ${(metaCognitive.score * 100).toFixed(0)}%`);
+                console.error(`[MCTS] Missing: ${metaCognitive.feedback.join(', ')}`);
+            }
+            return Math.max(0, Math.min(1, reward));
+        }
+        // Fallback to text-based analysis if no verification (for fast simulations)
         const components = {
             hasCode: /```[\s\S]+```/.test(result.response),
             syntaxValid: !result.error && result.response.length > 100,
@@ -280,6 +332,10 @@ This is a FULL IMPLEMENTATION - write all code, test it, verify it works.`;
             // Scale down fast simulation rewards
             reward *= 0.7;
         }
+        // Apply meta-cognitive multiplier to text-based analysis too
+        const metaCognitive = calculateMetaCognitiveScore(result.response);
+        const metaCognitiveMultiplier = 0.8 + (metaCognitive.score * 0.2);
+        reward *= metaCognitiveMultiplier;
         return Math.max(0, Math.min(1, reward));
     }
     /**
