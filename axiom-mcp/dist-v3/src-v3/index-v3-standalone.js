@@ -17,6 +17,7 @@ import { dirname } from 'path';
 import { axiomMcpSpawnTool, handleAxiomMcpSpawn } from './tools/axiom-mcp-spawn.js';
 import { axiomMcpObserveTool, handleAxiomMcpObserve } from './tools/axiom-mcp-observe.js';
 import { axiomMcpPrinciplesTool, handleAxiomMcpPrinciples } from './tools/axiom-mcp-principles.js';
+import { axiomMcpDemoTool, handleAxiomMcpDemo } from './tools/axiom-mcp-demo.js';
 import { StatusManager } from './managers/status-manager.js';
 import { EventLogger } from './logging/event-logger.js';
 import { ConversationDB } from './database/conversation-db.js';
@@ -52,6 +53,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             axiomMcpSpawnTool,
             axiomMcpObserveTool,
             axiomMcpPrinciplesTool,
+            axiomMcpDemoTool,
             // We'll add more v3 tools as we build them
             {
                 name: 'axiom_mcp_status',
@@ -93,6 +95,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 return await handleAxiomMcpObserve(args, conversationDB);
             case 'axiom_mcp_principles':
                 return await handleAxiomMcpPrinciples(args, conversationDB);
+            case 'axiom_mcp_demo':
+                return await handleAxiomMcpDemo(args, conversationDB);
             case 'axiom_mcp_status':
                 return handleAxiomMcpStatusV3(args, statusManager);
             default:

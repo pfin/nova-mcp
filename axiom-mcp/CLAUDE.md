@@ -76,31 +76,45 @@ The entire point of Axiom MCP is to force real implementation. If it doesn't cre
 
 ## Execution Plan (Current Priority)
 
-### Step 1: Verify Baseline (NOW)
+### Step 1: Verify Baseline (DONE ✓)
 ```bash
 npm run build
-# Check for errors
-# Ensure all components compile
+npx tsc -p tsconfig.v3.json
+# All components built successfully
 ```
 
-### Step 2: Test After Reload
-1. Reload window to get new tools
-2. Test `axiom_mcp_observe` tool
-3. Test `axiom_mcp_principles` tool
-4. Verify database creation
+### Step 2: Test Observability Demo
+After reload, test these scenarios:
 
-### Step 3: Fix Execution Bottleneck
-Options to try:
-1. **Direct File Writer**: Create executor that writes files directly
-2. **Command Patterns**: Try `echo "content" > file.py` approach
-3. **Script Generation**: Generate and execute bash scripts
-4. **API Integration**: Skip CLI entirely
+#### Test 1: Violations Demo
+```
+axiom_mcp_demo({ scenario: "violations", prompt: "factorial function" })
+```
+This will:
+- Start with planning language (triggers intervention)
+- Add a TODO (triggers another intervention)
+- Fix violations and create actual file
+- Show complete audit trail
 
-### Step 4: Verify Everything Works
-- Run factorial test with new executor
-- Check observability captures events
-- Verify principles are enforced
-- Confirm files are created
+#### Test 2: Observe the Results
+```
+axiom_mcp_observe({ mode: "all" })
+axiom_mcp_observe({ mode: "recent", limit: 10 })
+```
+
+#### Test 3: Check Principles
+```
+axiom_mcp_principles({ action: "list", category: "coding" })
+axiom_mcp_principles({ action: "check", code: "// TODO: implement" })
+```
+
+### How Observability Works
+
+1. **Stream Parsing**: Every character of output is parsed for events
+2. **Real-time Verification**: Rules checked as execution happens
+3. **Interventions**: System interrupts and corrects violations
+4. **Database Tracking**: Complete history stored in SQLite
+5. **Observable Proof**: Files created = success, no files = failure
 
 ### Always Before Proceeding:
 1. Build: `npm run build`
