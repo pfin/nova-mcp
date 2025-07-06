@@ -1,8 +1,8 @@
-# Axiom MCP - Intelligent Research Tree System
+# Axiom MCP - Parallel Execution Observatory
 
-Axiom MCP is a Model Context Protocol (MCP) server that implements intelligent task decomposition and execution using Monte Carlo Tree Search (MCTS), real-time intervention, and parallel processing.
+Axiom MCP is transforming from a task planning tool into a **parallel execution observatory** that monitors, guides, and optimizes multiple implementation attempts in real-time.
 
-> **⚠️ v3.0 In Development**: Major architecture overhaul to address implementation gaps. See [docs/CURRENT_STATE.md](docs/CURRENT_STATE.md) for details.
+> **🚨 v3.0 Critical Update**: We discovered v3 has all components but they're NOT CONNECTED. The system only does research, never implementation. Track the fix at [Issue #1](https://github.com/pfin/nova-mcp/issues/1).
 
 ## 🚀 Quick Start
 
@@ -41,24 +41,37 @@ Add to your Claude Desktop config:
 }
 ```
 
-## 🎯 Core Features
+## 🎯 The Vision
 
-### v3 Architecture (In Development)
+### Current Problem
+- ❌ Provides excellent analysis about best practices
+- ❌ Creates detailed plans for implementation
+- ❌ Researches frameworks and methodologies
+- **❌ Never writes a single line of actual code**
 
-- **PTY Executor**: Prevents 30-second timeouts with pseudo-terminal execution
-- **MCTS Engine**: Monte Carlo Tree Search for intelligent task exploration
-- **Real-time Intervention**: Detects and corrects research-only behavior
-- **Event System**: JSONL logging and WebSocket streaming
-- **Prompt Configuration**: Task-aware and framework-specific prompts
+### The Solution: Parallel Execution Observatory
 
-### Current Capabilities
+1. **Parallel Execution** - Multiple approaches in git worktrees
+2. **Real-time Observation** - Monitor output character-by-character
+3. **Intelligent Intervention** - Fix problems as they occur
+4. **MCTS Optimization** - Allocate resources to promising approaches
+5. **Success Amplification** - Extract and propagate working patterns
 
-- 🌳 **Recursive Task Trees**: Decompose complex tasks into subtasks
-- 🎯 **Goal Tracking**: Define and monitor success criteria
-- 🔍 **Quality Evaluation**: Score and retry low-quality outputs
-- 📊 **Visualizations**: Terminal-friendly tree and progress views
-- 🔗 **Context Synthesis**: Merge findings from parallel branches
-- 📈 **Status Monitoring**: Track system and task progress
+### Revolutionary Use Cases
+- **Competitive Implementation Racing** - Multiple approaches race to implement features
+- **Bug Hunt Swarms** - 10+ parallel attempts attack bugs from different angles
+- **Architecture Evolution Chamber** - Test architectures in parallel universes
+
+## 📅 Implementation Roadmap
+
+### Phase 0: Fix Core Execution (THIS WEEK) 🚨
+- [ ] Wire PTY Executor to axiom_mcp_spawn
+- [ ] Add file change verification
+- [ ] Implement "No TODO" rule
+- [ ] Test with MCP inspector
+
+### Phase 1-5: Full Vision (6 Weeks)
+See [docs/IMPLEMENTATION_ROADMAP.md](docs/IMPLEMENTATION_ROADMAP.md) for complete plan.
 
 ## 📋 Available Tools
 
@@ -162,34 +175,16 @@ AXIOM_PROMPT_CONFIG=./custom-prompts.json  # Custom prompts
               └───────────┘        └─────────────┘
 ```
 
-## 🔍 Key Concepts
+## 🔍 The Philosophy
 
-### Task Decomposition
-Axiom automatically breaks complex tasks into manageable subtasks:
+> "Don't plan for perfection. Execute in parallel, observe carefully, intervene intelligently, and synthesize success."
 
-```
-Build REST API
-├── Design API endpoints
-├── Implement authentication
-│   ├── Setup JWT tokens
-│   ├── Create user model
-│   └── Build auth middleware
-└── Add database integration
-```
-
-### Quality Scoring
-Each task is scored based on:
-- Completion status
-- Code quality
-- Test coverage
-- Error handling
-
-### Real-time Intervention
-Prevents common AI pitfalls:
-- Endless research loops
-- Placeholder implementations
-- Missing error handling
-- Incomplete testing
+### Key Principles
+1. **Execution Over Planning** - Real code > perfect plans
+2. **Parallel Over Serial** - Many attempts > one attempt
+3. **Observation Over Hope** - Watch what happens > assume it works
+4. **Intervention Over Failure** - Fix immediately > let problems compound
+5. **Synthesis Over Selection** - Combine best parts > pick single winner
 
 ## 🛠️ Development
 
@@ -268,11 +263,21 @@ const result = await axiom_mcp_evaluate({
 });
 ```
 
-## 📚 Documentation
+## 📚 Essential Documentation
 
-- [Current State](./docs/CURRENT_STATE.md) - Detailed implementation status
-- [Prompt Customization Guide](./docs/PROMPT_CUSTOMIZATION_GUIDE.md) - Customize prompts
-- [V3 Complete Guide](./docs/V3_COMPLETE_GUIDE.md) - Full v3 documentation
+### Start Here
+- [AXIOM_V3_VISION.md](./docs/AXIOM_V3_VISION.md) - **The complete vision**
+- [USE_CASE_GUIDE.md](./docs/USE_CASE_GUIDE.md) - **See it in action**
+- [IMPLEMENTATION_ROADMAP.md](./docs/IMPLEMENTATION_ROADMAP.md) - **Week-by-week plan**
+
+### Deep Dives
+- [TECHNICAL_DESIGN.md](./docs/TECHNICAL_DESIGN.md) - Architecture details
+- [CURRENT_STATE.md](./docs/CURRENT_STATE.md) - What's built vs planned
+- [V3_IMPLEMENTATION_LEARNINGS.md](./docs/V3_IMPLEMENTATION_LEARNINGS.md) - What we discovered
+
+## 🐛 Known Issues
+
+**Critical**: The system currently only produces research, not code. We're fixing this in Phase 0. Track progress at [Issue #1](https://github.com/pfin/nova-mcp/issues/1).
 
 ## 🤝 Contributing
 
