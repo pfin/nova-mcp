@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import { ChatGPTClient } from '../chatgpt-client.js';
+import { ChatGPTClientEnhanced } from '../chatgpt-client-enhanced.js';
 
 export const selectModelSchema = z.object({
   model: z.string().describe('Model to switch to (e.g., "gpt-4", "gpt-4o", "gpt-3.5-turbo")'),
@@ -16,7 +16,7 @@ export const selectModelTool = {
 
 export async function handleSelectModel(
   input: SelectModelInput,
-  client: ChatGPTClient
+  client: ChatGPTClientEnhanced
 ): Promise<{ content: Array<{ type: string; text: string }> }> {
   try {
     // Initialize if needed

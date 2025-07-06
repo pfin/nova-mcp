@@ -1,0 +1,10 @@
+#!/usr/bin/env node
+// Wrapper script for Axiom MCP v3
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Import and run the v3 server
+import(join(__dirname, 'dist-v3/src-v3/index.js'));

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import { ChatGPTClient } from '../chatgpt-client.js';
+import { ChatGPTClientEnhanced } from '../chatgpt-client-enhanced.js';
 
 export const chatgptAskSchema = z.object({
   query: z.string().describe('The question to ask ChatGPT'),
@@ -18,7 +18,7 @@ export const chatgptAskTool = {
 
 export async function handleChatGPTAsk(
   input: ChatGPTAskInput,
-  client: ChatGPTClient
+  client: ChatGPTClientEnhanced
 ): Promise<{ content: Array<{ type: string; text: string }> }> {
   try {
     // Initialize if needed

@@ -1,0 +1,5 @@
+{
+  "debugUrl": "http://localhost:9222",
+  "wsEndpoint": "ws://127.0.0.1:9222/devtools/browser/8c65e8cc-3036-48fc-8338-bac4d3c978cc",
+  "port": 9222
+}

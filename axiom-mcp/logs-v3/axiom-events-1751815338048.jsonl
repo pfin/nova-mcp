@@ -1,0 +1,5 @@
+{"taskId":"system","workerId":"main","event":"task_start","payload":{"message":"Event bus initialized"},"timestamp":"2025-07-06T15:22:18.048Z"}
+{"taskId":"test-123","workerId":"test-worker","event":"task_start","payload":{"message":"Starting test task"},"timestamp":"2025-07-06T15:22:18.163Z"}
+{"taskId":"test-123","workerId":"test-worker","event":"task_complete","payload":{"message":"Task completed"},"timestamp":"2025-07-06T15:22:18.265Z"}
+{"taskId":"test-123","workerId":"websocket","event":"intervention","payload":{"prompt":"Test intervention","clientId":"client-1751815338162-gvlp39ejn"},"timestamp":"2025-07-06T15:22:18.367Z"}
+{"taskId":"system","workerId":"main","event":"task_complete","payload":{"message":"Event bus shutting down","stats":{"eventCount":4,"uptime":421,"eventsPerSecond":9.501187648456057}},"timestamp":"2025-07-06T15:22:18.469Z"}

@@ -1,8 +1,35 @@
-node_modules/
-dist/
-*.log
+# Environment variables
 .env
-.DS_Store
-*.tsbuildinfo
+.env.local
+.env.*.local
+
+# Session data
 chatgpt-session/
-cookies.json
+chatgpt-user-data/
+
+# Build output
+dist/
+build/
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test files
+test-auth.js
+login-helper.js
+manual-login.js
+manual-login-enhanced.js

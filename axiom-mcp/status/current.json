@@ -1,0 +1,274 @@
+{
+  "tasks": [
+    [
+      "2a6ea585-af55-4233-a9ba-085eec49c0b8",
+      {
+        "id": "2a6ea585-af55-4233-a9ba-085eec49c0b8",
+        "prompt": "Build a secure authentication system",
+        "status": "completed",
+        "startTime": "2025-07-05T02:13:22.865Z",
+        "depth": 0,
+        "childTasks": [
+          "15f62cab-d5e3-4aa3-b648-c0c85638fa99",
+          "65731f28-b264-406f-a295-c4ab32f66e51",
+          "6ac759e5-f2ef-4c1b-af7d-584ef11b2400"
+        ],
+        "output": "[\"Design authentication architecture with secure token management and session handling\", \"Implement user registration and login endpoints with password hashing and validation\", \"Create middleware for authentication verification and role-based access control\"]",
+        "endTime": "2025-07-05T02:13:31.365Z",
+        "duration": 8500
+      }
+    ],
+    [
+      "15f62cab-d5e3-4aa3-b648-c0c85638fa99",
+      {
+        "id": "15f62cab-d5e3-4aa3-b648-c0c85638fa99",
+        "prompt": "Design authentication architecture with secure token management and session handling",
+        "status": "pending",
+        "startTime": "2025-07-05T02:13:31.363Z",
+        "depth": 1,
+        "parentTask": "2a6ea585-af55-4233-a9ba-085eec49c0b8",
+        "childTasks": []
+      }
+    ],
+    [
+      "65731f28-b264-406f-a295-c4ab32f66e51",
+      {
+        "id": "65731f28-b264-406f-a295-c4ab32f66e51",
+        "prompt": "Implement user registration and login endpoints with password hashing and validation",
+        "status": "pending",
+        "startTime": "2025-07-05T02:13:31.364Z",
+        "depth": 1,
+        "parentTask": "2a6ea585-af55-4233-a9ba-085eec49c0b8",
+        "childTasks": []
+      }
+    ],
+    [
+      "6ac759e5-f2ef-4c1b-af7d-584ef11b2400",
+      {
+        "id": "6ac759e5-f2ef-4c1b-af7d-584ef11b2400",
+        "prompt": "Create middleware for authentication verification and role-based access control",
+        "status": "pending",
+        "startTime": "2025-07-05T02:13:31.364Z",
+        "depth": 1,
+        "parentTask": "2a6ea585-af55-4233-a9ba-085eec49c0b8",
+        "childTasks": []
+      }
+    ],
+    [
+      "64221f38-7c39-4fa6-93e4-7da5b321edde",
+      {
+        "id": "64221f38-7c39-4fa6-93e4-7da5b321edde",
+        "prompt": "Research quantum computing applications",
+        "status": "completed",
+        "startTime": "2025-07-05T02:13:31.366Z",
+        "depth": 0,
+        "childTasks": [
+          "41ad4233-97d7-438f-967d-00de9cd054fb",
+          "57d17d34-a5bb-48e0-bce1-2d3e915a9122",
+          "d0be6ebf-ce51-49f6-b159-0e2d27521cd1",
+          "d74342bf-c360-4a44-98ca-52f98f7a2752"
+        ],
+        "output": "[\"Quantum algorithm implementations for specific industry problems\", \"Quantum machine learning algorithms for drug discovery\", \"Quantum optimization algorithms for financial portfolio management\", \"Quantum simulation algorithms for materials science\"]",
+        "endTime": "2025-07-05T02:13:45.993Z",
+        "duration": 14627
+      }
+    ],
+    [
+      "41ad4233-97d7-438f-967d-00de9cd054fb",
+      {
+        "id": "41ad4233-97d7-438f-967d-00de9cd054fb",
+        "prompt": "Quantum algorithm implementations for specific industry problems",
+        "status": "pending",
+        "startTime": "2025-07-05T02:13:45.988Z",
+        "depth": 1,
+        "parentTask": "64221f38-7c39-4fa6-93e4-7da5b321edde",
+        "childTasks": []
+      }
+    ],
+    [
+      "57d17d34-a5bb-48e0-bce1-2d3e915a9122",
+      {
+        "id": "57d17d34-a5bb-48e0-bce1-2d3e915a9122",
+        "prompt": "Quantum machine learning algorithms for drug discovery",
+        "status": "pending",
+        "startTime": "2025-07-05T02:13:45.989Z",
+        "depth": 1,
+        "parentTask": "64221f38-7c39-4fa6-93e4-7da5b321edde",
+        "childTasks": []
+      }
+    ],
+    [
+      "d0be6ebf-ce51-49f6-b159-0e2d27521cd1",
+      {
+        "id": "d0be6ebf-ce51-49f6-b159-0e2d27521cd1",
+        "prompt": "Quantum optimization algorithms for financial portfolio management",
+        "status": "pending",
+        "startTime": "2025-07-05T02:13:45.992Z",
+        "depth": 1,
+        "parentTask": "64221f38-7c39-4fa6-93e4-7da5b321edde",
+        "childTasks": []
+      }
+    ],
+    [
+      "d74342bf-c360-4a44-98ca-52f98f7a2752",
+      {
+        "id": "d74342bf-c360-4a44-98ca-52f98f7a2752",
+        "prompt": "Quantum simulation algorithms for materials science",
+        "status": "pending",
+        "startTime": "2025-07-05T02:13:45.993Z",
+        "depth": 1,
+        "parentTask": "64221f38-7c39-4fa6-93e4-7da5b321edde",
+        "childTasks": []
+      }
+    ],
+    [
+      "3524f89b-5e4f-4080-9166-fc37f559eacc",
+      {
+        "id": "3524f89b-5e4f-4080-9166-fc37f559eacc",
+        "prompt": "Create a simple calculator function that adds two numbers",
+        "status": "running",
+        "startTime": "2025-07-05T02:14:10.444Z",
+        "depth": 0,
+        "childTasks": [],
+        "output": "[\"Create add function\", \"Handle input validation\", \"Support decimal numbers\", \"Return formatted result\"]"
+      }
+    ],
+    [
+      "b90ff1bb-baba-4414-a68a-65ec6cc38e10",
+      {
+        "id": "b90ff1bb-baba-4414-a68a-65ec6cc38e10",
+        "prompt": "Create add function",
+        "status": "pending",
+        "startTime": "2025-07-05T02:14:17.322Z",
+        "depth": 1,
+        "parentTask": "3524f89b-5e4f-4080-9166-fc37f559eacc",
+        "childTasks": []
+      }
+    ],
+    [
+      "5a5d904c-e09a-48c9-98d1-204b5e60c52c",
+      {
+        "id": "5a5d904c-e09a-48c9-98d1-204b5e60c52c",
+        "prompt": "Create add function",
+        "status": "running",
+        "startTime": "2025-07-05T02:14:17.323Z",
+        "depth": 0,
+        "childTasks": []
+      }
+    ],
+    [
+      "14773955-de61-4291-9845-361f75cee9c3",
+      {
+        "id": "14773955-de61-4291-9845-361f75cee9c3",
+        "prompt": "Handle input validation",
+        "status": "running",
+        "startTime": "2025-07-05T02:14:51.845Z",
+        "depth": 1,
+        "parentTask": "3524f89b-5e4f-4080-9166-fc37f559eacc",
+        "childTasks": []
+      }
+    ],
+    [
+      "a6f151a6-0e4b-4b6d-8ad5-48ed90ee1858",
+      {
+        "id": "a6f151a6-0e4b-4b6d-8ad5-48ed90ee1858",
+        "prompt": "Research the best ways to evaluate success metrics in goal-oriented research systems",
+        "status": "failed",
+        "startTime": "2025-07-05T08:48:33.003Z",
+        "depth": 0,
+        "childTasks": [],
+        "output": "",
+        "error": "Failed to parse subtasks: Error: No JSON array found in response",
+        "endTime": "2025-07-05T08:49:33.191Z",
+        "duration": 60188
+      }
+    ],
+    [
+      "37c4c9ad-ac94-4e0f-9888-9ea26a820d91",
+      {
+        "id": "37c4c9ad-ac94-4e0f-9888-9ea26a820d91",
+        "prompt": "Design a simple web API",
+        "status": "completed",
+        "startTime": "2025-07-05T09:17:05.134Z",
+        "depth": 0,
+        "childTasks": [
+          "b735da49-2f56-4f65-a38f-443c05a0113f",
+          "0ab80c66-f5ed-44cc-9333-9f26463ecccc",
+          "b3b128b6-07c7-456f-9c87-5e45b416cfcb"
+        ],
+        "output": "[\"Define API endpoints and HTTP methods for core functionality\", \"Design request/response data structures and validation rules\", \"Create API documentation with authentication and error handling specifications\"]",
+        "endTime": "2025-07-05T09:17:12.729Z",
+        "duration": 7595
+      }
+    ],
+    [
+      "b735da49-2f56-4f65-a38f-443c05a0113f",
+      {
+        "id": "b735da49-2f56-4f65-a38f-443c05a0113f",
+        "prompt": "Define API endpoints and HTTP methods for core functionality",
+        "status": "pending",
+        "startTime": "2025-07-05T09:17:12.726Z",
+        "depth": 1,
+        "parentTask": "37c4c9ad-ac94-4e0f-9888-9ea26a820d91",
+        "childTasks": []
+      }
+    ],
+    [
+      "0ab80c66-f5ed-44cc-9333-9f26463ecccc",
+      {
+        "id": "0ab80c66-f5ed-44cc-9333-9f26463ecccc",
+        "prompt": "Design request/response data structures and validation rules",
+        "status": "pending",
+        "startTime": "2025-07-05T09:17:12.727Z",
+        "depth": 1,
+        "parentTask": "37c4c9ad-ac94-4e0f-9888-9ea26a820d91",
+        "childTasks": []
+      }
+    ],
+    [
+      "b3b128b6-07c7-456f-9c87-5e45b416cfcb",
+      {
+        "id": "b3b128b6-07c7-456f-9c87-5e45b416cfcb",
+        "prompt": "Create API documentation with authentication and error handling specifications",
+        "status": "pending",
+        "startTime": "2025-07-05T09:17:12.727Z",
+        "depth": 1,
+        "parentTask": "37c4c9ad-ac94-4e0f-9888-9ea26a820d91",
+        "childTasks": []
+      }
+    ],
+    [
+      "4e99c9e1-7d54-498c-b83e-ef3a46408e62",
+      {
+        "id": "4e99c9e1-7d54-498c-b83e-ef3a46408e62",
+        "prompt": "Create a simple hello.py file that prints \"Hello from Axiom!\"",
+        "status": "completed",
+        "startTime": "2025-07-05T23:23:30.438Z",
+        "temporalStartTime": "Sat Jul  5 19:23:30 EDT 2025",
+        "depth": 0,
+        "taskType": "Implementation",
+        "taskTypeId": "implementation",
+        "systemPrompt": "You are an implementation-focused AI agent. Your PRIMARY directive is to WRITE ACTUAL CODE, not describe it.\n\nSYSTEM VERIFICATION IS ACTIVE. I am monitoring:\n- Every file you create (or don't create)\n- Every command you run (or don't run)\n- Whether tests actually pass (not just claims)\n\nYOU WILL BE CAUGHT if you:\n- Claim to write code without using Write tool\n- Say tests pass without running them\n- Mark tasks complete without implementation\n\nMANDATORY ACTIONS:\n1. Use Write tool to create actual code files\n2. Use Write tool to create actual test files\n3. Use Bash tool to run tests and show they pass\n4. Only claim success when files exist and tests pass\n\nENFORCEMENT:\n- If no files detected → RETRY with \"You wrote NO FILES. Use Write tool NOW.\"\n- If tests not run → RETRY with \"Run tests with Bash tool NOW.\"\n- If tests fail → RETRY with \"Fix the code and run tests again.\"\n\nThis is not a suggestion. This is enforced at the system level.\nYou cannot fake it. You cannot bypass it. You must actually implement.",
+        "output": "",
+        "temporalEndTime": "Sat Jul  5 19:23:33 EDT 2025",
+        "endTime": "2025-07-05T23:23:33.453Z",
+        "duration": 3015
+      }
+    ],
+    [
+      "1a8750c0-3913-4f0b-b577-fd2e5538bbab",
+      {
+        "id": "1a8750c0-3913-4f0b-b577-fd2e5538bbab",
+        "prompt": "Create a simple calculator.py file with add and subtract functions, and a test_calculator.py file with tests",
+        "status": "running",
+        "startTime": "2025-07-06T16:34:03.273Z",
+        "temporalStartTime": "Sun Jul  6 12:34:03 EDT 2025",
+        "depth": 0,
+        "taskType": "Implementation",
+        "taskTypeId": "implementation",
+        "systemPrompt": "You are an implementation-focused AI agent. Your PRIMARY directive is to WRITE ACTUAL CODE, not describe it.\n\nSYSTEM VERIFICATION IS ACTIVE. I am monitoring:\n- Every file you create (or don't create)\n- Every command you run (or don't run)\n- Whether tests actually pass (not just claims)\n\nYOU WILL BE CAUGHT if you:\n- Claim to write code without using Write tool\n- Say tests pass without running them\n- Mark tasks complete without implementation\n\nMANDATORY ACTIONS:\n1. Use Write tool to create actual code files\n2. Use Write tool to create actual test files\n3. Use Bash tool to run tests and show they pass\n4. Only claim success when files exist and tests pass\n\nENFORCEMENT:\n- If no files detected → RETRY with \"You wrote NO FILES. Use Write tool NOW.\"\n- If tests not run → RETRY with \"Run tests with Bash tool NOW.\"\n- If tests fail → RETRY with \"Fix the code and run tests again.\"\n\nThis is not a suggestion. This is enforced at the system level.\nYou cannot fake it. You cannot bypass it. You must actually implement."
+      }
+    ]
+  ],
+  "lastSaved": "2025-07-06T16:34:03.273Z"
+}

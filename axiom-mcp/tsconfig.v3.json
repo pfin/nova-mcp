@@ -20,7 +20,14 @@
   "include": [
     "src-v3/**/*",
     "src/base-system-prompt.ts",
-    "src/system-verification.ts"
+    "src/system-verification.ts",
+    "src/status-manager.ts",
+    "src/stream-manager.ts",
+    "src/mcts-engine.ts",
+    "src/context-manager.ts",
+    "src/implementation-monitor.ts",
+    "src/task-types.ts",
+    "src/tools/**/*"
   ],
   "exclude": ["node_modules", "dist-v3", "**/*.test.ts", "**/*.spec.ts"]
 }

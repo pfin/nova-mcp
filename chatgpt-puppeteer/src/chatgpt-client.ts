@@ -52,7 +52,7 @@ export class ChatGPTClient extends EventEmitter {
     await this.loadSession();
 
     // Navigate to ChatGPT
-    await this.page.goto('https://chat.openai.com', { waitUntil: 'networkidle2' });
+    await this.page.goto('https://chatgpt.com', { waitUntil: 'networkidle2' });
 
     // Check if we're logged in
     const isLoggedIn = await this.checkLoginStatus();
@@ -198,7 +198,7 @@ export class ChatGPTClient extends EventEmitter {
     if (!this.isInitialized) throw new Error('Client not initialized');
 
     // Navigate to new chat
-    await this.page!.goto('https://chat.openai.com/chat', { waitUntil: 'networkidle2' });
+    await this.page!.goto('https://chatgpt.com/', { waitUntil: 'networkidle2' });
     this.emit('conversation-cleared');
   }
 

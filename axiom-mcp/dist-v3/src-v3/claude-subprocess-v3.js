@@ -30,7 +30,7 @@ export class ClaudeCodeSubprocessV3 {
      */
     async execute(prompt, customOptions) {
         const startTime = Date.now();
-        const id = uuidv4();
+        const id = customOptions?.taskId || uuidv4();
         const options = { ...this.options, ...customOptions };
         // Get bash date at start (still using execSync for simple date command)
         const startDateResult = execSync('date', { encoding: 'utf-8' }).trim();
@@ -38,6 +38,19 @@ export class ClaudeCodeSubprocessV3 {
         console.error(`[${new Date().toISOString()}] Starting Claude Code task ${id}`);
         console.error(`[TEMPORAL] Task start: ${startDateResult}`);
         console.error(`[V3] Using PTY executor - no timeout!`);
+        // Emit task start event
+        this.eventBus.logEvent({
+            taskId: id,
+            workerId: 'main',
+            event: EventType.TASK_START,
+            payload: {
+                prompt: prompt,
+                title: options.title || prompt.substring(0, 50),
+                parentId: options.parentId,
+                depth: options.depth || 0,
+                taskType: options.taskType
+            }
+        });
         // Build the prompt with complete system prompt
         const completeSystemPrompt = getCompleteSystemPrompt(options.systemPrompt, options.taskType);
         let fullPrompt = `${completeSystemPrompt}\n\n${prompt}`;
@@ -73,6 +86,7 @@ export class ClaudeCodeSubprocessV3 {
             heartbeatInterval: 180_000, // 3 minutes
             enableMonitoring: options.enableMonitoring ?? false,
             enableIntervention: options.enableIntervention ?? false,
+            onExecutorCreated: options.onExecutorCreated
         });
         // Collect output
         let output = '';

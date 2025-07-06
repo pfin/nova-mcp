@@ -50,7 +50,7 @@ Create a `.env` file or set these environment variables:
 GEMINI_ENABLED=true                   # Enable/disable integration
 GEMINI_AUTO_CONSULT=true              # Auto-consult on uncertainty
 GEMINI_CLI_COMMAND=gemini             # CLI command to use
-GEMINI_TIMEOUT=60                     # Query timeout in seconds
+GEMINI_TIMEOUT=300                    # Query timeout in seconds (default: 300s/5 minutes)
 GEMINI_RATE_LIMIT=2                   # Seconds between API calls
 GEMINI_MODEL=gemini-2.5-pro          # Gemini model to use
 GEMINI_ENABLE_STREAMING=true          # Enable streaming responses
@@ -174,10 +174,12 @@ npx @modelcontextprotocol/inspector ./dist/index.js
 | Issue | Solution |
 |-------|----------|
 | Gemini CLI not found | Install with `npm install -g @google/gemini-cli` |
-| Authentication errors | Run `gemini` directly and sign in |
+| Authentication errors | 1. Run `gcloud auth login`<br>2. Set project: `gcloud config set project YOUR_PROJECT_ID`<br>3. Enable API: `gcloud services enable cloudaicompanion.googleapis.com` |
+| "SERVICE_DISABLED" error | The Gemini API needs to be enabled in your Google Cloud project (see authentication steps above) |
 | Node version issues | Use Node.js 18+ (recommended: `nvm use 22.16.0`) |
-| Timeout errors | Increase `GEMINI_TIMEOUT` environment variable |
+| Timeout errors | 1. Default timeout is now 5 minutes (300s)<br>2. Increase via `GEMINI_TIMEOUT` environment variable<br>3. Network issues may cause timeouts |
 | Rate limit errors | Increase `GEMINI_RATE_LIMIT` delay |
+| Process hangs | The Gemini CLI may hang on auth issues - the server now handles this with proper timeouts |
 
 ## Security Considerations
 

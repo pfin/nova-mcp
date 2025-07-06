@@ -62,6 +62,10 @@ export class PtyExecutor extends EventEmitter {
                     });
                 });
             }
+            // Notify if callback provided (for interactive controller)
+            if (this.options.onExecutorCreated) {
+                this.options.onExecutorCreated(this);
+            }
             // Stream output character by character
             this.ptyProcess.onData((data) => {
                 this.outputBuffer += data;

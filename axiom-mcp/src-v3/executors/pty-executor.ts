@@ -20,6 +20,7 @@ export interface PtyExecutorOptions {
   heartbeatInterval?: number;
   enableMonitoring?: boolean;
   enableIntervention?: boolean;
+  onExecutorCreated?: (executor: PtyExecutor) => void;
 }
 
 export interface ExecutorEvent {
@@ -88,6 +89,11 @@ export class PtyExecutor extends EventEmitter {
             payload: violation
           });
         });
+      }
+      
+      // Notify if callback provided (for interactive controller)
+      if (this.options.onExecutorCreated) {
+        this.options.onExecutorCreated(this);
       }
       
       // Stream output character by character

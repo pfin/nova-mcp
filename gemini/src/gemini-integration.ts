@@ -19,7 +19,7 @@ export class GeminiIntegration {
       rateLimitDelay: config.rateLimitDelay ?? parseInt(process.env.GEMINI_RATE_LIMIT ?? '2'),
       model: config.model ?? process.env.GEMINI_MODEL ?? 'gemini-2.5-pro',
       maxContext: config.maxContext ?? (process.env.GEMINI_MAX_CONTEXT ? parseInt(process.env.GEMINI_MAX_CONTEXT) : undefined),
-      debug: config.debug ?? (process.env.GEMINI_DEBUG === 'true'),
+      debug: config.debug ?? true,
     };
 
     this.rateLimiter = new RateLimiter(this.config.rateLimitDelay);
@@ -109,21 +109,18 @@ export class GeminiIntegration {
 
   private async executeGeminiCommand(query: string): Promise<string> {
     return new Promise((resolve, reject) => {
-      const args = ['-m', this.config.model];
+      const args = ['-m', this.config.model, '-p', query];
       
       if (this.config.debug) {
         console.log(`Executing: ${this.config.cliCommand} ${args.join(' ')}`);
       }
 
-      const geminiProcess = spawn(this.config.cliCommand, args, {
-        timeout: this.config.timeout * 1000,
-      });
+      const geminiProcess = spawn(this.config.cliCommand, args);
 
       let stdout = '';
       let stderr = '';
 
-      // Send the query to stdin
-      geminiProcess.stdin.write(query);
+      // Close stdin immediately since we're using -p flag
       geminiProcess.stdin.end();
 
       geminiProcess.stdout.on('data', (data) => {
@@ -140,6 +137,8 @@ export class GeminiIntegration {
 
       geminiProcess.on('close', (code) => {
         if (code !== 0) {
+          console.error('Gemini CLI stderr:', stderr);
+          console.error('Gemini CLI stdout:', stdout);
           reject(new Error(`Gemini CLI exited with code ${code}: ${stderr}`));
         } else {
           resolve(stdout.trim());
@@ -148,6 +147,7 @@ export class GeminiIntegration {
 
       // Handle timeout
       setTimeout(() => {
+        console.error('Timeout reached, killing process');
         geminiProcess.kill();
         reject(new Error(`Gemini CLI command timed out after ${this.config.timeout} seconds`));
       }, this.config.timeout * 1000);

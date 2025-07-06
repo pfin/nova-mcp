@@ -1,4 +1,4 @@
-import { ChatGPTClient } from '../chatgpt-client.js';
+import { ChatGPTClientEnhanced } from '../chatgpt-client-enhanced.js';
 
 export const getModelsTool = {
   name: 'chatgpt_get_models',
@@ -10,7 +10,7 @@ export const getModelsTool = {
 };
 
 export async function handleGetModels(
-  client: ChatGPTClient
+  client: ChatGPTClientEnhanced
 ): Promise<{ content: Array<{ type: string; text: string }> }> {
   try {
     // Initialize if needed
@@ -21,7 +21,7 @@ export async function handleGetModels(
     const models = await client.getAvailableModels();
 
     const modelsText = models.length > 0
-      ? `**Available ChatGPT Models:**\n${models.map(m => `- ${m}`).join('\n')}`
+      ? `**Available ChatGPT Models:**\n${models.map((m: string) => `- ${m}`).join('\n')}`
       : 'No models found. Make sure you are logged in to ChatGPT.';
 
     return {

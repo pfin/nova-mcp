@@ -1,0 +1,4 @@
+{"taskId":"system","workerId":"main","event":"task_start","payload":{"message":"Event bus initialized"},"timestamp":"2025-07-06T15:19:19.517Z"}
+{"taskId":"77066ca2-413b-4055-ab85-0b7802e80d16","workerId":"master","event":"task_start","payload":{"prompt":"Write a simple hello world in Python...","priority":1,"parentId":null},"timestamp":"2025-07-06T15:19:21.166Z"}
+{"taskId":"77066ca2-413b-4055-ab85-0b7802e80d16","workerId":"websocket","event":"intervention","payload":{"prompt":"Add a comment explaining the code","clientId":"client-1751815161064-q31lt8jzw"},"timestamp":"2025-07-06T15:19:24.013Z"}
+{"taskId":"7c0ab8e0-301e-49b4-8d66-df704a1331d7","workerId":"master","event":"task_start","payload":{"prompt":"Calculate fibonacci sequence...","priority":2,"parentId":null},"timestamp":"2025-07-06T15:21:06.686Z"}

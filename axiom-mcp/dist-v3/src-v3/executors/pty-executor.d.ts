@@ -16,6 +16,7 @@ export interface PtyExecutorOptions {
     heartbeatInterval?: number;
     enableMonitoring?: boolean;
     enableIntervention?: boolean;
+    onExecutorCreated?: (executor: PtyExecutor) => void;
 }
 export interface ExecutorEvent {
     taskId: string;

@@ -14,7 +14,7 @@ export class GeminiStreamingIntegration extends EventEmitter {
       enabled: config.enabled ?? (process.env.GEMINI_ENABLED !== 'false'),
       autoConsult: config.autoConsult ?? (process.env.GEMINI_AUTO_CONSULT !== 'false'),
       cliCommand: config.cliCommand ?? process.env.GEMINI_CLI_COMMAND ?? 'gemini',
-      timeout: config.timeout ?? parseInt(process.env.GEMINI_TIMEOUT ?? '60'),
+      timeout: config.timeout ?? parseInt(process.env.GEMINI_TIMEOUT ?? '300'),
       rateLimitDelay: config.rateLimitDelay ?? parseInt(process.env.GEMINI_RATE_LIMIT ?? '2'),
       model: config.model ?? process.env.GEMINI_MODEL ?? 'gemini-2.5-pro',
       maxContext: config.maxContext ?? (process.env.GEMINI_MAX_CONTEXT ? parseInt(process.env.GEMINI_MAX_CONTEXT) : undefined),
@@ -87,16 +87,54 @@ export class GeminiStreamingIntegration extends EventEmitter {
         console.error(`Executing: ${this.config.cliCommand} ${args.join(' ')}`);
       }
 
-      this.activeProcess = spawn(this.config.cliCommand, args, {
-        timeout: this.config.timeout * 1000,
-      });
+      this.activeProcess = spawn(this.config.cliCommand, args);
 
       let hasErrored = false;
+      let stderr = '';
+      let processExited = false;
+      let timeoutId: NodeJS.Timeout;
+
+      // Setup timeout handler
+      const timeoutHandler = () => {
+        if (!processExited && this.activeProcess) {
+          processExited = true;
+          try {
+            this.activeProcess.kill('SIGKILL');
+          } catch (e) {
+            // Process might already be dead
+          }
+          const error = new Error(`Gemini CLI command timed out after ${this.config.timeout} seconds`);
+          if (!hasErrored) {
+            hasErrored = true;
+            options.onError?.(error);
+            this.emit('error', error);
+            reject(error);
+          }
+        }
+      };
+
+      // Set timeout - use 5 minutes minimum for streaming
+      const timeoutMs = Math.max(this.config.timeout * 1000, 300000);
+      timeoutId = setTimeout(timeoutHandler, timeoutMs);
+
+      // Handle process exit
+      const cleanup = () => {
+        processExited = true;
+        clearTimeout(timeoutId);
+      };
 
       // Send the query to stdin
-      if (this.activeProcess.stdin) {
-        this.activeProcess.stdin.write(query);
-        this.activeProcess.stdin.end();
+      try {
+        if (this.activeProcess.stdin) {
+          this.activeProcess.stdin.write(query);
+          this.activeProcess.stdin.end();
+        }
+      } catch (error) {
+        cleanup();
+        const err = new Error(`Failed to write to Gemini CLI stdin: ${error}`);
+        options.onError?.(err);
+        reject(err);
+        return;
       }
 
       // Stream stdout data
@@ -111,17 +149,13 @@ export class GeminiStreamingIntegration extends EventEmitter {
       // Handle stderr
       if (this.activeProcess.stderr) {
         this.activeProcess.stderr.on('data', (data) => {
-          const error = data.toString();
-          if (!hasErrored) {
-            hasErrored = true;
-            options.onError?.(new Error(error));
-            this.emit('error', new Error(error));
-          }
+          stderr += data.toString();
         });
       }
 
       // Handle process errors
       this.activeProcess.on('error', (error) => {
+        cleanup();
         if (!hasErrored) {
           hasErrored = true;
           options.onError?.(error);
@@ -132,10 +166,16 @@ export class GeminiStreamingIntegration extends EventEmitter {
 
       // Handle process close
       this.activeProcess.on('close', (code) => {
+        cleanup();
         this.activeProcess = undefined;
         
         if (code !== 0 && !hasErrored) {
-          const error = new Error(`Gemini CLI exited with code ${code}`);
+          let error: Error;
+          if (stderr.includes('PERMISSION_DENIED') || stderr.includes('SERVICE_DISABLED')) {
+            error = new Error('Gemini API is not enabled or authentication failed. Please check your Google Cloud setup.');
+          } else {
+            error = new Error(`Gemini CLI exited with code ${code}: ${stderr.substring(0, 500)}`);
+          }
           options.onError?.(error);
           this.emit('error', error);
           reject(error);
@@ -144,22 +184,6 @@ export class GeminiStreamingIntegration extends EventEmitter {
           this.emit('end');
           resolve();
         }
-      });
-
-      // Handle timeout
-      const timeoutId = setTimeout(() => {
-        if (this.activeProcess) {
-          this.activeProcess.kill();
-          const error = new Error(`Gemini CLI command timed out after ${this.config.timeout} seconds`);
-          options.onError?.(error);
-          this.emit('error', error);
-          reject(error);
-        }
-      }, this.config.timeout * 1000);
-
-      // Clear timeout on process end
-      this.activeProcess.on('exit', () => {
-        clearTimeout(timeoutId);
       });
     });
   }

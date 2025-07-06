@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import { ChatGPTClient } from '../chatgpt-client.js';
+import { ChatGPTClientEnhanced } from '../chatgpt-client-enhanced.js';
 
 export const compareModelsSchema = z.object({
   query: z.string().describe('The question to ask all models'),
@@ -17,7 +17,7 @@ export const compareModelsTool = {
 
 export async function handleCompareModels(
   input: CompareModelsInput,
-  client: ChatGPTClient
+  client: ChatGPTClientEnhanced
 ): Promise<{ content: Array<{ type: string; text: string }> }> {
   try {
     // Initialize if needed
@@ -31,7 +31,7 @@ export async function handleCompareModels(
     // Format the comparison
     let comparisonText = `**Model Comparison for Query:** "${input.query}"\n\n`;
     
-    for (const [model, response] of responses.entries()) {
+    for (const [model, response] of Object.entries(responses)) {
       comparisonText += `### ${model}\n\n${response}\n\n---\n\n`;
     }
 

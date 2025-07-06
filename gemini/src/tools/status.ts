@@ -22,7 +22,7 @@ export async function handleGeminiStatus(
     `- Consultations: ${status.consultationCount}`,
     `- Last consultation: ${status.lastConsultation ? status.lastConsultation.toLocaleString() : 'Never'}`,
     `- Rate limit: ${status.rateLimitDelay}s between calls`,
-    `- Timeout: ${status.timeout}s`,
+    `- Timeout: ${status.timeout}s (${Math.floor(status.timeout / 60)} minutes)`,
   ].join('\n');
 
   return {

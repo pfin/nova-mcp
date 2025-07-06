@@ -1,4 +1,4 @@
-import { ChatGPTClient } from '../chatgpt-client.js';
+import { ChatGPTClientEnhanced } from '../chatgpt-client-enhanced.js';
 
 export const clearConversationTool = {
   name: 'chatgpt_clear_conversation',
@@ -10,7 +10,7 @@ export const clearConversationTool = {
 };
 
 export async function handleClearConversation(
-  client: ChatGPTClient
+  client: ChatGPTClientEnhanced
 ): Promise<{ content: Array<{ type: string; text: string }> }> {
   try {
     // Initialize if needed

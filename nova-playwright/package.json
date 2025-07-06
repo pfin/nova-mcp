@@ -1,0 +1,29 @@
+{
+  "name": "@nova-mcp/nova-playwright",
+  "version": "0.1.0",
+  "description": "Playwright-based browser automation MCP server with stealth features",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc && chmod +x dist/index.js",
+    "watch": "tsc --watch",
+    "dev": "npm run build && node dist/index.js",
+    "lint": "eslint src/**/*.ts",
+    "test": "npx @modelcontextprotocol/inspector dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "playwright": "^1.49.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.9.0",
+    "@typescript-eslint/eslint-plugin": "^8.17.0",
+    "@typescript-eslint/parser": "^8.17.0",
+    "eslint": "^8.56.0",
+    "typescript": "^5.5.0"
+  },
+  "keywords": ["mcp", "playwright", "browser", "automation", "stealth"],
+  "author": "Nova Underground",
+  "license": "MIT"
+}

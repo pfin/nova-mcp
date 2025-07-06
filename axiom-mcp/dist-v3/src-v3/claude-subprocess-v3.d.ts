@@ -8,6 +8,7 @@
  * - Maintains v1 API compatibility
  */
 import { VerificationProof } from '../src/system-verification.js';
+import { PtyExecutor } from './executors/pty-executor.js';
 import { EventBus } from './core/event-bus.js';
 export interface ClaudeCodeOptions {
     model?: string;
@@ -22,6 +23,11 @@ export interface ClaudeCodeOptions {
     eventBus?: EventBus;
     enableMonitoring?: boolean;
     enableIntervention?: boolean;
+    taskId?: string;
+    title?: string;
+    parentId?: string;
+    depth?: number;
+    onExecutorCreated?: (executor: PtyExecutor) => void;
 }
 export interface ClaudeCodeResult {
     id: string;

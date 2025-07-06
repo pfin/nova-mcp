@@ -1,0 +1,6 @@
+{"taskId":"system","workerId":"main","event":"task_start","payload":{"message":"Event bus initialized"},"timestamp":"2025-07-06T14:16:02.536Z"}
+{"taskId":"test-sprint0-001","workerId":"main","event":"task_start","payload":{"description":"Testing PTY executor with simple Python task"},"timestamp":"2025-07-06T14:16:02.536Z"}
+{"taskId":"test-sprint0-001","workerId":"main","event":"claude_stdout","payload":"Done! I've created `hello_v2.py` with a simple script that prints \"Hello from Axiom MCP v2!\".\r\n\u001b[?25h\u001b[?25h","timestamp":"2025-07-06T14:16:16.907Z"}
+{"taskId":"test-sprint0-001","workerId":"main","event":"task_complete","payload":{"exitCode":0,"outputChunks":1,"totalLength":107},"timestamp":"2025-07-06T14:16:16.924Z"}
+{"taskId":"test-sprint0-001","workerId":"main","event":"verification_pass","payload":{"passed":true,"checks":{"filesCreated":true,"testsPass":false,"coverageMet":false,"noVulnerabilities":true,"actuallyRuns":false},"details":"Task completed in 14388ms"},"timestamp":"2025-07-06T14:16:16.925Z"}
+{"taskId":"system","workerId":"main","event":"task_complete","payload":{"message":"Event bus shutting down","stats":{"eventCount":5,"uptime":14390,"eventsPerSecond":0.34746351633078526}},"timestamp":"2025-07-06T14:16:16.925Z"}

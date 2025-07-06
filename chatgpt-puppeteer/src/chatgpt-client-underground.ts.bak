@@ -1,0 +1,397 @@
+import { connect } from 'puppeteer-real-browser';
+import type { Browser, Page } from 'puppeteer-real-browser';
+import { EventEmitter } from 'events';
+import type { ChatGPTClientWithSession } from './chatgpt-client-interface.js';
+import crypto from 'crypto';
+
+/**
+ * Underground ChatGPT client using advanced evasion techniques
+ * Hip hop consciousness: We don't accept defeat, we innovate
+ */
+export class ChatGPTClientUnderground extends EventEmitter implements ChatGPTClientWithSession {
+  private browser?: Browser;
+  private page?: Page;
+  private isInitialized: boolean = false;
+  private sessionFingerprint: string;
+
+  constructor() {
+    super();
+    // Generate unique fingerprint for this session
+    this.sessionFingerprint = crypto.randomBytes(16).toString('hex');
+  }
+
+  async initialize(): Promise<void> {
+    if (this.isInitialized) return;
+
+    console.log('🎤 Underground client initializing...');
+    console.log('💀 Activating stealth mode...');
+
+    try {
+      // Launch with puppeteer-real-browser for maximum evasion
+      const browserConfig = await connect({
+        headless: false, // Always use visible mode for ChatGPT
+        turnstile: true, // Auto-solve Cloudflare Turnstile
+        fingerprint: {
+          // Randomize fingerprint data
+          screen: {
+            width: 1920 + Math.floor(Math.random() * 200),
+            height: 1080 + Math.floor(Math.random() * 100),
+            deviceScaleFactor: 1 + Math.random() * 0.5,
+          },
+          locale: ['en-US', 'en-GB', 'en'][Math.floor(Math.random() * 3)],
+          platform: ['Win32', 'MacIntel', 'Linux x86_64'][Math.floor(Math.random() * 3)],
+          memory: 8 + Math.floor(Math.random() * 8),
+          cpuCores: 4 + Math.floor(Math.random() * 4) * 2,
+        },
+        // Advanced evasion args
+        args: [
+          '--disable-blink-features=AutomationControlled',
+          '--disable-features=IsolateOrigins,site-per-process',
+          '--flag-switches-begin',
+          '--disable-site-isolation-trials',
+          '--flag-switches-end',
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--disable-gpu',
+          '--disable-web-security',
+          '--disable-features=CrossSiteDocumentBlockingIfIsolating',
+          '--disable-site-isolation-for-policy',
+          '--disable-features=BlockInsecurePrivateNetworkRequests',
+          // Randomize window size
+          `--window-size=${1200 + Math.floor(Math.random() * 720)},${800 + Math.floor(Math.random() * 400)}`,
+          // Randomize user agent components
+          '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        ],
+      });
+
+      this.browser = browserConfig.browser;
+      this.page = browserConfig.page;
+
+      // Additional evasion techniques
+      await this.applyAdvancedEvasion();
+
+      // Navigate to ChatGPT with human-like timing
+      await this.humanDelay(1000, 3000);
+      await this.page.goto('https://chatgpt.com', {
+        waitUntil: 'domcontentloaded',
+        timeout: 60000,
+      });
+
+      // Wait for page to stabilize
+      await this.humanDelay(2000, 5000);
+
+      // Check auth status
+      const isAuthenticated = await this.checkAuthStatus();
+      if (!isAuthenticated) {
+        this.emit('auth-required');
+        console.log('🔓 Manual authentication required - complete login in browser');
+        
+        // Wait for manual auth
+        await this.waitForAuthentication();
+      }
+
+      this.isInitialized = true;
+      this.emit('initialized');
+      console.log('🎯 Underground client ready!');
+
+    } catch (error) {
+      console.error('❌ Underground initialization failed:', error);
+      throw error;
+    }
+  }
+
+  private async applyAdvancedEvasion(): Promise<void> {
+    if (!this.page) return;
+
+    // Override additional detection points
+    await this.page.evaluateOnNewDocument(() => {
+      // Hide webdriver
+      Object.defineProperty(navigator, 'webdriver', {
+        get: () => undefined,
+      });
+
+      // Mock plugins
+      Object.defineProperty(navigator, 'plugins', {
+        get: () => {
+          const pluginData = [
+            { name: 'Chrome PDF Plugin', filename: 'internal-pdf-viewer' },
+            { name: 'Chrome PDF Viewer', filename: 'mhjfbmdgcfjbbpaeojofohoefgiehjai' },
+            { name: 'Native Client', filename: 'internal-nacl-plugin' },
+          ];
+          const plugins = pluginData.map(p => ({
+            name: p.name,
+            filename: p.filename,
+            description: p.name,
+            length: 1,
+            [0]: { type: 'application/x-google-chrome-pdf', suffixes: 'pdf', description: 'Portable Document Format' },
+          }));
+          plugins.length = pluginData.length;
+          return plugins;
+        },
+      });
+
+      // Mock permissions
+      const originalQuery = window.navigator.permissions.query;
+      window.navigator.permissions.query = (parameters: any) => (
+        parameters.name === 'notifications'
+          ? Promise.resolve({ state: Notification.permission } as PermissionStatus)
+          : originalQuery(parameters)
+      );
+
+      // Add chrome object
+      if (!window.chrome) {
+        (window as any).chrome = {
+          runtime: {},
+          loadTimes: () => {},
+          csi: () => {},
+        };
+      }
+
+      // Randomize canvas fingerprint
+      const originalGetContext = HTMLCanvasElement.prototype.getContext;
+      HTMLCanvasElement.prototype.getContext = function(type: any, ...args: any[]) {
+        const context = originalGetContext.apply(this, [type, ...args]);
+        if (type === '2d' && context) {
+          const originalFillText = context.fillText;
+          context.fillText = function(...args: any[]) {
+            args[1] = args[1] + (Math.random() * 0.1 - 0.05);
+            args[2] = args[2] + (Math.random() * 0.1 - 0.05);
+            return originalFillText.apply(this, args);
+          };
+        }
+        return context;
+      };
+    });
+  }
+
+  private async humanDelay(min: number, max: number): Promise<void> {
+    const delay = min + Math.random() * (max - min);
+    await new Promise(resolve => setTimeout(resolve, delay));
+  }
+
+  private async checkAuthStatus(): Promise<boolean> {
+    if (!this.page) return false;
+
+    try {
+      return await this.page.evaluate(() => {
+        const chatInput = document.querySelector('textarea[placeholder*="Message"], textarea#prompt-textarea, [contenteditable="true"]');
+        const loginButton = document.querySelector('button[data-testid*="login"], a[href*="/auth/login"]');
+        return !!chatInput && !loginButton;
+      });
+    } catch {
+      return false;
+    }
+  }
+
+  private async waitForAuthentication(): Promise<void> {
+    if (!this.page) return;
+
+    await this.page.waitForFunction(
+      () => {
+        const chatInput = document.querySelector('textarea[placeholder*="Message"], textarea#prompt-textarea');
+        return !!chatInput;
+      },
+      { timeout: 300000 } // 5 minute timeout for manual auth
+    );
+  }
+
+  async sendMessage(message: string, waitForResponse: boolean = true): Promise<string> {
+    if (!this.isInitialized || !this.page) {
+      throw new Error('Client not initialized');
+    }
+
+    // Human-like delay before typing
+    await this.humanDelay(500, 2000);
+
+    // Find chat input
+    const chatInput = await this.page.$('textarea[placeholder*="Message"], textarea#prompt-textarea');
+    if (!chatInput) {
+      throw new Error('Chat input not found');
+    }
+
+    // Clear and type with human-like speed
+    await chatInput.click({ clickCount: 3 });
+    await this.humanDelay(100, 300);
+    
+    // Type character by character with random delays
+    for (const char of message) {
+      await this.page.keyboard.type(char);
+      await this.humanDelay(50, 150);
+    }
+
+    // Submit
+    await this.humanDelay(300, 800);
+    await this.page.keyboard.press('Enter');
+
+    if (!waitForResponse) {
+      return '';
+    }
+
+    return await this.waitForResponse();
+  }
+
+  private async waitForResponse(): Promise<string> {
+    if (!this.page) throw new Error('No page available');
+
+    // Wait for response with human-like patience
+    await this.page.waitForFunction(
+      () => {
+        const articles = document.querySelectorAll('article');
+        if (articles.length < 2) return false;
+        
+        const lastArticle = articles[articles.length - 1];
+        const isAssistant = lastArticle.querySelector('[data-message-author-role="assistant"]') || 
+                            lastArticle.textContent?.includes('ChatGPT');
+        
+        return isAssistant && lastArticle.textContent && lastArticle.textContent.trim().length > 0;
+      },
+      { timeout: 60000 }
+    );
+
+    // Wait for streaming to complete
+    await this.page.waitForFunction(
+      () => {
+        return document.querySelector('button[aria-label*="Stop"], button[aria-label*="Regenerate"]');
+      },
+      { timeout: 60000 }
+    );
+
+    // Extract response
+    const response = await this.page.evaluate(() => {
+      const articles = document.querySelectorAll('article');
+      const lastArticle = articles[articles.length - 1];
+      
+      const messageContent = lastArticle.querySelector('.markdown, [data-message-content]');
+      if (messageContent) {
+        return messageContent.textContent?.trim() || '';
+      }
+      
+      return lastArticle.textContent?.trim() || '';
+    });
+
+    return response;
+  }
+
+  async selectModel(model: string): Promise<void> {
+    if (!this.isInitialized || !this.page) {
+      throw new Error('Client not initialized');
+    }
+
+    // Implementation similar to other clients but with human delays
+    await this.humanDelay(1000, 2000);
+    
+    const modelSelector = await this.page.$('[data-testid="model-selector"], button[aria-haspopup="listbox"]');
+    if (!modelSelector) {
+      throw new Error('Model selector not found');
+    }
+
+    await modelSelector.click();
+    await this.humanDelay(500, 1500);
+
+    const modelOption = await this.page.evaluateHandle((modelName) => {
+      const options = Array.from(document.querySelectorAll('[role="option"], [data-testid*="model-option"]'));
+      return options.find(el => el.textContent?.includes(modelName));
+    }, model);
+
+    if (modelOption && 'click' in modelOption) {
+      await (modelOption as any).click();
+      this.emit('model-selected', model);
+    } else {
+      await this.page.keyboard.press('Escape');
+      throw new Error(`Model ${model} not found`);
+    }
+  }
+
+  async extractTokens(): Promise<{ sessionToken?: string; cfClearance?: string }> {
+    if (!this.page) throw new Error('Not initialized');
+
+    const cookies = await this.page.cookies();
+    const tokens: { sessionToken?: string; cfClearance?: string } = {};
+
+    for (const cookie of cookies) {
+      if (cookie.name === '__Secure-next-auth.session-token') {
+        tokens.sessionToken = cookie.value;
+      } else if (cookie.name === 'cf_clearance') {
+        tokens.cfClearance = cookie.value;
+      }
+    }
+
+    return tokens;
+  }
+
+  async clearConversation(): Promise<void> {
+    if (!this.isInitialized || !this.page) {
+      throw new Error('Client not initialized');
+    }
+
+    await this.humanDelay(500, 1500);
+    
+    const newChatButton = await this.page.$('a[href="/"], button[aria-label*="New chat"]');
+    if (newChatButton) {
+      await newChatButton.click();
+      await this.page.waitForNavigation({ waitUntil: 'networkidle2' });
+    } else {
+      await this.page.goto('https://chatgpt.com/', { waitUntil: 'networkidle2' });
+    }
+
+    this.emit('conversation-cleared');
+  }
+
+  async getAvailableModels(): Promise<string[]> {
+    if (!this.isInitialized || !this.page) {
+      throw new Error('Client not initialized');
+    }
+
+    await this.humanDelay(1000, 2000);
+    
+    const modelSelector = await this.page.$('[data-testid="model-selector"], button[aria-haspopup="listbox"]');
+    if (!modelSelector) {
+      return [];
+    }
+
+    await modelSelector.click();
+    await this.humanDelay(500, 1500);
+
+    const models = await this.page.evaluate(() => {
+      const options = Array.from(document.querySelectorAll('[role="option"], [data-testid*="model-option"]'));
+      return options.map(el => el.textContent?.trim() || '').filter(text => text.length > 0);
+    });
+
+    await this.page.keyboard.press('Escape');
+    return models;
+  }
+
+  async compareModels(query: string, models: string[]): Promise<Record<string, string>> {
+    const results: Record<string, string> = {};
+
+    for (const model of models) {
+      try {
+        await this.clearConversation();
+        await this.selectModel(model);
+        const response = await this.sendMessage(query);
+        results[model] = response;
+      } catch (error) {
+        results[model] = `Error: ${error instanceof Error ? error.message : String(error)}`;
+      }
+    }
+
+    return results;
+  }
+
+  async close(): Promise<void> {
+    if (this.browser) {
+      await this.browser.close();
+      this.browser = undefined;
+      this.page = undefined;
+      this.isInitialized = false;
+    }
+  }
+
+  isReady(): boolean {
+    return this.isInitialized && !!this.page;
+  }
+}

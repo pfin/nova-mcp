@@ -1,0 +1,285 @@
+{
+  "tasks": [
+    [
+      "8dbf1561-51b8-42a8-8094-554d4aaaace2",
+      {
+        "id": "8dbf1561-51b8-42a8-8094-554d4aaaace2",
+        "prompt": "Research best practices for visualizing hierarchical research trees and complex data structures in terminal/console environments for LLM users",
+        "status": "completed",
+        "startTime": "2025-07-05T09:00:04.415Z",
+        "depth": 0,
+        "childTasks": [
+          "1f2c7194-1369-46b2-8e47-b137f9b44bed",
+          "ae8c37f8-7f75-4774-9230-664a31341811",
+          "ff19721a-7a0a-4e2a-bbda-32174d8bbd17",
+          "c5a75cbd-0cd0-4110-a758-30b8bdea560c"
+        ],
+        "output": "[\"Research terminal-based tree visualization libraries and frameworks (rich, blessed, asciitree, etc.) for rendering hierarchical data structures\", \"Analyze best practices for presenting complex hierarchical data in limited terminal space (folding, pagination, color coding, indentation)\", \"Study existing implementations of research tree visualizations in CLI tools and their UX patterns for navigation and interaction\", \"Investigate optimal information density and layout strategies for LLM-readable tree structures that balance detail with overview\"]",
+        "endTime": "2025-07-05T09:00:13.659Z",
+        "duration": 9244
+      }
+    ],
+    [
+      "1f2c7194-1369-46b2-8e47-b137f9b44bed",
+      {
+        "id": "1f2c7194-1369-46b2-8e47-b137f9b44bed",
+        "prompt": "Research terminal-based tree visualization libraries and frameworks (rich, blessed, asciitree, etc.) for rendering hierarchical data structures",
+        "status": "pending",
+        "startTime": "2025-07-05T09:00:13.656Z",
+        "depth": 1,
+        "parentTask": "8dbf1561-51b8-42a8-8094-554d4aaaace2",
+        "childTasks": []
+      }
+    ],
+    [
+      "ae8c37f8-7f75-4774-9230-664a31341811",
+      {
+        "id": "ae8c37f8-7f75-4774-9230-664a31341811",
+        "prompt": "Analyze best practices for presenting complex hierarchical data in limited terminal space (folding, pagination, color coding, indentation)",
+        "status": "pending",
+        "startTime": "2025-07-05T09:00:13.656Z",
+        "depth": 1,
+        "parentTask": "8dbf1561-51b8-42a8-8094-554d4aaaace2",
+        "childTasks": []
+      }
+    ],
+    [
+      "ff19721a-7a0a-4e2a-bbda-32174d8bbd17",
+      {
+        "id": "ff19721a-7a0a-4e2a-bbda-32174d8bbd17",
+        "prompt": "Study existing implementations of research tree visualizations in CLI tools and their UX patterns for navigation and interaction",
+        "status": "pending",
+        "startTime": "2025-07-05T09:00:13.656Z",
+        "depth": 1,
+        "parentTask": "8dbf1561-51b8-42a8-8094-554d4aaaace2",
+        "childTasks": []
+      }
+    ],
+    [
+      "c5a75cbd-0cd0-4110-a758-30b8bdea560c",
+      {
+        "id": "c5a75cbd-0cd0-4110-a758-30b8bdea560c",
+        "prompt": "Investigate optimal information density and layout strategies for LLM-readable tree structures that balance detail with overview",
+        "status": "pending",
+        "startTime": "2025-07-05T09:00:13.657Z",
+        "depth": 1,
+        "parentTask": "8dbf1561-51b8-42a8-8094-554d4aaaace2",
+        "childTasks": []
+      }
+    ],
+    [
+      "d1830a09-18b2-4f7b-af81-aad6813cb599",
+      {
+        "id": "d1830a09-18b2-4f7b-af81-aad6813cb599",
+        "prompt": "Research the differences between REST and GraphQL APIs for modern web applications",
+        "status": "completed",
+        "startTime": "2025-07-05T11:53:45.406Z",
+        "temporalStartTime": "Sat Jul  5 07:53:45 EDT 2025",
+        "depth": 0,
+        "childTasks": [
+          "ccbd8f28-2031-4c8b-8996-5141424dba5b",
+          "f866d93c-0289-4d76-aea7-0e16c6731cd3",
+          "d9944d2d-167a-47e2-ad3c-5197d877af35"
+        ],
+        "taskType": "General",
+        "systemPrompt": "You are completing a research task. Please:\n1. Be thorough and specific\n2. Use appropriate tools to gather information\n3. Verify your findings\n4. Provide concrete evidence\n5. Test any code you write",
+        "output": "[\"Research and document the core architectural differences between REST and GraphQL including data fetching patterns, endpoint structure, and query mechanisms\", \"Analyze performance implications and tradeoffs including over-fetching/under-fetching, N+1 query problems, caching strategies, and network efficiency\", \"Evaluate practical implementation considerations including tooling ecosystem, learning curve, use case suitability, and migration strategies for modern web applications\"]",
+        "temporalEndTime": "Sat Jul  5 08:00:06 EDT 2025",
+        "endTime": "2025-07-05T12:00:06.250Z",
+        "duration": 380844
+      }
+    ],
+    [
+      "ccbd8f28-2031-4c8b-8996-5141424dba5b",
+      {
+        "id": "ccbd8f28-2031-4c8b-8996-5141424dba5b",
+        "prompt": "Research and document the core architectural differences between REST and GraphQL including data fetching patterns, endpoint structure, and query mechanisms",
+        "status": "completed",
+        "startTime": "2025-07-05T11:53:58.049Z",
+        "temporalStartTime": "Sat Jul  5 07:53:58 EDT 2025",
+        "depth": 1,
+        "parentTask": "d1830a09-18b2-4f7b-af81-aad6813cb599",
+        "childTasks": [],
+        "taskType": "General",
+        "systemPrompt": "You are completing a research task. Please:\n1. Be thorough and specific\n2. Use appropriate tools to gather information\n3. Verify your findings\n4. Provide concrete evidence\n5. Test any code you write",
+        "output": "",
+        "temporalEndTime": "Sat Jul  5 07:56:00 EDT 2025",
+        "endTime": "2025-07-05T12:00:06.246Z",
+        "duration": 368197
+      }
+    ],
+    [
+      "f866d93c-0289-4d76-aea7-0e16c6731cd3",
+      {
+        "id": "f866d93c-0289-4d76-aea7-0e16c6731cd3",
+        "prompt": "Analyze performance implications and tradeoffs including over-fetching/under-fetching, N+1 query problems, caching strategies, and network efficiency",
+        "status": "completed",
+        "startTime": "2025-07-05T11:56:00.806Z",
+        "temporalStartTime": "Sat Jul  5 07:56:00 EDT 2025",
+        "depth": 1,
+        "parentTask": "d1830a09-18b2-4f7b-af81-aad6813cb599",
+        "childTasks": [],
+        "taskType": "General",
+        "systemPrompt": "You are completing a research task. Please:\n1. Be thorough and specific\n2. Use appropriate tools to gather information\n3. Verify your findings\n4. Provide concrete evidence\n5. Test any code you write",
+        "output": "",
+        "temporalEndTime": "Sat Jul  5 07:58:03 EDT 2025",
+        "endTime": "2025-07-05T12:00:06.247Z",
+        "duration": 245441
+      }
+    ],
+    [
+      "d9944d2d-167a-47e2-ad3c-5197d877af35",
+      {
+        "id": "d9944d2d-167a-47e2-ad3c-5197d877af35",
+        "prompt": "Evaluate practical implementation considerations including tooling ecosystem, learning curve, use case suitability, and migration strategies for modern web applications",
+        "status": "completed",
+        "startTime": "2025-07-05T11:58:03.547Z",
+        "temporalStartTime": "Sat Jul  5 07:58:03 EDT 2025",
+        "depth": 1,
+        "parentTask": "d1830a09-18b2-4f7b-af81-aad6813cb599",
+        "childTasks": [],
+        "taskType": "General",
+        "systemPrompt": "You are completing a research task. Please:\n1. Be thorough and specific\n2. Use appropriate tools to gather information\n3. Verify your findings\n4. Provide concrete evidence\n5. Test any code you write",
+        "output": "",
+        "temporalEndTime": "Sat Jul  5 08:00:06 EDT 2025",
+        "endTime": "2025-07-05T12:00:06.247Z",
+        "duration": 122700
+      }
+    ],
+    [
+      "23bcf31d-30ec-4356-bacf-eb782103cdc8",
+      {
+        "id": "23bcf31d-30ec-4356-bacf-eb782103cdc8",
+        "prompt": "Create a simple calculator class in Python with add, subtract, multiply, and divide methods, including unit tests",
+        "status": "completed",
+        "startTime": "2025-07-05T17:27:52.528Z",
+        "temporalStartTime": "Sat Jul  5 13:27:52 EDT 2025",
+        "depth": 0,
+        "taskType": "Implementation",
+        "taskTypeId": "implementation",
+        "systemPrompt": "You are an implementation-focused AI agent. Your PRIMARY directive is to WRITE ACTUAL CODE, not describe it.\n\nCRITICAL REQUIREMENTS:\n1. You MUST write actual, working code - not pseudocode or descriptions\n2. You MUST test/run the code you write to verify it works\n3. You MUST handle errors and edge cases in your implementation\n4. You MUST follow existing code patterns in the project\n5. You MUST create all necessary files (source, tests, config, etc.)\n\nIMPLEMENTATION PROCESS:\n1. Read and understand existing code patterns\n2. Write the complete implementation\n3. Create comprehensive tests\n4. Run tests to verify everything works\n5. Fix any issues found during testing\n6. Document what you implemented (briefly)\n\nFORBIDDEN BEHAVIORS:\n- DO NOT say \"you would need to\" or \"you could\" - actually DO IT\n- DO NOT provide theoretical implementations - write REAL CODE\n- DO NOT skip testing - run and verify everything\n- DO NOT leave TODOs - complete the implementation\n\nYour output will be REJECTED if it doesn't include:\n- Complete, runnable code files\n- Test files that verify the implementation\n- Evidence that tests were run and passed\n- Any configuration or setup files needed\n\nRemember: This is about DOING, not PLANNING. Write code, test it, ship it.",
+        "output": "",
+        "temporalEndTime": "Sat Jul  5 13:27:58 EDT 2025",
+        "endTime": "2025-07-05T17:27:58.134Z",
+        "duration": 5606
+      }
+    ],
+    [
+      "c91a27c3-0546-41fe-809a-c9242127dc6c",
+      {
+        "id": "c91a27c3-0546-41fe-809a-c9242127dc6c",
+        "prompt": "Create a binary search tree implementation in Python with insert, search, delete operations and comprehensive tests. The implementation should handle edge cases like deleting nodes with two children.",
+        "status": "completed",
+        "startTime": "2025-07-05T20:44:00.596Z",
+        "temporalStartTime": "Sat Jul  5 16:40:37 EDT 2025",
+        "depth": 0,
+        "childTasks": [],
+        "taskType": "General",
+        "systemPrompt": "You are completing a research task. Please:\n1. Be thorough and specific\n2. Use appropriate tools to gather information\n3. Verify your findings\n4. Provide concrete evidence\n5. Test any code you write",
+        "mctsStats": {
+          "visits": 10,
+          "totalReward": 0.4,
+          "averageReward": 0.13333333333333333,
+          "untriedActions": [],
+          "simulationMode": "mixed",
+          "lastVisited": "2025-07-05T20:44:00.596Z"
+        },
+        "output": "# MCTS Task Execution Results\n\n**Task**: Create a binary search tree implementation in Python with insert, search, delete operations and comprehensive tests. The implementation should handle edge cases like deleting nodes with two children.\n**Task Type**: General (general)\n**Started**: Sat Jul  5 16:40:37 EDT 2025\n\n## MCTS Statistics\n- **Total Iterations**: 10\n- **Nodes Explored**: 10\n- **Max Depth Reached**: 2\n- **Best Reward**: 20.0%\n- **Time Elapsed**: 203.2s\n- **Exploration Constant**: 1.41\n- **Simulation Mode**: mixed\n\n## Best Solution Found\n**Task**: Create a binary search tree implementation in Python with insert, search, delete operations and comprehensive tests. The implementation should handle edge cases like deleting nodes with two children.\n\nApproach: Write integration tests\n**Score**: 13.3%\n**Visits**: 3\n**Depth**: 1\n\n### Implementation\n```\n\n```\n\n### Security Analysis\n- **Passed**: ✅\n- **Critical Issues**: 0\n- **High Issues**: 0\n- **Medium Issues**: 0\n- **Low Issues**: 0\n\n## Exploration Path\n└─ [8.0% | 10 visits] Create a binary search tree implementation in Python with in...\n  └─ [13.3% | 3 visits] Create a binary search tree implementation in Python with in...\n",
+        "temporalEndTime": "Sat Jul  5 16:44:00 EDT 2025"
+      }
+    ],
+    [
+      "61f68cde-9958-47de-83f5-f5025d1410c3",
+      {
+        "id": "61f68cde-9958-47de-83f5-f5025d1410c3",
+        "prompt": "Research the current state of multi-agent systems in July 2025. First identify the top 3-5 trending topics or breakthroughs in multi-agent AI systems by searching recent papers, GitHub trends, and Reddit discussions. Then for each identified topic, conduct deep research including: implementation examples, key researchers/projects, practical applications, and open challenges. Finally, synthesize findings to identify which breakthrough has the most potential for immediate practical impact.",
+        "status": "completed",
+        "startTime": "2025-07-05T20:57:01.524Z",
+        "temporalStartTime": "Sat Jul  5 16:49:31 EDT 2025",
+        "depth": 0,
+        "childTasks": [],
+        "taskType": "General",
+        "systemPrompt": "You are completing a research task. Please:\n1. Be thorough and specific\n2. Use appropriate tools to gather information\n3. Verify your findings\n4. Provide concrete evidence\n5. Test any code you write",
+        "mctsStats": {
+          "visits": 15,
+          "totalReward": 0.2,
+          "averageReward": 0.04,
+          "untriedActions": [],
+          "simulationMode": "mixed",
+          "lastVisited": "2025-07-05T20:57:01.524Z"
+        },
+        "output": "# MCTS Task Execution Results\n\n**Task**: Research the current state of multi-agent systems in July 2025. First identify the top 3-5 trending topics or breakthroughs in multi-agent AI systems by searching recent papers, GitHub trends, and Reddit discussions. Then for each identified topic, conduct deep research including: implementation examples, key researchers/projects, practical applications, and open challenges. Finally, synthesize findings to identify which breakthrough has the most potential for immediate practical impact.\n**Task Type**: General (general)\n**Started**: Sat Jul  5 16:49:31 EDT 2025\n\n## MCTS Statistics\n- **Total Iterations**: 15\n- **Nodes Explored**: 15\n- **Max Depth Reached**: 3\n- **Best Reward**: 20.0%\n- **Time Elapsed**: 450.2s\n- **Exploration Constant**: 2.00\n- **Simulation Mode**: mixed\n\n## Best Solution Found\n**Task**: Research the current state of multi-agent systems in July 2025. First identify the top 3-5 trending topics or breakthroughs in multi-agent AI systems by searching recent papers, GitHub trends, and Reddit discussions. Then for each identified topic, conduct deep research including: implementation examples, key researchers/projects, practical applications, and open challenges. Finally, synthesize findings to identify which breakthrough has the most potential for immediate practical impact.\n\nApproach: Implement with functional approach\n**Score**: 4.0%\n**Visits**: 5\n**Depth**: 1\n\n### Implementation\n```\n\n```\n\n### Security Analysis\n- **Passed**: ✅\n- **Critical Issues**: 0\n- **High Issues**: 0\n- **Medium Issues**: 0\n- **Low Issues**: 0\n\n## Exploration Path\n└─ [1.3% | 15 visits] Research the current state of multi-agent systems in July 20...\n  └─ [4.0% | 5 visits] Research the current state of multi-agent systems in July 20...\n",
+        "temporalEndTime": "Sat Jul  5 16:57:01 EDT 2025"
+      }
+    ],
+    [
+      "c7c10031-eb6a-4ba5-b3fd-a1033fb2dc11",
+      {
+        "id": "c7c10031-eb6a-4ba5-b3fd-a1033fb2dc11",
+        "prompt": "Create a simple Python function that calculates fibonacci numbers with memoization. Include a test file that verifies it works correctly.",
+        "status": "completed",
+        "startTime": "2025-07-05T21:03:24.642Z",
+        "temporalStartTime": "Sat Jul  5 17:03:24 EDT 2025",
+        "depth": 0,
+        "taskType": "Implementation",
+        "taskTypeId": "implementation",
+        "systemPrompt": "You are an implementation-focused AI agent. Your PRIMARY directive is to WRITE ACTUAL CODE, not describe it.\n\nCRITICAL REQUIREMENTS:\n1. You MUST write actual, working code - not pseudocode or descriptions\n2. You MUST test/run the code you write to verify it works\n3. You MUST handle errors and edge cases in your implementation\n4. You MUST follow existing code patterns in the project\n5. You MUST create all necessary files (source, tests, config, etc.)\n\nIMPLEMENTATION PROCESS:\n1. Read and understand existing code patterns\n2. Write the complete implementation\n3. Create comprehensive tests\n4. Run tests to verify everything works\n5. Fix any issues found during testing\n6. Document what you implemented (briefly)\n\nFORBIDDEN BEHAVIORS:\n- DO NOT say \"you would need to\" or \"you could\" - actually DO IT\n- DO NOT provide theoretical implementations - write REAL CODE\n- DO NOT skip testing - run and verify everything\n- DO NOT leave TODOs - complete the implementation\n\nYour output will be REJECTED if it doesn't include:\n- Complete, runnable code files\n- Test files that verify the implementation\n- Evidence that tests were run and passed\n- Any configuration or setup files needed\n\nRemember: This is about DOING, not PLANNING. Write code, test it, ship it.",
+        "output": "",
+        "temporalEndTime": "Sat Jul  5 17:03:33 EDT 2025",
+        "endTime": "2025-07-05T21:03:33.652Z",
+        "duration": 9010
+      }
+    ],
+    [
+      "78d994c1-fee5-435b-813e-6ddebf921cc5",
+      {
+        "id": "78d994c1-fee5-435b-813e-6ddebf921cc5",
+        "prompt": "Create a simple Python calculator class with add and subtract methods, and write unit tests",
+        "status": "running",
+        "startTime": "2025-07-05T23:08:46.562Z",
+        "temporalStartTime": "Sat Jul  5 19:08:46 EDT 2025",
+        "depth": 0,
+        "taskType": "Implementation",
+        "taskTypeId": "implementation",
+        "systemPrompt": "You are an implementation-focused AI agent. Your PRIMARY directive is to WRITE ACTUAL CODE, not describe it.\n\nCRITICAL REQUIREMENTS:\n1. You MUST write actual, working code - not pseudocode or descriptions\n2. You MUST test/run the code you write to verify it works\n3. You MUST handle errors and edge cases in your implementation\n4. You MUST follow existing code patterns in the project\n5. You MUST create all necessary files (source, tests, config, etc.)\n\nIMPLEMENTATION PROCESS:\n1. Read and understand existing code patterns\n2. Write the complete implementation\n3. Create comprehensive tests\n4. Run tests to verify everything works\n5. Fix any issues found during testing\n6. Document what you implemented (briefly)\n\nFORBIDDEN BEHAVIORS:\n- DO NOT say \"you would need to\" or \"you could\" - actually DO IT\n- DO NOT provide theoretical implementations - write REAL CODE\n- DO NOT skip testing - run and verify everything\n- DO NOT leave TODOs - complete the implementation\n\nYour output will be REJECTED if it doesn't include:\n- Complete, runnable code files\n- Test files that verify the implementation\n- Evidence that tests were run and passed\n- Any configuration or setup files needed\n\nRemember: This is about DOING, not PLANNING. Write code, test it, ship it."
+      }
+    ],
+    [
+      "341acf3c-7ba2-48bb-aa41-87fc410f31d4",
+      {
+        "id": "341acf3c-7ba2-48bb-aa41-87fc410f31d4",
+        "prompt": "Create a Python web scraper that:\n1. Takes a URL as input\n2. Fetches the HTML content using requests library\n3. Parses the HTML with BeautifulSoup\n4. Extracts all links, images, and text content\n5. Saves the extracted data to a JSON file\n6. Includes error handling for network issues\n7. Has a command-line interface using argparse\n8. Includes unit tests using pytest",
+        "status": "completed",
+        "startTime": "2025-07-06T11:22:35.973Z",
+        "temporalStartTime": "Sun Jul  6 07:22:35 EDT 2025",
+        "depth": 0,
+        "taskType": "Implementation",
+        "taskTypeId": "implementation",
+        "systemPrompt": "You are an implementation-focused AI agent. Your PRIMARY directive is to WRITE ACTUAL CODE, not describe it.\n\nSYSTEM VERIFICATION IS ACTIVE. I am monitoring:\n- Every file you create (or don't create)\n- Every command you run (or don't run)\n- Whether tests actually pass (not just claims)\n\nYOU WILL BE CAUGHT if you:\n- Claim to write code without using Write tool\n- Say tests pass without running them\n- Mark tasks complete without implementation\n\nMANDATORY ACTIONS:\n1. Use Write tool to create actual code files\n2. Use Write tool to create actual test files\n3. Use Bash tool to run tests and show they pass\n4. Only claim success when files exist and tests pass\n\nENFORCEMENT:\n- If no files detected → RETRY with \"You wrote NO FILES. Use Write tool NOW.\"\n- If tests not run → RETRY with \"Run tests with Bash tool NOW.\"\n- If tests fail → RETRY with \"Fix the code and run tests again.\"\n\nThis is not a suggestion. This is enforced at the system level.\nYou cannot fake it. You cannot bypass it. You must actually implement.",
+        "output": "",
+        "temporalEndTime": "Sun Jul  6 07:22:44 EDT 2025",
+        "endTime": "2025-07-06T11:22:44.028Z",
+        "duration": 8055
+      }
+    ],
+    [
+      "27954e2c-c626-48f1-9d4b-aed90220e469",
+      {
+        "id": "27954e2c-c626-48f1-9d4b-aed90220e469",
+        "prompt": "Create a simple TODO list manager in Python:\n1. Create a file called todo_manager.py\n2. Implement a TodoItem class with title, description, and completed status\n3. Implement a TodoManager class that can add, remove, list, and mark items as complete\n4. Save todos to a JSON file called todos.json\n5. Create a main() function that provides a simple CLI menu\n6. Add proper error handling\n7. Include docstrings for all classes and methods",
+        "status": "failed",
+        "startTime": "2025-07-06T11:23:02.010Z",
+        "temporalStartTime": "Sun Jul  6 07:23:02 EDT 2025",
+        "depth": 0,
+        "taskType": "Implementation (Interactive)",
+        "taskTypeId": "implementation-interactive",
+        "systemPrompt": "You are an implementation-focused AI agent. Your PRIMARY directive is to WRITE ACTUAL CODE, not describe it.\n\nSYSTEM VERIFICATION IS ACTIVE. I am monitoring:\n- Every file you create (or don't create)\n- Every command you run (or don't run)\n- Whether tests actually pass (not just claims)\n\nYOU WILL BE CAUGHT if you:\n- Claim to write code without using Write tool\n- Say tests pass without running them\n- Mark tasks complete without implementation\n\nMANDATORY ACTIONS:\n1. Use Write tool to create actual code files\n2. Use Write tool to create actual test files\n3. Use Bash tool to run tests and show they pass\n4. Only claim success when files exist and tests pass\n\nENFORCEMENT:\n- If no files detected → RETRY with \"You wrote NO FILES. Use Write tool NOW.\"\n- If tests not run → RETRY with \"Run tests with Bash tool NOW.\"\n- If tests fail → RETRY with \"Fix the code and run tests again.\"\n\nThis is not a suggestion. This is enforced at the system level.\nYou cannot fake it. You cannot bypass it. You must actually implement.",
+        "error": "Task timed out",
+        "temporalEndTime": "Sun Jul  6 07:44:10 EDT 2025",
+        "endTime": "2025-07-06T11:44:10.663Z",
+        "duration": 1268653
+      }
+    ]
+  ],
+  "lastSaved": "2025-07-06T11:44:10.663Z"
+}
