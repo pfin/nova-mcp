@@ -7,34 +7,34 @@ export declare const axiomMcpParallelSchema: z.ZodObject<{
         focus: z.ZodString;
         tools: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     }, "strip", z.ZodTypeAny, {
-        id: string;
-        focus: string;
-        tools?: string[] | undefined;
+        id?: string;
+        tools?: string[];
+        focus?: string;
     }, {
-        id: string;
-        focus: string;
-        tools?: string[] | undefined;
+        id?: string;
+        tools?: string[];
+        focus?: string;
     }>, "many">;
     synthesize: z.ZodDefault<z.ZodBoolean>;
     timeLimit: z.ZodDefault<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
-    mainGoal: string;
-    synthesize: boolean;
-    branches: {
-        id: string;
-        focus: string;
-        tools?: string[] | undefined;
+    mainGoal?: string;
+    synthesize?: boolean;
+    branches?: {
+        id?: string;
+        tools?: string[];
+        focus?: string;
     }[];
-    timeLimit: number;
+    timeLimit?: number;
 }, {
-    mainGoal: string;
-    branches: {
-        id: string;
-        focus: string;
-        tools?: string[] | undefined;
+    mainGoal?: string;
+    synthesize?: boolean;
+    branches?: {
+        id?: string;
+        tools?: string[];
+        focus?: string;
     }[];
-    synthesize?: boolean | undefined;
-    timeLimit?: number | undefined;
+    timeLimit?: number;
 }>;
 export type axiomMcpParallelInput = z.infer<typeof axiomMcpParallelSchema>;
 export declare const axiomMcpParallelTool: {
@@ -44,7 +44,7 @@ export declare const axiomMcpParallelTool: {
         $schema?: string | undefined;
         definitions?: {
             [key: string]: import("zod-to-json-schema").JsonSchema7Type;
-        } | undefined;
+        };
     };
 };
 export declare function handleAxiomMcpParallel(input: axiomMcpParallelInput, claudeCode: ClaudeCodeSubprocess): Promise<{

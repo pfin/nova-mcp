@@ -8,15 +8,15 @@ export declare const axiomMcpExploreSchema: z.ZodObject<{
     tools: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     synthesize: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    topics: string[];
-    mainGoal: string;
-    synthesize: boolean;
-    tools?: string[] | undefined;
+    tools?: string[];
+    topics?: string[];
+    mainGoal?: string;
+    synthesize?: boolean;
 }, {
-    topics: string[];
-    mainGoal: string;
-    tools?: string[] | undefined;
-    synthesize?: boolean | undefined;
+    tools?: string[];
+    topics?: string[];
+    mainGoal?: string;
+    synthesize?: boolean;
 }>;
 export type axiomMcpExploreInput = z.infer<typeof axiomMcpExploreSchema>;
 export declare const axiomMcpExploreTool: {
@@ -26,7 +26,7 @@ export declare const axiomMcpExploreTool: {
         $schema?: string | undefined;
         definitions?: {
             [key: string]: import("zod-to-json-schema").JsonSchema7Type;
-        } | undefined;
+        };
     };
 };
 export declare function handleAxiomMcpExplore(input: axiomMcpExploreInput, claudeCode: ClaudeCodeSubprocess): Promise<{

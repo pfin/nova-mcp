@@ -7,11 +7,11 @@ export declare const axiomTestV3Tool: {
         prompt: z.ZodString;
         useStreaming: z.ZodOptional<z.ZodBoolean>;
     }, "strip", z.ZodTypeAny, {
-        prompt: string;
-        useStreaming?: boolean | undefined;
+        prompt?: string;
+        useStreaming?: boolean;
     }, {
-        prompt: string;
-        useStreaming?: boolean | undefined;
+        prompt?: string;
+        useStreaming?: boolean;
     }>;
 };
 export declare function handleAxiomTestV3(args: z.infer<typeof axiomTestV3Tool.inputSchema>, claudeCode: ClaudeCodeSubprocessV3): Promise<{

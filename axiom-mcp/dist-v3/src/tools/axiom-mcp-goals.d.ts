@@ -10,37 +10,37 @@ export declare const axiomMcpGoalsSchema: z.ZodObject<{
         constraints: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
         priority: z.ZodDefault<z.ZodEnum<["critical", "high", "medium", "low"]>>;
     }, "strip", z.ZodTypeAny, {
-        objective: string;
-        successCriteria: string[];
-        priority: "critical" | "high" | "medium" | "low";
-        constraints?: string[] | undefined;
+        objective?: string;
+        successCriteria?: string[];
+        constraints?: string[];
+        priority?: "critical" | "high" | "medium" | "low";
     }, {
-        objective: string;
-        successCriteria: string[];
-        constraints?: string[] | undefined;
-        priority?: "critical" | "high" | "medium" | "low" | undefined;
+        objective?: string;
+        successCriteria?: string[];
+        constraints?: string[];
+        priority?: "critical" | "high" | "medium" | "low";
     }>>;
     propagationStrategy: z.ZodOptional<z.ZodEnum<["inherit", "decompose", "transform"]>>;
 }, "strip", z.ZodTypeAny, {
-    taskId: string;
-    action: "define" | "propagate" | "evaluate" | "track";
+    taskId?: string;
+    action?: "define" | "propagate" | "evaluate" | "track";
     goalDefinition?: {
-        objective: string;
-        successCriteria: string[];
-        priority: "critical" | "high" | "medium" | "low";
-        constraints?: string[] | undefined;
-    } | undefined;
-    propagationStrategy?: "inherit" | "decompose" | "transform" | undefined;
+        objective?: string;
+        successCriteria?: string[];
+        constraints?: string[];
+        priority?: "critical" | "high" | "medium" | "low";
+    };
+    propagationStrategy?: "inherit" | "decompose" | "transform";
 }, {
-    taskId: string;
-    action: "define" | "propagate" | "evaluate" | "track";
+    taskId?: string;
+    action?: "define" | "propagate" | "evaluate" | "track";
     goalDefinition?: {
-        objective: string;
-        successCriteria: string[];
-        constraints?: string[] | undefined;
-        priority?: "critical" | "high" | "medium" | "low" | undefined;
-    } | undefined;
-    propagationStrategy?: "inherit" | "decompose" | "transform" | undefined;
+        objective?: string;
+        successCriteria?: string[];
+        constraints?: string[];
+        priority?: "critical" | "high" | "medium" | "low";
+    };
+    propagationStrategy?: "inherit" | "decompose" | "transform";
 }>;
 export type axiomMcpGoalsInput = z.infer<typeof axiomMcpGoalsSchema>;
 export declare const axiomMcpGoalsTool: {
@@ -50,7 +50,7 @@ export declare const axiomMcpGoalsTool: {
         $schema?: string | undefined;
         definitions?: {
             [key: string]: import("zod-to-json-schema").JsonSchema7Type;
-        } | undefined;
+        };
     };
 };
 export declare function handleAxiomMcpGoals(input: axiomMcpGoalsInput, statusManager: StatusManager, contextManager: ContextManager): Promise<{

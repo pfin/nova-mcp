@@ -73,3 +73,37 @@ Axiom MCP:
 ## Remember
 
 The entire point of Axiom MCP is to force real implementation. If it doesn't create files, it's not working. The observability system shows us exactly what's happening - use it!
+
+## Execution Plan (Current Priority)
+
+### Step 1: Verify Baseline (NOW)
+```bash
+npm run build
+# Check for errors
+# Ensure all components compile
+```
+
+### Step 2: Test After Reload
+1. Reload window to get new tools
+2. Test `axiom_mcp_observe` tool
+3. Test `axiom_mcp_principles` tool
+4. Verify database creation
+
+### Step 3: Fix Execution Bottleneck
+Options to try:
+1. **Direct File Writer**: Create executor that writes files directly
+2. **Command Patterns**: Try `echo "content" > file.py` approach
+3. **Script Generation**: Generate and execute bash scripts
+4. **API Integration**: Skip CLI entirely
+
+### Step 4: Verify Everything Works
+- Run factorial test with new executor
+- Check observability captures events
+- Verify principles are enforced
+- Confirm files are created
+
+### Always Before Proceeding:
+1. Build: `npm run build`
+2. Check: No TypeScript errors
+3. Test: Basic functionality works
+4. Commit: Working state preserved

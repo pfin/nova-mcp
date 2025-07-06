@@ -7,17 +7,17 @@ export declare const axiomMcpResearchSchema: z.ZodObject<{
     outputFormat: z.ZodDefault<z.ZodEnum<["summary", "detailed", "structured"]>>;
     allowedTools: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
-    depth: "quick" | "standard" | "deep";
-    outputFormat: "summary" | "detailed" | "structured";
-    topic: string;
-    constraints?: string[] | undefined;
-    allowedTools?: string[] | undefined;
+    depth?: "quick" | "standard" | "deep";
+    constraints?: string[];
+    outputFormat?: "summary" | "detailed" | "structured";
+    topic?: string;
+    allowedTools?: string[];
 }, {
-    topic: string;
-    depth?: "quick" | "standard" | "deep" | undefined;
-    constraints?: string[] | undefined;
-    outputFormat?: "summary" | "detailed" | "structured" | undefined;
-    allowedTools?: string[] | undefined;
+    depth?: "quick" | "standard" | "deep";
+    constraints?: string[];
+    outputFormat?: "summary" | "detailed" | "structured";
+    topic?: string;
+    allowedTools?: string[];
 }>;
 export type axiomMcpResearchInput = z.infer<typeof axiomMcpResearchSchema>;
 export declare const axiomMcpResearchTool: {
@@ -27,7 +27,7 @@ export declare const axiomMcpResearchTool: {
         $schema?: string | undefined;
         definitions?: {
             [key: string]: import("zod-to-json-schema").JsonSchema7Type;
-        } | undefined;
+        };
     };
 };
 export declare function handleAxiomMcpResearch(input: axiomMcpResearchInput, claudeCode: ClaudeCodeSubprocess): Promise<{

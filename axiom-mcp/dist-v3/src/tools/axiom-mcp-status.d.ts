@@ -13,46 +13,46 @@ export declare const axiomMcpStatusSchema: z.ZodObject<{
         maxDepth: z.ZodOptional<z.ZodNumber>;
         parentTask: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        taskType?: string | undefined;
-        status?: "pending" | "running" | "completed" | "failed" | undefined;
-        parentTask?: string | undefined;
-        maxDepth?: number | undefined;
-        hasErrors?: boolean | undefined;
-        minDepth?: number | undefined;
+        taskType?: string;
+        status?: "pending" | "running" | "completed" | "failed";
+        parentTask?: string;
+        maxDepth?: number;
+        hasErrors?: boolean;
+        minDepth?: number;
     }, {
-        taskType?: string | undefined;
-        status?: "pending" | "running" | "completed" | "failed" | undefined;
-        parentTask?: string | undefined;
-        maxDepth?: number | undefined;
-        hasErrors?: boolean | undefined;
-        minDepth?: number | undefined;
+        taskType?: string;
+        status?: "pending" | "running" | "completed" | "failed";
+        parentTask?: string;
+        maxDepth?: number;
+        hasErrors?: boolean;
+        minDepth?: number;
     }>>;
 }, "strip", z.ZodTypeAny, {
-    action: "system" | "recent" | "task" | "tree" | "clear" | "most_recent";
-    limit: number;
-    daysToKeep: number;
-    taskId?: string | undefined;
+    taskId?: string;
+    limit?: number;
+    action?: "system" | "tree" | "recent" | "task" | "clear" | "most_recent";
+    daysToKeep?: number;
     filters?: {
-        taskType?: string | undefined;
-        status?: "pending" | "running" | "completed" | "failed" | undefined;
-        parentTask?: string | undefined;
-        maxDepth?: number | undefined;
-        hasErrors?: boolean | undefined;
-        minDepth?: number | undefined;
-    } | undefined;
+        taskType?: string;
+        status?: "pending" | "running" | "completed" | "failed";
+        parentTask?: string;
+        maxDepth?: number;
+        hasErrors?: boolean;
+        minDepth?: number;
+    };
 }, {
-    action: "system" | "recent" | "task" | "tree" | "clear" | "most_recent";
-    taskId?: string | undefined;
-    limit?: number | undefined;
-    daysToKeep?: number | undefined;
+    taskId?: string;
+    limit?: number;
+    action?: "system" | "tree" | "recent" | "task" | "clear" | "most_recent";
+    daysToKeep?: number;
     filters?: {
-        taskType?: string | undefined;
-        status?: "pending" | "running" | "completed" | "failed" | undefined;
-        parentTask?: string | undefined;
-        maxDepth?: number | undefined;
-        hasErrors?: boolean | undefined;
-        minDepth?: number | undefined;
-    } | undefined;
+        taskType?: string;
+        status?: "pending" | "running" | "completed" | "failed";
+        parentTask?: string;
+        maxDepth?: number;
+        hasErrors?: boolean;
+        minDepth?: number;
+    };
 }>;
 export type axiomMcpStatusInput = z.infer<typeof axiomMcpStatusSchema>;
 export declare const axiomMcpStatusTool: {
@@ -62,7 +62,7 @@ export declare const axiomMcpStatusTool: {
         $schema?: string | undefined;
         definitions?: {
             [key: string]: import("zod-to-json-schema").JsonSchema7Type;
-        } | undefined;
+        };
     };
 };
 export declare function handleAxiomMcpStatus(input: axiomMcpStatusInput, statusManager: StatusManager): Promise<{

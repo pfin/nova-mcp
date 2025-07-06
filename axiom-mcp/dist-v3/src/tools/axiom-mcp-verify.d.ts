@@ -3,11 +3,11 @@ export declare const axiomMcpVerifySchema: z.ZodObject<{
     action: z.ZodEnum<["status", "report", "enforce"]>;
     taskId: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    action: "status" | "report" | "enforce";
-    taskId?: string | undefined;
+    taskId?: string;
+    action?: "status" | "enforce" | "report";
 }, {
-    action: "status" | "report" | "enforce";
-    taskId?: string | undefined;
+    taskId?: string;
+    action?: "status" | "enforce" | "report";
 }>;
 export type AxiomMcpVerifyInput = z.infer<typeof axiomMcpVerifySchema>;
 export declare const axiomMcpVerifyTool: {
@@ -17,7 +17,7 @@ export declare const axiomMcpVerifyTool: {
         $schema?: string | undefined;
         definitions?: {
             [key: string]: import("zod-to-json-schema").JsonSchema7Type;
-        } | undefined;
+        };
     };
 };
 export declare function handleAxiomMcpVerify(input: AxiomMcpVerifyInput): Promise<{

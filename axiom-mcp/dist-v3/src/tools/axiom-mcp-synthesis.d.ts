@@ -6,13 +6,13 @@ export declare const axiomMcpSynthesisSchema: z.ZodObject<{
     includeChildren: z.ZodDefault<z.ZodBoolean>;
     depth: z.ZodDefault<z.ZodEnum<["summary", "detailed", "comprehensive"]>>;
 }, "strip", z.ZodTypeAny, {
-    depth: "summary" | "detailed" | "comprehensive";
-    contextId: string;
-    includeChildren: boolean;
+    depth?: "summary" | "detailed" | "comprehensive";
+    contextId?: string;
+    includeChildren?: boolean;
 }, {
-    contextId: string;
-    depth?: "summary" | "detailed" | "comprehensive" | undefined;
-    includeChildren?: boolean | undefined;
+    depth?: "summary" | "detailed" | "comprehensive";
+    contextId?: string;
+    includeChildren?: boolean;
 }>;
 export type axiomMcpSynthesisInput = z.infer<typeof axiomMcpSynthesisSchema>;
 export declare const axiomMcpSynthesisTool: {
@@ -22,7 +22,7 @@ export declare const axiomMcpSynthesisTool: {
         $schema?: string | undefined;
         definitions?: {
             [key: string]: import("zod-to-json-schema").JsonSchema7Type;
-        } | undefined;
+        };
     };
 };
 export declare function initializeSynthesisContextManager(cm: ContextManager): void;

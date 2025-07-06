@@ -8,19 +8,19 @@ export declare const axiomMcpVisualizeSchema: z.ZodObject<{
     showMetrics: z.ZodDefault<z.ZodBoolean>;
     colorize: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    format: "ascii" | "tree" | "progress" | "box" | "compact";
-    width: number;
-    showMetrics: boolean;
-    colorize: boolean;
-    taskId?: string | undefined;
-    depth?: number | undefined;
+    taskId?: string;
+    depth?: number;
+    format?: "ascii" | "tree" | "progress" | "box" | "compact";
+    width?: number;
+    showMetrics?: boolean;
+    colorize?: boolean;
 }, {
-    taskId?: string | undefined;
-    format?: "ascii" | "tree" | "progress" | "box" | "compact" | undefined;
-    depth?: number | undefined;
-    width?: number | undefined;
-    showMetrics?: boolean | undefined;
-    colorize?: boolean | undefined;
+    taskId?: string;
+    depth?: number;
+    format?: "ascii" | "tree" | "progress" | "box" | "compact";
+    width?: number;
+    showMetrics?: boolean;
+    colorize?: boolean;
 }>;
 export type axiomMcpVisualizeInput = z.infer<typeof axiomMcpVisualizeSchema>;
 export declare const axiomMcpVisualizeTool: {
@@ -30,7 +30,7 @@ export declare const axiomMcpVisualizeTool: {
         $schema?: string | undefined;
         definitions?: {
             [key: string]: import("zod-to-json-schema").JsonSchema7Type;
-        } | undefined;
+        };
     };
 };
 export declare function handleAxiomMcpVisualize(input: axiomMcpVisualizeInput, statusManager: StatusManager): Promise<{

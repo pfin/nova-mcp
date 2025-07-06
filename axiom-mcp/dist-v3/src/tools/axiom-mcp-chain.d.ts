@@ -8,17 +8,17 @@ export declare const axiomMcpChainSchema: z.ZodObject<{
     parentContext: z.ZodOptional<z.ZodString>;
     autoDecompose: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    maxDepth: number;
-    goal: string;
-    strategy: "breadth-first" | "depth-first";
-    autoDecompose: boolean;
-    parentContext?: string | undefined;
+    maxDepth?: number;
+    goal?: string;
+    strategy?: "breadth-first" | "depth-first";
+    parentContext?: string;
+    autoDecompose?: boolean;
 }, {
-    goal: string;
-    maxDepth?: number | undefined;
-    strategy?: "breadth-first" | "depth-first" | undefined;
-    parentContext?: string | undefined;
-    autoDecompose?: boolean | undefined;
+    maxDepth?: number;
+    goal?: string;
+    strategy?: "breadth-first" | "depth-first";
+    parentContext?: string;
+    autoDecompose?: boolean;
 }>;
 export type axiomMcpChainInput = z.infer<typeof axiomMcpChainSchema>;
 export declare const axiomMcpChainTool: {
@@ -28,7 +28,7 @@ export declare const axiomMcpChainTool: {
         $schema?: string | undefined;
         definitions?: {
             [key: string]: import("zod-to-json-schema").JsonSchema7Type;
-        } | undefined;
+        };
     };
 };
 export declare function initializeContextManager(cm: ContextManager): void;

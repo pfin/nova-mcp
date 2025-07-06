@@ -10,15 +10,15 @@ export declare const DatabaseToolSchema: z.ZodObject<{
     orm: z.ZodOptional<z.ZodEnum<["prisma", "drizzle", "typeorm", "mongoose"]>>;
     config: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
 }, "strip", z.ZodTypeAny, {
-    operation: "create-schema" | "migrate" | "seed" | "test-connection" | "generate-types";
-    database?: "postgresql" | "mysql" | "sqlite" | "mongodb" | undefined;
-    orm?: "prisma" | "drizzle" | "typeorm" | "mongoose" | undefined;
-    config?: Record<string, string> | undefined;
+    operation?: "create-schema" | "migrate" | "seed" | "test-connection" | "generate-types";
+    database?: "postgresql" | "mysql" | "sqlite" | "mongodb";
+    orm?: "prisma" | "drizzle" | "typeorm" | "mongoose";
+    config?: Record<string, string>;
 }, {
-    operation: "create-schema" | "migrate" | "seed" | "test-connection" | "generate-types";
-    database?: "postgresql" | "mysql" | "sqlite" | "mongodb" | undefined;
-    orm?: "prisma" | "drizzle" | "typeorm" | "mongoose" | undefined;
-    config?: Record<string, string> | undefined;
+    operation?: "create-schema" | "migrate" | "seed" | "test-connection" | "generate-types";
+    database?: "postgresql" | "mysql" | "sqlite" | "mongodb";
+    orm?: "prisma" | "drizzle" | "typeorm" | "mongoose";
+    config?: Record<string, string>;
 }>;
 export type DatabaseToolInput = z.infer<typeof DatabaseToolSchema>;
 /**
@@ -42,15 +42,15 @@ export declare const databaseTool: {
         orm: z.ZodOptional<z.ZodEnum<["prisma", "drizzle", "typeorm", "mongoose"]>>;
         config: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
     }, "strip", z.ZodTypeAny, {
-        operation: "create-schema" | "migrate" | "seed" | "test-connection" | "generate-types";
-        database?: "postgresql" | "mysql" | "sqlite" | "mongodb" | undefined;
-        orm?: "prisma" | "drizzle" | "typeorm" | "mongoose" | undefined;
-        config?: Record<string, string> | undefined;
+        operation?: "create-schema" | "migrate" | "seed" | "test-connection" | "generate-types";
+        database?: "postgresql" | "mysql" | "sqlite" | "mongodb";
+        orm?: "prisma" | "drizzle" | "typeorm" | "mongoose";
+        config?: Record<string, string>;
     }, {
-        operation: "create-schema" | "migrate" | "seed" | "test-connection" | "generate-types";
-        database?: "postgresql" | "mysql" | "sqlite" | "mongodb" | undefined;
-        orm?: "prisma" | "drizzle" | "typeorm" | "mongoose" | undefined;
-        config?: Record<string, string> | undefined;
+        operation?: "create-schema" | "migrate" | "seed" | "test-connection" | "generate-types";
+        database?: "postgresql" | "mysql" | "sqlite" | "mongodb";
+        orm?: "prisma" | "drizzle" | "typeorm" | "mongoose";
+        config?: Record<string, string>;
     }>;
     handler: typeof handleDatabaseOperation;
 };

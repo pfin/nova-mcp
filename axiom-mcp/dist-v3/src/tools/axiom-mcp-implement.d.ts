@@ -11,48 +11,48 @@ export declare const axiomMcpImplementSchema: z.ZodObject<{
         noVulnerabilities: z.ZodDefault<z.ZodBoolean>;
         coverageThreshold: z.ZodOptional<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
-        hasWorkingCode: boolean;
-        testsPass: boolean;
-        noVulnerabilities: boolean;
-        coverageThreshold?: number | undefined;
+        hasWorkingCode?: boolean;
+        testsPass?: boolean;
+        noVulnerabilities?: boolean;
+        coverageThreshold?: number;
     }, {
-        hasWorkingCode?: boolean | undefined;
-        testsPass?: boolean | undefined;
-        noVulnerabilities?: boolean | undefined;
-        coverageThreshold?: number | undefined;
+        hasWorkingCode?: boolean;
+        testsPass?: boolean;
+        noVulnerabilities?: boolean;
+        coverageThreshold?: number;
     }>>;
     securityScan: z.ZodDefault<z.ZodBoolean>;
     autoFix: z.ZodDefault<z.ZodBoolean>;
     maxRetries: z.ZodDefault<z.ZodNumber>;
     useInteractive: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    task: string;
-    maxRetries: number;
-    securityScan: boolean;
-    autoFix: boolean;
-    useInteractive: boolean;
-    contextFiles?: string[] | undefined;
-    verifyWith?: string[] | undefined;
+    task?: string;
+    maxRetries?: number;
+    contextFiles?: string[];
+    verifyWith?: string[];
     acceptanceCriteria?: {
-        hasWorkingCode: boolean;
-        testsPass: boolean;
-        noVulnerabilities: boolean;
-        coverageThreshold?: number | undefined;
-    } | undefined;
+        hasWorkingCode?: boolean;
+        testsPass?: boolean;
+        noVulnerabilities?: boolean;
+        coverageThreshold?: number;
+    };
+    securityScan?: boolean;
+    autoFix?: boolean;
+    useInteractive?: boolean;
 }, {
-    task: string;
-    maxRetries?: number | undefined;
-    contextFiles?: string[] | undefined;
-    verifyWith?: string[] | undefined;
+    task?: string;
+    maxRetries?: number;
+    contextFiles?: string[];
+    verifyWith?: string[];
     acceptanceCriteria?: {
-        hasWorkingCode?: boolean | undefined;
-        testsPass?: boolean | undefined;
-        noVulnerabilities?: boolean | undefined;
-        coverageThreshold?: number | undefined;
-    } | undefined;
-    securityScan?: boolean | undefined;
-    autoFix?: boolean | undefined;
-    useInteractive?: boolean | undefined;
+        hasWorkingCode?: boolean;
+        testsPass?: boolean;
+        noVulnerabilities?: boolean;
+        coverageThreshold?: number;
+    };
+    securityScan?: boolean;
+    autoFix?: boolean;
+    useInteractive?: boolean;
 }>;
 export type AxiomMcpImplementInput = z.infer<typeof axiomMcpImplementSchema>;
 export declare const axiomMcpImplementTool: {
@@ -62,7 +62,7 @@ export declare const axiomMcpImplementTool: {
         $schema?: string | undefined;
         definitions?: {
             [key: string]: import("zod-to-json-schema").JsonSchema7Type;
-        } | undefined;
+        };
     };
 };
 export declare function handleAxiomMcpImplement(input: AxiomMcpImplementInput, claudeCode: ClaudeCodeSubprocess, statusManager: StatusManager): Promise<{

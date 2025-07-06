@@ -5,13 +5,13 @@ export declare const axiomMcpTestGuidanceSchema: z.ZodObject<{
     includeTaskType: z.ZodDefault<z.ZodBoolean>;
     customSystemPrompt: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    prompt: string;
-    includeTaskType: boolean;
-    customSystemPrompt?: string | undefined;
+    prompt?: string;
+    includeTaskType?: boolean;
+    customSystemPrompt?: string;
 }, {
-    prompt: string;
-    includeTaskType?: boolean | undefined;
-    customSystemPrompt?: string | undefined;
+    prompt?: string;
+    includeTaskType?: boolean;
+    customSystemPrompt?: string;
 }>;
 export type axiomMcpTestGuidanceInput = z.infer<typeof axiomMcpTestGuidanceSchema>;
 export declare const axiomMcpTestGuidanceTool: {
@@ -21,7 +21,7 @@ export declare const axiomMcpTestGuidanceTool: {
         $schema?: string | undefined;
         definitions?: {
             [key: string]: import("zod-to-json-schema").JsonSchema7Type;
-        } | undefined;
+        };
     };
 };
 export declare function handleAxiomMcpTestGuidance(input: axiomMcpTestGuidanceInput, claudeCode: ClaudeCodeSubprocess): Promise<{

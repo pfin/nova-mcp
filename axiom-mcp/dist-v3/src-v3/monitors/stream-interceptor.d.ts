@@ -16,7 +16,7 @@ export declare class StreamInterceptor extends Transform {
     private violations;
     private hasIntervened;
     private eventEmitter;
-    constructor(options: InterceptorOptions, onIntervention?: ((message: string) => void) | undefined);
+    constructor(options: InterceptorOptions, onIntervention?: (message: string) => void);
     _transform(chunk: Buffer, encoding: string, callback: Function): void;
     _flush(callback: Function): void;
     private handleViolation;

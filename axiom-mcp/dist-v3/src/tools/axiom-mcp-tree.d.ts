@@ -8,17 +8,17 @@ export declare const axiomMcpTreeSchema: z.ZodObject<{
     depth: z.ZodOptional<z.ZodNumber>;
     includeContent: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    format: "text" | "mermaid" | "json" | "markdown";
-    action: "visualize" | "analyze" | "export" | "navigate";
-    includeContent: boolean;
-    taskId?: string | undefined;
-    depth?: number | undefined;
+    taskId?: string;
+    depth?: number;
+    format?: "text" | "mermaid" | "json" | "markdown";
+    action?: "visualize" | "analyze" | "export" | "navigate";
+    includeContent?: boolean;
 }, {
-    action: "visualize" | "analyze" | "export" | "navigate";
-    taskId?: string | undefined;
-    format?: "text" | "mermaid" | "json" | "markdown" | undefined;
-    depth?: number | undefined;
-    includeContent?: boolean | undefined;
+    taskId?: string;
+    depth?: number;
+    format?: "text" | "mermaid" | "json" | "markdown";
+    action?: "visualize" | "analyze" | "export" | "navigate";
+    includeContent?: boolean;
 }>;
 export type axiomMcpTreeInput = z.infer<typeof axiomMcpTreeSchema>;
 export declare const axiomMcpTreeTool: {
@@ -28,7 +28,7 @@ export declare const axiomMcpTreeTool: {
         $schema?: string | undefined;
         definitions?: {
             [key: string]: import("zod-to-json-schema").JsonSchema7Type;
-        } | undefined;
+        };
     };
 };
 export declare function handleAxiomMcpTree(input: axiomMcpTreeInput, statusManager: StatusManager, contextManager: ContextManager): Promise<{

@@ -3,6 +3,11 @@ import { promisify } from 'util';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 
+// Type-safe promisified sqlite3 methods
+type RunFunction = (sql: string, params?: any[]) => Promise<void>;
+type GetFunction = (sql: string, params?: any[]) => Promise<any>;
+type AllFunction = (sql: string, params?: any[]) => Promise<any[]>;
+
 export interface Conversation {
   id: string;
   parent_id?: string;
@@ -18,7 +23,7 @@ export interface Action {
   id: string;
   conversation_id: string;
   timestamp: string;
-  type: 'file_created' | 'command_executed' | 'error' | 'output' | 'task_started' | 'task_completed';
+  type: 'file_created' | 'file_modified' | 'command_executed' | 'error' | 'error_occurred' | 'output' | 'task_started' | 'task_completed' | 'code_block' | 'output_chunk';
   content: string;
   metadata?: Record<string, any>;
 }
@@ -39,7 +44,7 @@ export interface ObservationView {
 }
 
 export class ConversationDB {
-  private db: sqlite3.Database;
+  private db!: sqlite3.Database;
   private dbPath: string;
   
   constructor(dbPath?: string) {
@@ -147,7 +152,7 @@ export class ConversationDB {
   
   async getConversation(id: string): Promise<Conversation | null> {
     const get = promisify(this.db.get.bind(this.db));
-    const row = await get('SELECT * FROM conversations WHERE id = ?', [id]);
+    const row = await get('SELECT * FROM conversations WHERE id = ?', [id]) as any;
     if (!row) return null;
     
     return {

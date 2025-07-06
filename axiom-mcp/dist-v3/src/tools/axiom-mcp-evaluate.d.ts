@@ -10,36 +10,36 @@ export declare const axiomMcpEvaluateSchema: z.ZodObject<{
         qualityThreshold: z.ZodDefault<z.ZodNumber>;
         rejectIfMissing: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     }, "strip", z.ZodTypeAny, {
-        requiredElements: string[];
-        qualityThreshold: number;
-        rejectIfMissing?: string[] | undefined;
+        requiredElements?: string[];
+        qualityThreshold?: number;
+        rejectIfMissing?: string[];
     }, {
-        requiredElements: string[];
-        qualityThreshold?: number | undefined;
-        rejectIfMissing?: string[] | undefined;
+        requiredElements?: string[];
+        qualityThreshold?: number;
+        rejectIfMissing?: string[];
     }>>;
     autoRetry: z.ZodDefault<z.ZodBoolean>;
     maxRetries: z.ZodDefault<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
-    taskId: string;
-    evaluationType: "quality" | "relevance" | "completeness" | "accuracy";
-    autoRetry: boolean;
-    maxRetries: number;
+    taskId?: string;
+    evaluationType?: "quality" | "relevance" | "completeness" | "accuracy";
     parentExpectations?: {
-        requiredElements: string[];
-        qualityThreshold: number;
-        rejectIfMissing?: string[] | undefined;
-    } | undefined;
+        requiredElements?: string[];
+        qualityThreshold?: number;
+        rejectIfMissing?: string[];
+    };
+    autoRetry?: boolean;
+    maxRetries?: number;
 }, {
-    taskId: string;
-    evaluationType: "quality" | "relevance" | "completeness" | "accuracy";
+    taskId?: string;
+    evaluationType?: "quality" | "relevance" | "completeness" | "accuracy";
     parentExpectations?: {
-        requiredElements: string[];
-        qualityThreshold?: number | undefined;
-        rejectIfMissing?: string[] | undefined;
-    } | undefined;
-    autoRetry?: boolean | undefined;
-    maxRetries?: number | undefined;
+        requiredElements?: string[];
+        qualityThreshold?: number;
+        rejectIfMissing?: string[];
+    };
+    autoRetry?: boolean;
+    maxRetries?: number;
 }>;
 export type axiomMcpEvaluateInput = z.infer<typeof axiomMcpEvaluateSchema>;
 export declare const axiomMcpEvaluateTool: {
@@ -49,7 +49,7 @@ export declare const axiomMcpEvaluateTool: {
         $schema?: string | undefined;
         definitions?: {
             [key: string]: import("zod-to-json-schema").JsonSchema7Type;
-        } | undefined;
+        };
     };
 };
 interface EvaluationResult {

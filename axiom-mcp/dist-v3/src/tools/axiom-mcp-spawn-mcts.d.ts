@@ -10,39 +10,39 @@ export declare const axiomMcpSpawnMctsSchema: z.ZodObject<{
         simulationMode: z.ZodDefault<z.ZodEnum<["fast", "full", "mixed"]>>;
         minQualityThreshold: z.ZodDefault<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
-        maxDepth: number;
-        explorationConstant: number;
-        maxIterations: number;
-        simulationMode: "fast" | "full" | "mixed";
-        minQualityThreshold: number;
+        maxDepth?: number;
+        explorationConstant?: number;
+        maxIterations?: number;
+        simulationMode?: "fast" | "full" | "mixed";
+        minQualityThreshold?: number;
     }, {
-        maxDepth?: number | undefined;
-        explorationConstant?: number | undefined;
-        maxIterations?: number | undefined;
-        simulationMode?: "fast" | "full" | "mixed" | undefined;
-        minQualityThreshold?: number | undefined;
+        maxDepth?: number;
+        explorationConstant?: number;
+        maxIterations?: number;
+        simulationMode?: "fast" | "full" | "mixed";
+        minQualityThreshold?: number;
     }>>;
     autoExecute: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    parentPrompt: string;
-    autoExecute: boolean;
+    parentPrompt?: string;
+    autoExecute?: boolean;
     mctsConfig?: {
-        maxDepth: number;
-        explorationConstant: number;
-        maxIterations: number;
-        simulationMode: "fast" | "full" | "mixed";
-        minQualityThreshold: number;
-    } | undefined;
+        maxDepth?: number;
+        explorationConstant?: number;
+        maxIterations?: number;
+        simulationMode?: "fast" | "full" | "mixed";
+        minQualityThreshold?: number;
+    };
 }, {
-    parentPrompt: string;
-    autoExecute?: boolean | undefined;
+    parentPrompt?: string;
+    autoExecute?: boolean;
     mctsConfig?: {
-        maxDepth?: number | undefined;
-        explorationConstant?: number | undefined;
-        maxIterations?: number | undefined;
-        simulationMode?: "fast" | "full" | "mixed" | undefined;
-        minQualityThreshold?: number | undefined;
-    } | undefined;
+        maxDepth?: number;
+        explorationConstant?: number;
+        maxIterations?: number;
+        simulationMode?: "fast" | "full" | "mixed";
+        minQualityThreshold?: number;
+    };
 }>;
 export type axiomMcpSpawnMctsInput = z.infer<typeof axiomMcpSpawnMctsSchema>;
 export declare const axiomMcpSpawnMctsTool: {
@@ -52,7 +52,7 @@ export declare const axiomMcpSpawnMctsTool: {
         $schema?: string | undefined;
         definitions?: {
             [key: string]: import("zod-to-json-schema").JsonSchema7Type;
-        } | undefined;
+        };
     };
 };
 export declare function handleAxiomMcpSpawnMcts(input: axiomMcpSpawnMctsInput, claudeCode: ClaudeCodeSubprocess, statusManager: StatusManager): Promise<{

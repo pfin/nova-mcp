@@ -172,7 +172,7 @@ export async function handleAxiomMcpPrinciples(
         throw new Error('Principle definition required for add action');
       }
       
-      customPrinciples.set(input.principle.id, input.principle);
+      customPrinciples.set(input.principle.id, input.principle as Principle);
       output = `✅ Added custom principle: ${input.principle.name}\n\n`;
       output += `ID: ${input.principle.id}\n`;
       output += `Category: ${input.principle.category}\n`;

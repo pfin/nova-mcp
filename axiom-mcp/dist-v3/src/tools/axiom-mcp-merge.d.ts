@@ -8,15 +8,15 @@ export declare const axiomMcpMergeSchema: z.ZodObject<{
     outputFormat: z.ZodDefault<z.ZodEnum<["unified", "comparison", "matrix"]>>;
     parentTaskId: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    taskIds: string[];
-    mergeStrategy: "synthesize" | "compare" | "deduplicate" | "hierarchical";
-    outputFormat: "unified" | "comparison" | "matrix";
-    parentTaskId?: string | undefined;
+    taskIds?: string[];
+    mergeStrategy?: "synthesize" | "compare" | "deduplicate" | "hierarchical";
+    outputFormat?: "unified" | "comparison" | "matrix";
+    parentTaskId?: string;
 }, {
-    taskIds: string[];
-    parentTaskId?: string | undefined;
-    mergeStrategy?: "synthesize" | "compare" | "deduplicate" | "hierarchical" | undefined;
-    outputFormat?: "unified" | "comparison" | "matrix" | undefined;
+    taskIds?: string[];
+    mergeStrategy?: "synthesize" | "compare" | "deduplicate" | "hierarchical";
+    outputFormat?: "unified" | "comparison" | "matrix";
+    parentTaskId?: string;
 }>;
 export type axiomMcpMergeInput = z.infer<typeof axiomMcpMergeSchema>;
 export declare const axiomMcpMergeTool: {
@@ -26,7 +26,7 @@ export declare const axiomMcpMergeTool: {
         $schema?: string | undefined;
         definitions?: {
             [key: string]: import("zod-to-json-schema").JsonSchema7Type;
-        } | undefined;
+        };
     };
 };
 export declare function handleAxiomMcpMerge(input: axiomMcpMergeInput, statusManager: StatusManager, contextManager: ContextManager, claudeCode: ClaudeCodeSubprocess): Promise<{
