@@ -81,9 +81,10 @@ async function executeWithPty(
   prompt: string, 
   taskId: string, 
   systemPrompt?: string,
-  conversationDB?: ConversationDB
+  conversationDB?: ConversationDB,
+  providedExecutor?: PtyExecutor
 ): Promise<string> {
-  const executor = new PtyExecutor({
+  const executor = providedExecutor || new PtyExecutor({
     cwd: process.cwd(),
     enableMonitoring: true,
     enableIntervention: true,
@@ -310,7 +311,10 @@ async function executeWithPty(
     
     return output;
   } finally {
-    executor.cleanup();
+    // Only cleanup if we created the executor
+    if (!providedExecutor) {
+      executor.cleanup();
+    }
   }
 }
 
@@ -319,9 +323,10 @@ async function executeWithSdk(
   prompt: string,
   taskId: string,
   systemPrompt?: string,
-  conversationDB?: ConversationDB
+  conversationDB?: ConversationDB,
+  providedExecutor?: SdkExecutor
 ): Promise<string> {
-  const executor = new SdkExecutor({
+  const executor = providedExecutor || new SdkExecutor({
     cwd: process.cwd(),
     systemPrompt: systemPrompt,
     maxTurns: 10
@@ -763,16 +768,18 @@ Requirements:
           let executorPromise: Promise<string>;
           
           if (useChildInteractive) {
-            // Attach to aggregator BEFORE execution
+            // Create PTY executor  
             const executor = new PtyExecutor({
               cwd: process.cwd(),
               enableMonitoring: true,
               enableIntervention: true,
             });
+            
+            // Attach to aggregator BEFORE execution
             aggregator.attachChild(childId, executor);
             
-            // Now execute
-            executorPromise = executeWithPty(childPrompt, childId, systemPrompt, conversationDB);
+            // Now execute with the same executor
+            executorPromise = executeWithPty(childPrompt, childId, systemPrompt, conversationDB, executor);
           } else {
             // Create SDK executor
             const executor = new SdkExecutor({
@@ -780,10 +787,12 @@ Requirements:
               systemPrompt: systemPrompt,
               maxTurns: 10
             });
+            
+            // Attach to aggregator
             aggregator.attachChild(childId, executor);
             
-            // Execute
-            executorPromise = executeWithSdk(childPrompt, childId, systemPrompt, conversationDB);
+            // Execute with the same executor
+            executorPromise = executeWithSdk(childPrompt, childId, systemPrompt, conversationDB, executor);
           }
           
           // Handle completion asynchronously
