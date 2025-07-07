@@ -42,3 +42,6 @@ logs/
 .basic-memory/
 memory.db
 watch-status.json
+
+# Reference repositories (not part of our codebase)
+typescript-sdk/
