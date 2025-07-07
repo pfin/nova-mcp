@@ -12,7 +12,7 @@ export interface Action {
     id: string;
     conversation_id: string;
     timestamp: string;
-    type: 'file_created' | 'file_modified' | 'command_executed' | 'error' | 'error_occurred' | 'output' | 'task_started' | 'task_completed' | 'code_block' | 'output_chunk';
+    type: 'file_created' | 'file_modified' | 'command_executed' | 'error' | 'error_occurred' | 'output' | 'task_started' | 'task_completed' | 'code_block' | 'output_chunk' | 'intervention';
     content: string;
     metadata?: Record<string, any>;
 }

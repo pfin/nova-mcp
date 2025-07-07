@@ -225,35 +225,47 @@ We've built a complete observatory around execution. Once we solve the Claude CL
 
 ---
 
-## Observability System Design
+## Critical Analysis (Jan 6, 2025 18:35)
 
-### Requirements (Per User Request)
-1. **Multiple Conversations**: Track N conversations (not hardcoded to 3)
-2. **Arbitrary Depth**: Support parent-child relationships at any depth
-3. **Flexible Observation**:
-   - Master view (all conversations)
-   - Focused view (specific branch)
-   - Last N actions view
-4. **Database Storage**: Use SQLite, not LLM context
-5. **Stream Parsing**: Convert PTY output to structured data
+### What We Discovered
 
-### Proposed SQLite Schema
-```sql
--- Core tables
-conversations (id, parent_id, started_at, status, depth, prompt, task_type)
-actions (id, conversation_id, timestamp, type, content, metadata)
-streams (id, conversation_id, chunk, parsed_data, timestamp)
-observations (id, name, filter_json, created_at)
+**The observer doesn't actually intervene during execution!**
 
--- Indexes for performance
-idx_conversations_parent (parent_id)
-idx_actions_conversation (conversation_id, timestamp)
-idx_streams_conversation (conversation_id, timestamp)
-```
+1. **Components exist but aren't connected**:
+   - ✅ PTY executor captures streams
+   - ✅ Parser detects violations
+   - ✅ Verifier can suggest fixes
+   - ❌ But no real-time intervention happens!
 
-### Component Design
-- **ConversationDB**: SQLite wrapper with async operations
-- **StreamParser**: Parse PTY chunks into structured events
-- **ConversationTracker**: Manage parent-child relationships
-- **ObservationEngine**: Query interface for different views
-- **RealtimeEmitter**: Push updates to observers
+2. **Current vs Intended Flow**:
+   ```
+   Current:  Execute → Parse → Store → Analyze (after)
+   Intended: Execute → Parse → INTERVENE → Correct → Continue
+   ```
+
+3. **The Fix**:
+   ```typescript
+   // Missing connection in PTY handler:
+   const violations = await verifier.verifyInRealTime(chunk);
+   if (violations.length > 0) {
+     await executor.interrupt();
+     await executor.write(`[INTERVENTION] ${violations[0].fix}`);
+   }
+   ```
+
+### Philosophy Update
+
+**Planning is allowed!** The observer's job is to ensure planning leads to execution:
+- Monitor for progress
+- Allow thinking time
+- Intervene if no files created
+- Guide towards implementation
+
+### Next Steps
+
+1. **Connect real-time verification** to PTY stream handler
+2. **Implement progress-based rules** (e.g., "30s of planning → intervene")
+3. **Test with actual interventions** during execution
+4. **Measure intervention effectiveness**
+
+The infrastructure is complete - we just need to flip the switch from passive to active!

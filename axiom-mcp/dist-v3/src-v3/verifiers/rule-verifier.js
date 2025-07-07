@@ -24,25 +24,6 @@ export class RuleVerifier {
             }
             return violations;
         });
-        // Rule 2: No "I would" or "I will" statements
-        this.rules.set('no-planning', (actions, streams) => {
-            const violations = [];
-            const planningPatterns = /\b(I would|I will|I could|would implement|would create|plan to)\b/i;
-            for (const stream of streams) {
-                if (planningPatterns.test(stream.chunk)) {
-                    violations.push({
-                        ruleId: 'no-planning',
-                        ruleName: 'Implementation Over Planning',
-                        severity: 'critical',
-                        timestamp: stream.timestamp,
-                        conversationId: stream.conversation_id,
-                        evidence: stream.chunk.substring(0, 200),
-                        suggestion: 'Stop describing and start implementing'
-                    });
-                }
-            }
-            return violations;
-        });
         // Rule 3: Files must be created
         this.rules.set('files-required', (actions, streams) => {
             const violations = [];
@@ -109,7 +90,7 @@ export class RuleVerifier {
             filesCreated: actions.filter(a => a.type === 'file_created').length,
             filesModified: actions.filter(a => a.type === 'file_modified').length,
             todosFound: streams.filter(s => s.chunk.match(/\b(TODO|FIXME)\b/)).length,
-            planningStatements: streams.filter(s => /\b(I would|I will|would implement|plan to)\b/i.test(s.chunk)).length,
+            planningStatements: 0, // Not tracking anymore since planning is allowed
             codeBlocks: actions.filter(a => a.type === 'code_block').length,
             actualImplementation: actions.some(a => a.type === 'file_created' || a.type === 'file_modified')
         };
@@ -145,18 +126,6 @@ export class RuleVerifier {
                     suggestion: 'STOP! Implement this instead of writing TODO'
                 });
             }
-            // Check for planning language
-            if (/\b(I would|I will|would implement)\b/i.test(latestStream.chunk)) {
-                violations.push({
-                    ruleId: 'no-planning-realtime',
-                    ruleName: 'Planning Detected - Implement Instead!',
-                    severity: 'critical',
-                    timestamp: new Date().toISOString(),
-                    conversationId,
-                    evidence: latestStream.chunk,
-                    suggestion: 'INTERVENTION NEEDED: Force implementation'
-                });
-            }
         }
         return violations;
     }
@@ -169,7 +138,6 @@ export class RuleVerifier {
         report += `- **Files Modified**: ${result.metrics.filesModified}\n`;
         report += `- **Code Blocks**: ${result.metrics.codeBlocks}\n`;
         report += `- **TODOs Found**: ${result.metrics.todosFound}\n`;
-        report += `- **Planning Statements**: ${result.metrics.planningStatements}\n\n`;
         if (result.violations.length > 0) {
             report += '## Violations\n\n';
             const bySeverity = {

@@ -1,12 +1,14 @@
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { PtyExecutor } from '../executors/pty-executor.js';
+import { SdkExecutor } from '../executors/sdk-executor.js';
 import { v4 as uuidv4 } from 'uuid';
 import { detectTaskType, getSystemPrompt } from '../config/task-types.js';
 import { execSync } from 'child_process';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { StreamParser } from '../parsers/stream-parser.js';
+import { RuleVerifier } from '../verifiers/rule-verifier.js';
 export const axiomMcpSpawnSchema = z.object({
     parentPrompt: z.string().describe('The main task that will spawn subtasks'),
     spawnPattern: z.enum(['decompose', 'parallel', 'sequential', 'recursive']).describe('How to spawn subtasks'),
@@ -18,6 +20,14 @@ export const axiomMcpSpawnTool = {
     name: 'axiom_mcp_spawn',
     description: 'Execute a task that spawns multiple subtasks with recursive capabilities',
     inputSchema: zodToJsonSchema(axiomMcpSpawnSchema),
+};
+// Intervention statistics
+let interventionStats = {
+    totalInterventions: 0,
+    planningTimeouts: 0,
+    todoViolations: 0,
+    progressChecks: 0,
+    successfulFileCreation: 0
 };
 // Helper to capture file system state
 async function captureFileState(dir) {
@@ -52,12 +62,19 @@ async function executeWithPty(prompt, taskId, systemPrompt, conversationDB) {
     let output = '';
     let hasError = false;
     const streamParser = new StreamParser();
-    executor.on('data', (event) => {
+    const ruleVerifier = conversationDB ? new RuleVerifier(conversationDB) : null;
+    // Intervention tracking
+    let lastFileCheckTime = Date.now();
+    let planningStartTime = null;
+    let hasCreatedFiles = false;
+    let interventionCount = 0;
+    executor.on('data', async (event) => {
         if (event.type === 'data') {
             output += event.payload;
-            // Parse stream and store in database
+            // Parse stream
+            const events = streamParser.parse(event.payload);
+            // Store in database (existing functionality)
             if (conversationDB) {
-                const events = streamParser.parse(event.payload);
                 // Store raw stream chunk
                 conversationDB.createStream({
                     id: uuidv4(),
@@ -79,6 +96,120 @@ async function executeWithPty(prompt, taskId, systemPrompt, conversationDB) {
                         }).catch(err => console.error('[DB] Action storage error:', err));
                     }
                 }
+            }
+            // NEW: Real-time intervention logic
+            if (conversationDB && ruleVerifier && events.length > 0) {
+                // Check for file creation events
+                const fileEvents = events.filter(e => e.type === 'file_created' || e.type === 'file_modified');
+                if (fileEvents.length > 0) {
+                    hasCreatedFiles = true;
+                    planningStartTime = null; // Reset planning timer
+                    interventionStats.successfulFileCreation++;
+                    console.error('[INTERVENTION] File creation detected - good progress!');
+                }
+                // Detect planning without execution
+                const hasPlanningContent = event.payload.match(/\b(analyzing|planning|considering|exploring|researching|would implement|approach would be)\b/i);
+                if (hasPlanningContent && !hasCreatedFiles) {
+                    if (!planningStartTime) {
+                        planningStartTime = Date.now();
+                        console.error('[INTERVENTION] Planning detected, starting 30s timer...');
+                    }
+                    else if (Date.now() - planningStartTime > 30000) { // 30 seconds
+                        // INTERVENTION: Too much planning!
+                        const intervention = '\n\n[INTERVENTION] You have been planning for 30 seconds without creating any files. Stop planning and start implementing now! Create a .js, .ts, or .py file with actual code.\n\n';
+                        try {
+                            await executor.write(intervention);
+                            console.error('[INTERVENTION] Triggered: Excessive planning without implementation');
+                            interventionStats.totalInterventions++;
+                            interventionStats.planningTimeouts++;
+                            interventionCount++;
+                            // Log intervention
+                            await conversationDB.createAction({
+                                id: uuidv4(),
+                                conversation_id: taskId,
+                                timestamp: new Date().toISOString(),
+                                type: 'intervention',
+                                content: 'Excessive planning without implementation',
+                                metadata: {
+                                    interventionType: 'planning_timeout',
+                                    planningDuration: Date.now() - planningStartTime,
+                                    interventionNumber: interventionCount
+                                }
+                            });
+                        }
+                        catch (err) {
+                            console.error('[INTERVENTION] Failed to write intervention:', err);
+                        }
+                        planningStartTime = null; // Reset timer
+                    }
+                }
+                // Check for TODOs using verifier
+                const latestStream = {
+                    id: uuidv4(),
+                    conversation_id: taskId,
+                    chunk: event.payload,
+                    parsed_data: { events },
+                    timestamp: new Date().toISOString()
+                };
+                const violations = await ruleVerifier.verifyInRealTime(taskId, undefined, latestStream);
+                if (violations.length > 0) {
+                    // INTERVENTION: Rule violation detected
+                    const violation = violations[0];
+                    const intervention = `\n\n[INTERVENTION] ${violation.suggestion || 'Fix this violation immediately!'}\n\n`;
+                    try {
+                        await executor.write(intervention);
+                        console.error(`[INTERVENTION] ${violation.ruleName}: ${violation.evidence}`);
+                        interventionStats.totalInterventions++;
+                        interventionStats.todoViolations++;
+                        interventionCount++;
+                        // Log intervention
+                        await conversationDB.createAction({
+                            id: uuidv4(),
+                            conversation_id: taskId,
+                            timestamp: new Date().toISOString(),
+                            type: 'intervention',
+                            content: violation.suggestion || 'Rule violation detected',
+                            metadata: {
+                                interventionType: 'rule_violation',
+                                ruleId: violation.ruleId,
+                                ruleName: violation.ruleName,
+                                interventionNumber: interventionCount
+                            }
+                        });
+                    }
+                    catch (err) {
+                        console.error('[INTERVENTION] Failed to write intervention:', err);
+                    }
+                }
+            }
+            // Progress check every 10 seconds
+            if (!hasCreatedFiles && Date.now() - lastFileCheckTime > 10000) {
+                const progressCheck = '\n\n[PROGRESS CHECK] No files created yet. Remember to write actual code files, not just descriptions. Create a .js, .ts, or .py file now!\n\n';
+                try {
+                    await executor.write(progressCheck);
+                    console.error('[PROGRESS CHECK] No files created after', Math.floor((Date.now() - lastFileCheckTime) / 1000), 'seconds');
+                    interventionStats.totalInterventions++;
+                    interventionStats.progressChecks++;
+                    interventionCount++;
+                    if (conversationDB) {
+                        await conversationDB.createAction({
+                            id: uuidv4(),
+                            conversation_id: taskId,
+                            timestamp: new Date().toISOString(),
+                            type: 'intervention',
+                            content: 'Progress check - no files created',
+                            metadata: {
+                                interventionType: 'progress_check',
+                                timeElapsed: Date.now() - lastFileCheckTime,
+                                interventionNumber: interventionCount
+                            }
+                        });
+                    }
+                }
+                catch (err) {
+                    console.error('[PROGRESS CHECK] Failed to write check:', err);
+                }
+                lastFileCheckTime = Date.now();
             }
         }
     });
@@ -118,6 +249,106 @@ async function executeWithPty(prompt, taskId, systemPrompt, conversationDB) {
     finally {
         executor.cleanup();
     }
+}
+// Helper to execute with SDK (for non-interactive tasks)
+async function executeWithSdk(prompt, taskId, systemPrompt, conversationDB) {
+    const executor = new SdkExecutor({
+        cwd: process.cwd(),
+        systemPrompt: systemPrompt,
+        maxTurns: 10
+    });
+    let output = '';
+    let hasError = false;
+    const streamParser = new StreamParser();
+    const ruleVerifier = conversationDB ? new RuleVerifier(conversationDB) : null;
+    // Stream handling for SDK messages
+    executor.on('delta', async (event) => {
+        if (event.type === 'data' && event.payload) {
+            const messageStr = JSON.stringify(event.payload);
+            output += messageStr + '\n';
+            // Parse SDK events
+            const events = streamParser.parse(messageStr);
+            // Store in database
+            if (conversationDB) {
+                conversationDB.createStream({
+                    id: uuidv4(),
+                    conversation_id: taskId,
+                    chunk: messageStr,
+                    parsed_data: events.length > 0 ? { events } : undefined,
+                    timestamp: new Date().toISOString(),
+                }).catch(err => console.error('[SDK] Stream storage error:', err));
+                for (const evt of events) {
+                    if (evt.type !== 'output_chunk') {
+                        conversationDB.createAction({
+                            id: uuidv4(),
+                            conversation_id: taskId,
+                            timestamp: evt.timestamp,
+                            type: evt.type,
+                            content: evt.content,
+                            metadata: evt.metadata,
+                        }).catch(err => console.error('[SDK] Action storage error:', err));
+                    }
+                }
+            }
+        }
+    });
+    executor.on('assistant_message', (event) => {
+        console.error(`[SDK] Assistant message received`);
+        // Process tool calls from assistant messages
+        if (event.payload && conversationDB) {
+            conversationDB.createAction({
+                id: uuidv4(),
+                conversation_id: taskId,
+                timestamp: new Date().toISOString(),
+                type: 'output',
+                content: JSON.stringify(event.payload),
+                metadata: { source: 'sdk', messageType: 'assistant' }
+            }).catch(err => console.error('[SDK] Assistant message storage error:', err));
+        }
+    });
+    executor.on('error', (event) => {
+        hasError = true;
+        console.error(`[SDK ERROR] ${event.payload}`);
+        if (conversationDB) {
+            conversationDB.createAction({
+                id: uuidv4(),
+                conversation_id: taskId,
+                timestamp: new Date().toISOString(),
+                type: 'error',
+                content: event.payload,
+                metadata: { errorType: 'sdk_error' }
+            }).catch(err => console.error('[SDK] Error storage failed:', err));
+        }
+    });
+    executor.on('complete', (event) => {
+        console.error(`[SDK] Execution complete. Messages: ${event.payload?.messageCount}`);
+    });
+    console.error(`[SDK] Executing task ${taskId} with SDK executor`);
+    try {
+        await executor.execute(prompt, taskId);
+        if (hasError) {
+            throw new Error('SDK execution failed with errors');
+        }
+        // Get final response
+        const finalResponse = executor.getFinalResponse();
+        return finalResponse || output;
+    }
+    catch (error) {
+        console.error(`[SDK] Execution error:`, error);
+        throw error;
+    }
+}
+// Helper to determine if task needs interactive execution
+function needsInteractiveExecution(prompt) {
+    // Tasks that typically need user interaction or permissions
+    const interactivePatterns = [
+        /\b(install|npm install|yarn|pip install|apt-get|brew)\b/i,
+        /\b(permission|sudo|admin|authorize)\b/i,
+        /\b(login|authenticate|credentials)\b/i,
+        /\b(interactive|dialog|prompt for)\b/i,
+        /\b(server|start server|run server|localhost)\b/i,
+    ];
+    return interactivePatterns.some(pattern => pattern.test(prompt));
 }
 export async function handleAxiomMcpSpawn(input, statusManager, conversationDB) {
     try {
@@ -238,9 +469,12 @@ Requirements:
 - Use appropriate file extensions (.ts, .js, .py, etc.)
 - The code must be complete and runnable, not snippets
 `;
-        // Execute the spawning prompt with PTY
-        console.error(`[SPAWN] Executing parent task with PTY to generate ${input.spawnCount} subtasks...`);
-        const spawnResult = await executeWithPty(spawnPrompt, rootTaskId, systemPrompt, conversationDB);
+        // Execute the spawning prompt with appropriate executor
+        const useInteractive = needsInteractiveExecution(spawnPrompt);
+        console.error(`[SPAWN] Executing parent task with ${useInteractive ? 'PTY' : 'SDK'} to generate ${input.spawnCount} subtasks...`);
+        const spawnResult = useInteractive
+            ? await executeWithPty(spawnPrompt, rootTaskId, systemPrompt, conversationDB)
+            : await executeWithSdk(spawnPrompt + (systemPrompt ? `\n\nSystem: ${systemPrompt}` : ''), rootTaskId, systemPrompt, conversationDB);
         // Check if any files were created
         const filesAfter = await captureFileState(process.cwd());
         const newFiles = Array.from(filesAfter).filter(f => !filesBefore.has(f));
@@ -345,7 +579,11 @@ Requirements:
             if (input.autoExecute && childTask.depth < input.maxDepth) {
                 // Execute child tasks
                 console.error(`[SPAWN] Executing child task ${i + 1}/${subtasks.length}: ${subtask.substring(0, 50)}...`);
-                const childPromise = executeWithPty(`CRITICAL: You must implement actual code, not just describe.\n\n${subtask}`, childId, systemPrompt, conversationDB).then(output => {
+                const childPrompt = `CRITICAL: You must implement actual code, not just describe.\n\n${subtask}`;
+                const useChildInteractive = needsInteractiveExecution(childPrompt);
+                const childPromise = (useChildInteractive
+                    ? executeWithPty(childPrompt, childId, systemPrompt, conversationDB)
+                    : executeWithSdk(childPrompt + (systemPrompt ? `\n\nSystem: ${systemPrompt}` : ''), childId, systemPrompt, conversationDB)).then(output => {
                     const endDate = execSync('date', { encoding: 'utf-8' }).trim();
                     statusManager.updateTask(childId, {
                         status: 'completed',
@@ -403,7 +641,18 @@ Requirements:
         output += `- Pattern: ${input.spawnPattern}\n`;
         output += `- Files Created: ${newFiles.length}\n`;
         output += `- Subtasks Generated: ${subtasks.length}\n`;
-        output += `- Subtasks Executed: ${childPromises.length}\n\n`;
+        output += `- Subtasks Executed: ${childPromises.length}\n`;
+        output += `- Total Interventions: ${interventionStats.totalInterventions}\n`;
+        if (interventionStats.planningTimeouts > 0) {
+            output += `  - Planning Timeouts: ${interventionStats.planningTimeouts}\n`;
+        }
+        if (interventionStats.todoViolations > 0) {
+            output += `  - TODO Violations: ${interventionStats.todoViolations}\n`;
+        }
+        if (interventionStats.progressChecks > 0) {
+            output += `  - Progress Checks: ${interventionStats.progressChecks}\n`;
+        }
+        output += '\n';
         if (newFiles.length > 0) {
             output += `## Files Created\n`;
             newFiles.forEach(f => output += `- ${f}\n`);

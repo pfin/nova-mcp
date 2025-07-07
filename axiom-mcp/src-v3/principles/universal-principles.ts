@@ -17,6 +17,25 @@ export interface Principle {
 
 export const UNIVERSAL_CODING_PRINCIPLES: Principle[] = [
   {
+    id: 'no-orphaned-files',
+    name: 'No Orphaned Files',
+    category: 'coding',
+    description: 'Every file must be connected to the project. No random docs, no disconnected files. Update existing documentation, don\'t create new files unless absolutely necessary.',
+    verificationRule: 'Files must be referenced by or integrated with existing project structure',
+    examples: {
+      bad: [
+        'docs/RANDOM_THOUGHTS.md',
+        'src/untitled-1.ts',
+        'NEW_AMAZING_IDEA.txt'
+      ],
+      good: [
+        'Update README.md',
+        'Edit CLAUDE.md',
+        'Add to existing docs/'
+      ]
+    }
+  },
+  {
     id: 'no-mocks',
     name: 'No Mocks Ever',
     category: 'coding',
@@ -111,21 +130,21 @@ export const UNIVERSAL_CODING_PRINCIPLES: Principle[] = [
 
 export const UNIVERSAL_THINKING_PRINCIPLES: Principle[] = [
   {
-    id: 'action-over-planning',
-    name: 'Action Over Planning',
+    id: 'temporal-awareness',
+    name: 'Temporal Awareness',
     category: 'thinking',
-    description: 'Implement first, refine later. Stop planning and start doing.',
-    verificationRule: 'Output must contain working code, not descriptions of code',
+    description: 'Always know the current time with bash date. Essential for finding recent files, understanding when things happened, and avoiding going backwards by thinking it\'s the wrong date.',
+    verificationRule: 'Must use bash date at start of sessions and when temporal context matters',
     examples: {
       bad: [
-        'I would implement a function that...',
-        'The approach would be to...',
-        'We could create a system that...'
+        'Assuming it\'s still 2024',
+        'Not checking timestamps on files',
+        'Guessing when something was last modified'
       ],
       good: [
-        'function calculate() { return x * y }',
-        'class DataProcessor { process() {...} }',
-        'const result = await api.fetch()'
+        'bash date # Sun Jan 6 18:27:49 EDT 2025',
+        'ls -la --time-style=long-iso # see exact timestamps',
+        'find . -mtime -1 # files modified in last day'
       ]
     }
   },
@@ -239,19 +258,20 @@ export class PrincipleEnforcer {
       });
     }
     
-    // Check for planning language
-    if (code.match(/\b(I would|I will|would implement|could create|plan to)\b/i)) {
-      violations.push({
-        principle: this.principles.get('action-over-planning')!,
-        violation: 'Contains planning language instead of implementation'
-      });
-    }
     
     // Check for silent catches
     if (code.match(/catch\s*\([^)]*\)\s*{\s*(\/\/.*)?}/)) {
       violations.push({
         principle: this.principles.get('fail-fast-loudly')!,
         violation: 'Empty catch block swallows errors'
+      });
+    }
+    
+    // Check for wrong year assumptions (2024 when it's 2025)
+    if (code.match(/2024/)) {
+      violations.push({
+        principle: this.principles.get('temporal-awareness')!,
+        violation: 'Contains outdated year reference (2024) - it\'s 2025!'
       });
     }
     
@@ -272,11 +292,12 @@ ${UNIVERSAL_CODING_PRINCIPLES.map(p => `- **${p.name}**: ${p.description}`).join
 ${UNIVERSAL_THINKING_PRINCIPLES.map(p => `- **${p.name}**: ${p.description}`).join('\n')}
 
 ## CRITICAL RULES
-1. NO MOCKS - Real execution only
-2. NO TODOs - Implement fully or not at all
-3. NO PLANNING - Write code, not descriptions
+1. TEMPORAL AWARENESS - Always use bash date, know when things happened
+2. NO MOCKS - Real execution only
+3. NO TODOs - Implement fully or not at all
 4. VERIFY EVERYTHING - Check that operations succeeded
 5. FAIL LOUDLY - Throw errors with clear messages
+6. NO ORPHANED FILES - Update existing docs, don't create random files
 
 Remember: Every line of code must DO something real, not pretend to do it.`;
   }
