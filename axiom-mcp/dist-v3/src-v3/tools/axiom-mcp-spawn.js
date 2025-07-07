@@ -12,6 +12,8 @@ import { RuleVerifier } from '../verifiers/rule-verifier.js';
 import { StreamAggregator } from '../aggregators/stream-aggregator.js';
 import chalk from 'chalk';
 import cliProgress from 'cli-progress';
+// Version tracking
+export const AXIOM_VERSION = '0.5.0-verbose';
 export const axiomMcpSpawnSchema = z.object({
     parentPrompt: z.string().describe('The main task that will spawn subtasks'),
     spawnPattern: z.enum(['decompose', 'parallel', 'sequential', 'recursive']).describe('How to spawn subtasks'),
@@ -32,7 +34,7 @@ export const axiomMcpSpawnSchema = z.object({
 });
 export const axiomMcpSpawnTool = {
     name: 'axiom_mcp_spawn',
-    description: 'Execute a task that spawns multiple subtasks with recursive capabilities',
+    description: 'Execute a task that spawns multiple subtasks with recursive capabilities (v0.5.0 - Verbose Mode)',
     inputSchema: zodToJsonSchema(axiomMcpSpawnSchema),
 };
 // Intervention statistics
@@ -372,6 +374,7 @@ export async function handleAxiomMcpSpawn(input, statusManager, conversationDB) 
         // Get temporal context
         const startDate = execSync('date', { encoding: 'utf-8' }).trim();
         console.error(`[TEMPORAL] Spawn start: ${startDate}`);
+        console.error(`[VERSION] Axiom MCP ${AXIOM_VERSION}`);
         // Detect task type from parent prompt
         const detectedTaskType = detectTaskType(input.parentPrompt);
         const systemPrompt = getSystemPrompt(detectedTaskType);

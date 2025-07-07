@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { StatusManager } from '../managers/status-manager.js';
 import { ConversationDB } from '../database/conversation-db.js';
+export declare const AXIOM_VERSION = "0.5.0-verbose";
 export declare const axiomMcpSpawnSchema: z.ZodObject<{
     parentPrompt: z.ZodString;
     spawnPattern: z.ZodEnum<["decompose", "parallel", "sequential", "recursive"]>;
