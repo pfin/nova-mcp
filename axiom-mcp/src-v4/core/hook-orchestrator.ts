@@ -198,6 +198,15 @@ export class HookOrchestrator extends EventEmitter {
           }
         }
         
+        // Send notification if sender provided
+        if (args.notificationSender) {
+          try {
+            await args.notificationSender(taskId, data);
+          } catch (error) {
+            this.logger.warn('HookOrchestrator', 'streamHandler', 'Failed to send notification', { taskId, error });
+          }
+        }
+        
         // Notify monitors
         this.notifyMonitors('stream', { taskId, data });
       };
@@ -264,12 +273,16 @@ export class HookOrchestrator extends EventEmitter {
         const response = {
           taskId,
           status: 'executing',
-          message: 'Task started in background. Updates streaming via hooks.',
+          message: args.notificationSender 
+            ? 'Task started. Output streaming via notifications.' 
+            : 'Task started in background. Use axiom_output to check progress.',
           instructions: {
-            monitor: 'Watch console output for real-time updates',
-            interrupt: 'Send interrupt commands through the stream',
+            monitor: args.notificationSender 
+              ? 'Watch notifications for real-time output' 
+              : 'Use axiom_output to read accumulated output',
+            interrupt: 'Use axiom_send to communicate with task',
             completion: 'Task will complete or fail asynchronously',
-            checkStatus: `Use getTaskStatus('${taskId}') to check progress`
+            checkStatus: `Use axiom_status to check progress`
           }
         };
         logDebug('ORCHESTRATOR', 'Response:', response);

@@ -185,14 +185,31 @@ async function main() {
   });
   
   // Tool execution
-  server.setRequestHandler(CallToolRequestSchema, async (request) => {
+  server.setRequestHandler(CallToolRequestSchema, async (request, extra) => {
     if (request.params.name === 'axiom_spawn') {
       try {
         // Log to file
         logDebug('MCP', 'axiom_spawn called with args:', request.params.arguments);
         
+        // Create notification sender if sendNotification is available
+        let notificationSender = undefined;
+        if (extra && extra.sendNotification) {
+          notificationSender = (taskId: string, data: string) => {
+            return extra.sendNotification({
+              method: "notifications/message",
+              params: {
+                level: "info",
+                data: `[${taskId}] ${data}`
+              }
+            });
+          };
+        }
+        
         // ALL execution goes through the orchestrator
-        const result = await orchestrator.handleRequest('axiom_spawn', request.params.arguments);
+        const result = await orchestrator.handleRequest('axiom_spawn', {
+          ...request.params.arguments,
+          notificationSender
+        });
         
         logDebug('MCP', `axiom_spawn returned: ${typeof result}`, result);
         
