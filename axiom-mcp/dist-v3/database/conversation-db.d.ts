@@ -47,6 +47,19 @@ export declare class ConversationDB {
     getConversationStreams(conversationId: string, limit?: number): Promise<Stream[]>;
     createObservationView(view: ObservationView): Promise<void>;
     getObservationViews(): Promise<ObservationView[]>;
+    getStats(): Promise<{
+        totalConversations: number;
+        activeConversations: number;
+        completedConversations: number;
+        totalActions: number;
+        fileCreates: number;
+        toolCalls: number;
+        errors: number;
+        totalStreams: number;
+        totalStreamSize: number;
+        totalViolations: number;
+        violationsByType?: Record<string, number>;
+    }>;
     close(): Promise<void>;
 }
 //# sourceMappingURL=conversation-db.d.ts.map

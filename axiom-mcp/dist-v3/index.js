@@ -21,6 +21,10 @@ import { axiomTestV3Tool, handleAxiomTestV3 } from './tools/axiom-test-v3.js';
 // Import v3 observability and principles tools
 import { axiomMcpObserveTool, handleAxiomMcpObserve } from './tools/axiom-mcp-observe.js';
 import { axiomMcpPrinciplesTool, handleAxiomMcpPrinciples } from './tools/axiom-mcp-principles.js';
+// Import new management tools
+import { axiomMcpLogsTool, handleAxiomMcpLogs } from './tools/axiom-mcp-logs.js';
+import { axiomMcpSettingsTool, handleAxiomMcpSettings } from './tools/axiom-mcp-settings.js';
+import { axiomMcpStatusTool, handleAxiomMcpStatus } from './tools/axiom-mcp-status.js';
 import { EventBus, EventType } from './core/event-bus.js';
 import { z } from 'zod';
 import { StatusManager } from './managers/status-manager.js';
@@ -72,6 +76,9 @@ const tools = [
     axiomTestV3Tool,
     axiomMcpObserveTool,
     axiomMcpPrinciplesTool,
+    axiomMcpLogsTool,
+    axiomMcpSettingsTool,
+    axiomMcpStatusTool,
 ];
 // Handle tool listing
 server.setRequestHandler(ListToolsRequestSchema, async () => {
@@ -100,6 +107,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 return await handleAxiomMcpObserve(args || {}, conversationDB);
             case 'axiom_mcp_principles':
                 return await handleAxiomMcpPrinciples(args || {}, conversationDB);
+            case 'axiom_mcp_logs':
+                return await handleAxiomMcpLogs(args || {});
+            case 'axiom_mcp_settings':
+                return await handleAxiomMcpSettings(args || {});
+            case 'axiom_mcp_status':
+                return await handleAxiomMcpStatus(args || {}, statusManager, conversationDB, eventBus);
             default:
                 throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
         }
@@ -114,11 +127,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         });
         // Return error in MCP format
         return {
-            content: [{
-                    type: 'text',
-                    text: `Error: ${error.message}`
-                }],
-            isError: true
+            result: {
+                content: [{
+                        type: 'text',
+                        text: `Error: ${error.message}`
+                    }],
+                isError: true
+            }
         };
     }
 });

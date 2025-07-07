@@ -1,0 +1,1 @@
+{"version":3,"file":"mcp-schema-official.js","sourceRoot":"","sources":["../../src-v3/utils/mcp-schema-official.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,eAAe,EAAE,MAAM,oBAAoB,CAAC;AAIrD;;GAEG;AACH,MAAM,UAAU,mBAAmB,CAAC,SAAyB;IAC3D,iCAAiC;IACjC,OAAO,eAAe,CAAC,SAAS,EAAE;QAChC,YAAY,EAAE,IAAI;KACnB,CAAwB,CAAC;AAC5B,CAAC"}

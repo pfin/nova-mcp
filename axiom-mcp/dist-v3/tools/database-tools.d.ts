@@ -10,13 +10,13 @@ export declare const DatabaseToolSchema: z.ZodObject<{
     orm: z.ZodOptional<z.ZodEnum<["prisma", "drizzle", "typeorm", "mongoose"]>>;
     config: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
 }, "strip", z.ZodTypeAny, {
-    operation?: "create-schema" | "migrate" | "seed" | "test-connection" | "generate-types";
     database?: "postgresql" | "mysql" | "sqlite" | "mongodb";
+    operation?: "create-schema" | "migrate" | "seed" | "test-connection" | "generate-types";
     orm?: "prisma" | "drizzle" | "typeorm" | "mongoose";
     config?: Record<string, string>;
 }, {
-    operation?: "create-schema" | "migrate" | "seed" | "test-connection" | "generate-types";
     database?: "postgresql" | "mysql" | "sqlite" | "mongodb";
+    operation?: "create-schema" | "migrate" | "seed" | "test-connection" | "generate-types";
     orm?: "prisma" | "drizzle" | "typeorm" | "mongoose";
     config?: Record<string, string>;
 }>;
@@ -42,13 +42,13 @@ export declare const databaseTool: {
         orm: z.ZodOptional<z.ZodEnum<["prisma", "drizzle", "typeorm", "mongoose"]>>;
         config: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
     }, "strip", z.ZodTypeAny, {
-        operation?: "create-schema" | "migrate" | "seed" | "test-connection" | "generate-types";
         database?: "postgresql" | "mysql" | "sqlite" | "mongodb";
+        operation?: "create-schema" | "migrate" | "seed" | "test-connection" | "generate-types";
         orm?: "prisma" | "drizzle" | "typeorm" | "mongoose";
         config?: Record<string, string>;
     }, {
-        operation?: "create-schema" | "migrate" | "seed" | "test-connection" | "generate-types";
         database?: "postgresql" | "mysql" | "sqlite" | "mongodb";
+        operation?: "create-schema" | "migrate" | "seed" | "test-connection" | "generate-types";
         orm?: "prisma" | "drizzle" | "typeorm" | "mongoose";
         config?: Record<string, string>;
     }>;

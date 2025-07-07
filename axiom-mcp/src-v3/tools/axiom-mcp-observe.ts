@@ -119,7 +119,7 @@ export async function handleAxiomMcpObserve(
       content: [{
         type: 'text',
         text: output,
-      }],
+      }]
     };
     
   } catch (error) {
@@ -128,7 +128,7 @@ export async function handleAxiomMcpObserve(
       content: [{
         type: 'text',
         text: `Error in axiom_mcp_observe: ${error instanceof Error ? error.message : String(error)}`,
-      }],
+      }]
     };
   }
 }

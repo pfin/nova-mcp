@@ -89,9 +89,13 @@ export declare class EventBus extends EventEmitter {
      * Get event statistics
      */
     getStats(): {
+        totalEvents: number;
         eventCount: number;
         uptime: number;
         eventsPerSecond: number;
+        startTime: number;
+        eventCounts?: Record<string, number>;
+        recentEvents?: LedgerEvent[];
     };
     /**
      * Close the event bus and flush logs

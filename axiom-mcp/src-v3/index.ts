@@ -46,6 +46,20 @@ import {
   handleAxiomMcpPrinciples
 } from './tools/axiom-mcp-principles.js';
 
+// Import new management tools
+import {
+  axiomMcpLogsTool,
+  handleAxiomMcpLogs
+} from './tools/axiom-mcp-logs.js';
+import {
+  axiomMcpSettingsTool,
+  handleAxiomMcpSettings
+} from './tools/axiom-mcp-settings.js';
+import {
+  axiomMcpStatusTool,
+  handleAxiomMcpStatus
+} from './tools/axiom-mcp-status.js';
+
 // Import v2 components
 import { PtyExecutor } from './executors/pty-executor.js';
 import { EventBus, EventType } from './core/event-bus.js';
@@ -107,6 +121,9 @@ const tools = [
   axiomTestV3Tool,
   axiomMcpObserveTool,
   axiomMcpPrinciplesTool,
+  axiomMcpLogsTool,
+  axiomMcpSettingsTool,
+  axiomMcpStatusTool,
 ];
 
 // Handle tool listing
@@ -143,6 +160,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'axiom_mcp_principles':
         return await handleAxiomMcpPrinciples(args || {}, conversationDB);
       
+      case 'axiom_mcp_logs':
+        return await handleAxiomMcpLogs(args || {});
+      
+      case 'axiom_mcp_settings':
+        return await handleAxiomMcpSettings(args || {});
+      
+      case 'axiom_mcp_status':
+        return await handleAxiomMcpStatus(args || {}, statusManager, conversationDB, eventBus);
+      
       default:
         throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
     }
@@ -157,11 +183,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     
     // Return error in MCP format
     return {
-      content: [{
-        type: 'text',
-        text: `Error: ${error.message}`
-      }],
-      isError: true
+      result: {
+        content: [{
+          type: 'text',
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      }
     };
   }
 });

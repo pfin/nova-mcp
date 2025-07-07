@@ -169,15 +169,24 @@ export class EventBus extends EventEmitter {
    * Get event statistics
    */
   getStats(): {
+    totalEvents: number;
     eventCount: number;
     uptime: number;
     eventsPerSecond: number;
+    startTime: number;
+    eventCounts?: Record<string, number>;
+    recentEvents?: LedgerEvent[];
   } {
     const uptime = Date.now() - this.startTime;
     return {
+      totalEvents: this.eventCount,
       eventCount: this.eventCount,
       uptime,
-      eventsPerSecond: this.eventCount / (uptime / 1000)
+      eventsPerSecond: this.eventCount / (uptime / 1000),
+      startTime: this.startTime,
+      // These would need to be tracked separately if needed
+      eventCounts: undefined,
+      recentEvents: undefined
     };
   }
   

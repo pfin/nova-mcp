@@ -119,9 +119,14 @@ export class EventBus extends EventEmitter {
     getStats() {
         const uptime = Date.now() - this.startTime;
         return {
+            totalEvents: this.eventCount,
             eventCount: this.eventCount,
             uptime,
-            eventsPerSecond: this.eventCount / (uptime / 1000)
+            eventsPerSecond: this.eventCount / (uptime / 1000),
+            startTime: this.startTime,
+            // These would need to be tracked separately if needed
+            eventCounts: undefined,
+            recentEvents: undefined
         };
     }
     /**
