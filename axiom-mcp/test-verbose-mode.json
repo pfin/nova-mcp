@@ -1,0 +1,11 @@
+{
+  "tool": "axiom_mcp_spawn",
+  "arguments": {
+    "parentPrompt": "Create a simple hello world function in Python and JavaScript",
+    "spawnPattern": "parallel",
+    "spawnCount": 2,
+    "maxDepth": 3,
+    "autoExecute": true,
+    "verboseMasterMode": true
+  }
+}

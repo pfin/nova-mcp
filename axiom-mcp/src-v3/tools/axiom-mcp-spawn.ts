@@ -655,8 +655,20 @@ Requirements:
     
     console.error(`[SPAWN] Generated ${subtasks.length} subtasks`);
     
+    // Check if verbose mode is requested but no subtasks
+    if (input.verboseMasterMode && subtasks.length === 0) {
+      console.error(chalk.yellow('\n[VERBOSE MODE] No subtasks generated. Parent task completed with file creation.'));
+      return {
+        content: [{
+          type: 'text',
+          text: `✅ Task completed successfully in verbose mode!\n\nCreated ${newFiles.length} files:\n${newFiles.map(f => `- ${f}`).join('\n')}\n\nNo subtasks were generated, but the implementation is complete.`
+        }]
+      };
+    }
+    
     // Check if verbose mode is requested
     if (input.verboseMasterMode && subtasks.length > 0) {
+      console.error('[DEBUG] Entering verbose mode with', subtasks.length, 'subtasks');
       console.error(chalk.cyan('\n' + '━'.repeat(60)));
       console.error(chalk.cyan.bold('    VERBOSE MASTER MODE - PARALLEL EXECUTION'));
       console.error(chalk.cyan('━'.repeat(60)));
