@@ -77,7 +77,8 @@ const claudeCode = new ClaudeCodeSubprocessV3({ eventBus });
 
 // Initialize database
 let conversationDB: ConversationDB | null = null;
-(async () => {
+
+async function initializeDB() {
   try {
     conversationDB = new ConversationDB('./axiom-v3.db');
     await conversationDB.initialize();
@@ -85,7 +86,7 @@ let conversationDB: ConversationDB | null = null;
   } catch (error) {
     console.error('[DB] Failed to initialize:', error);
   }
-})();
+}
 
 // V3 doesn't need context manager from v1
 
@@ -108,14 +109,6 @@ const tools = [
   axiomMcpPrinciplesTool,
 ];
 
-// Handler map
-const handlers = {
-  axiom_mcp_spawn: handleAxiomMcpSpawn,
-  axiom_test_v3: handleAxiomTestV3,
-  axiom_mcp_observe: handleAxiomMcpObserve,
-  axiom_mcp_principles: handleAxiomMcpPrinciples,
-};
-
 // Handle tool listing
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   console.error('[MCP] tools/list called');
@@ -126,11 +119,6 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   console.error(`[MCP] tools/call: ${request.params.name}`);
   const { name, arguments: args } = request.params;
-  const handler = handlers[name as keyof typeof handlers];
-  
-  if (!handler) {
-    throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
-  }
   
   try {
     // Log tool call
@@ -141,10 +129,23 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       payload: { tool: name, args }
     });
     
-    // Call handler with v3 subprocess
-    // Cast to any to bypass TypeScript strict checking for different handler signatures
-    const result = await (handler as any)(args || {}, statusManager, conversationDB);
-    return result;
+    // Handle each tool directly here to match MCP protocol
+    switch (name) {
+      case 'axiom_mcp_spawn':
+        return await handleAxiomMcpSpawn(args || {}, statusManager, conversationDB);
+      
+      case 'axiom_test_v3':
+        return await handleAxiomTestV3(args || {}, claudeCode);
+      
+      case 'axiom_mcp_observe':
+        return await handleAxiomMcpObserve(args || {}, conversationDB);
+      
+      case 'axiom_mcp_principles':
+        return await handleAxiomMcpPrinciples(args || {}, conversationDB);
+      
+      default:
+        throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
+    }
   } catch (error: any) {
     console.error(`[MCP] Tool error: ${error.message}`);
     eventBus.logEvent({
@@ -153,7 +154,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       event: EventType.TOOL_ERROR,
       payload: { tool: name, error: error.message }
     });
-    throw new McpError(ErrorCode.InternalError, error.message);
+    
+    // Return error in MCP format
+    return {
+      content: [{
+        type: 'text',
+        text: `Error: ${error.message}`
+      }],
+      isError: true
+    };
   }
 });
 
@@ -251,6 +260,9 @@ async function main() {
   console.error('- PTY executor prevents timeouts');
   console.error('- Worker threads enable parallelism');
   console.error('- Event bus tracks all operations');
+  
+  // Initialize database before starting server
+  await initializeDB();
   
   const transport = new StdioServerTransport();
   await server.connect(transport);
