@@ -12,7 +12,7 @@ import { parentPort, workerData } from 'worker_threads';
 import { PtyExecutor } from '../executors/pty-executor.js';
 import { Task, WorkerMessage, VerificationResult } from '../core/types.js';
 import { EventBus, EventType } from '../core/event-bus.js';
-import { SystemVerification } from '../../src/system-verification.js';
+import { SystemVerification } from '../system-verification.js';
 
 if (!parentPort) {
   throw new Error('Worker must be run in a worker thread');

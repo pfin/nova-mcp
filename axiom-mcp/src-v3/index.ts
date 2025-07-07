@@ -24,77 +24,11 @@ import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
-// Import v1 tools (we'll update their implementations)
-import { 
-  axiomMcpGoalTool, 
-  handleAxiomMcpGoal 
-} from '../src/tools/axiom-mcp-goal.js';
-import { 
-  axiomMcpExploreTool, 
-  handleAxiomMcpExplore 
-} from '../src/tools/axiom-mcp-explore.js';
-import { 
-  axiomMcpChainTool, 
-  handleAxiomMcpChain,
-  initializeContextManager as initChainContextManager
-} from '../src/tools/axiom-mcp-chain.js';
-import { 
-  axiomMcpSynthesisTool, 
-  handleAxiomMcpSynthesis,
-  initializeSynthesisContextManager
-} from '../src/tools/axiom-mcp-synthesis.js';
-import {
-  axiomMcpStatusTool,
-  handleAxiomMcpStatus
-} from '../src/tools/axiom-mcp-status.js';
+// Import v3 tools only
 import {
   axiomMcpSpawnTool,
   handleAxiomMcpSpawn
-} from '../src/tools/axiom-mcp-spawn.js';
-import {
-  axiomMcpSpawnMctsTool,
-  handleAxiomMcpSpawnMcts
-} from '../src/tools/axiom-mcp-spawn-mcts.js';
-import {
-  axiomMcpSpawnStreamingTool,
-  handleAxiomMcpSpawnStreaming
-} from '../src/tools/axiom-mcp-spawn-streaming.js';
-import {
-  axiomMcpTreeTool,
-  handleAxiomMcpTree
-} from '../src/tools/axiom-mcp-tree.js';
-import {
-  axiomMcpGoalsTool,
-  handleAxiomMcpGoals
-} from '../src/tools/axiom-mcp-goals.js';
-import {
-  axiomMcpMergeTool,
-  handleAxiomMcpMerge
-} from '../src/tools/axiom-mcp-merge.js';
-import {
-  axiomMcpEvaluateTool,
-  handleAxiomMcpEvaluate
-} from '../src/tools/axiom-mcp-evaluate.js';
-import {
-  axiomMcpTestGuidanceTool,
-  handleAxiomMcpTestGuidance
-} from '../src/tools/axiom-mcp-test-guidance.js';
-import {
-  axiomMcpImplementTool,
-  handleAxiomMcpImplement
-} from '../src/tools/axiom-mcp-implement.js';
-import {
-  axiomMcpVisualizeTool,
-  handleAxiomMcpVisualize
-} from '../src/tools/axiom-mcp-visualize.js';
-import {
-  axiomMcpVerifyTool,
-  handleAxiomMcpVerify
-} from '../src/tools/axiom-mcp-verify.js';
-import {
-  axiomMcpDocsTool,
-  handleAxiomMcpDocs
-} from '../src/tools/axiom-mcp-docs.js';
+} from './tools/axiom-mcp-spawn.js';
 
 // Import v3 test tool
 import {
@@ -102,14 +36,27 @@ import {
   handleAxiomTestV3
 } from './tools/axiom-test-v3.js';
 
+// Import v3 observability and principles tools
+import {
+  axiomMcpObserveTool,
+  handleAxiomMcpObserve
+} from './tools/axiom-mcp-observe.js';
+import {
+  axiomMcpPrinciplesTool,
+  handleAxiomMcpPrinciples
+} from './tools/axiom-mcp-principles.js';
+
 // Import v2 components
 import { PtyExecutor } from './executors/pty-executor.js';
 import { EventBus, EventType } from './core/event-bus.js';
 import { z } from 'zod';
-import { StatusManager } from '../src/status-manager.js';
+import { StatusManager } from './managers/status-manager.js';
 
 // V3 subprocess wrapper that uses PTY instead of execSync
 import { ClaudeCodeSubprocessV3 } from './claude-subprocess-v3.js';
+
+// Import database
+import { ConversationDB } from './database/conversation-db.js';
 
 // Initialize server
 const server = new Server({
@@ -128,15 +75,19 @@ const eventBus = new EventBus({ logDir: './logs-v3' });
 const statusManager = new StatusManager();
 const claudeCode = new ClaudeCodeSubprocessV3({ eventBus });
 
-// Import context manager
-import { ContextManager } from '../src/context-manager.js';
+// Initialize database
+let conversationDB: ConversationDB | null = null;
+(async () => {
+  try {
+    conversationDB = new ConversationDB('./axiom-v3.db');
+    await conversationDB.initialize();
+    console.error('[DB] Initialized successfully');
+  } catch (error) {
+    console.error('[DB] Failed to initialize:', error);
+  }
+})();
 
-// Initialize shared instances
-const contextManager = new ContextManager();
-
-// Initialize context managers
-initChainContextManager(contextManager);
-initializeSynthesisContextManager(contextManager);
+// V3 doesn't need context manager from v1
 
 // Error handling
 process.on('uncaughtException', (error) => {
@@ -151,46 +102,18 @@ process.on('uncaughtException', (error) => {
 
 // Tool implementations with v3 subprocess
 const tools = [
-  axiomMcpGoalTool,
-  axiomMcpExploreTool,
-  axiomMcpChainTool,
-  axiomMcpSynthesisTool,
-  axiomMcpStatusTool,
   axiomMcpSpawnTool,
-  axiomMcpSpawnMctsTool,
-  axiomMcpSpawnStreamingTool,
-  axiomMcpTreeTool,
-  axiomMcpGoalsTool,
-  axiomMcpMergeTool,
-  axiomMcpEvaluateTool,
-  axiomMcpTestGuidanceTool,
-  axiomMcpImplementTool,
-  axiomMcpVisualizeTool,
-  axiomMcpVerifyTool,
-  axiomMcpDocsTool,
   axiomTestV3Tool,
+  axiomMcpObserveTool,
+  axiomMcpPrinciplesTool,
 ];
 
 // Handler map
 const handlers = {
-  axiom_mcp_goal: handleAxiomMcpGoal,
-  axiom_mcp_explore: handleAxiomMcpExplore,
-  axiom_mcp_chain: handleAxiomMcpChain,
-  axiom_mcp_synthesis: handleAxiomMcpSynthesis,
-  axiom_mcp_status: handleAxiomMcpStatus,
   axiom_mcp_spawn: handleAxiomMcpSpawn,
-  axiom_mcp_spawn_mcts: handleAxiomMcpSpawnMcts,
-  axiom_mcp_spawn_streaming: handleAxiomMcpSpawnStreaming,
-  axiom_mcp_tree: handleAxiomMcpTree,
-  axiom_mcp_goals: handleAxiomMcpGoals,
-  axiom_mcp_merge: handleAxiomMcpMerge,
-  axiom_mcp_evaluate: handleAxiomMcpEvaluate,
-  axiom_mcp_test_guidance: handleAxiomMcpTestGuidance,
-  axiom_mcp_implement: handleAxiomMcpImplement,
-  axiom_mcp_visualize: handleAxiomMcpVisualize,
-  axiom_mcp_verify: handleAxiomMcpVerify,
-  axiom_mcp_docs: handleAxiomMcpDocs,
   axiom_test_v3: handleAxiomTestV3,
+  axiom_mcp_observe: handleAxiomMcpObserve,
+  axiom_mcp_principles: handleAxiomMcpPrinciples,
 };
 
 // Handle tool listing
@@ -220,7 +143,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     
     // Call handler with v3 subprocess
     // Cast to any to bypass TypeScript strict checking for different handler signatures
-    const result = await (handler as any)(args || {}, claudeCode, statusManager, contextManager);
+    const result = await (handler as any)(args || {}, statusManager, conversationDB);
     return result;
   } catch (error: any) {
     console.error(`[MCP] Tool error: ${error.message}`);

@@ -1,18 +1,22 @@
 import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 import { ClaudeCodeSubprocessV3 } from '../claude-subprocess-v3.js';
+
+// Define the schema separately
+const axiomTestV3Schema = z.object({
+  prompt: z.string().describe('The prompt to execute'),
+  useStreaming: z.boolean().optional().describe('Use streaming output')
+});
 
 // Simple test tool for v3
 export const axiomTestV3Tool = {
   name: 'axiom_test_v3',
   description: 'Test Axiom v3 with PTY executor (no timeout!)',
-  inputSchema: z.object({
-    prompt: z.string().describe('The prompt to execute'),
-    useStreaming: z.boolean().optional().describe('Use streaming output')
-  })
+  inputSchema: zodToJsonSchema(axiomTestV3Schema)
 };
 
 export async function handleAxiomTestV3(
-  args: z.infer<typeof axiomTestV3Tool.inputSchema>,
+  args: z.infer<typeof axiomTestV3Schema>,
   claudeCode: ClaudeCodeSubprocessV3
 ) {
   console.error('[TEST-V3] Starting test with prompt:', args.prompt.substring(0, 50));

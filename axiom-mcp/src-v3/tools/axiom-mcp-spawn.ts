@@ -1050,6 +1050,7 @@ axiom_mcp_observe({
       });
     }
     
+    // MCP SDK expects this exact format for tool responses
     return {
       content: [{
         type: 'text',

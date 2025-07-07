@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc && chmod +x dist/index.js",
-    "build:v3": "tsc -p tsconfig.v3.json && chmod +x dist-v3/src-v3/index.js",
+    "build:v3": "tsc -p tsconfig.v3.json && chmod +x dist-v3/index.js",
     "dev": "tsc --watch",
     "dev:v3": "tsc -p tsconfig.v3.json --watch",
     "start": "node dist/index.js",
