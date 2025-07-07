@@ -10,14 +10,14 @@ export declare const axiomMcpVisualizeSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     taskId?: string;
     depth?: number;
-    format?: "ascii" | "tree" | "progress" | "box" | "compact";
+    format?: "ascii" | "progress" | "tree" | "box" | "compact";
     colorize?: boolean;
     width?: number;
     showMetrics?: boolean;
 }, {
     taskId?: string;
     depth?: number;
-    format?: "ascii" | "tree" | "progress" | "box" | "compact";
+    format?: "ascii" | "progress" | "tree" | "box" | "compact";
     colorize?: boolean;
     width?: number;
     showMetrics?: boolean;

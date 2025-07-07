@@ -11,6 +11,9 @@ import * as path from 'path';
 import { ConversationDB } from '../database/conversation-db.js';
 import { StreamParser } from '../parsers/stream-parser.js';
 import { RuleVerifier } from '../verifiers/rule-verifier.js';
+import { StreamAggregator } from '../aggregators/stream-aggregator.js';
+import chalk from 'chalk';
+import cliProgress from 'cli-progress';
 
 export const axiomMcpSpawnSchema = z.object({
   parentPrompt: z.string().describe('The main task that will spawn subtasks'),
@@ -647,6 +650,228 @@ Requirements:
     
     console.error(`[SPAWN] Generated ${subtasks.length} subtasks`);
     
+    // Check if verbose mode is requested
+    if (input.verboseMasterMode && subtasks.length > 0) {
+      console.error(chalk.cyan('\n' + '━'.repeat(60)));
+      console.error(chalk.cyan.bold('    VERBOSE MASTER MODE - PARALLEL EXECUTION'));
+      console.error(chalk.cyan('━'.repeat(60)));
+      console.error(chalk.gray(`Parent: ${input.parentPrompt}`));
+      console.error(chalk.gray(`Pattern: ${input.spawnPattern} | Children: ${subtasks.length}`));
+      console.error(chalk.cyan('━'.repeat(60) + '\n'));
+      
+      // Create the stream aggregator
+      const aggregator = new StreamAggregator(
+        conversationDB ? new StreamParser() : null,
+        conversationDB ? new RuleVerifier(conversationDB) : null,
+        conversationDB,
+        process.stderr
+      );
+      
+      // Track completion
+      let completedCount = 0;
+      const startTime = Date.now();
+      
+      aggregator.on('child-complete', ({ taskId, duration }) => {
+        completedCount++;
+        console.error(chalk.gray(`\n[MASTER] Progress: ${completedCount}/${subtasks.length} tasks completed`));
+        
+        if (completedCount === subtasks.length) {
+          const totalDuration = Date.now() - startTime;
+          console.error(chalk.green(`\n[MASTER] All tasks completed in ${(totalDuration/1000).toFixed(1)}s\n`));
+        }
+      });
+      
+      aggregator.on('intervention', ({ taskId, line }) => {
+        console.error(chalk.yellow(`\n⚡ Intervention detected in ${taskId.slice(0,8)}\n`));
+      });
+      
+      // Create multi-progress bar
+      const multibar = new cliProgress.MultiBar({
+        format: '{taskId} |{bar}| {percentage}% | {lines} lines | {interventions} interventions',
+        clearOnComplete: false,
+        hideCursor: true,
+        barCompleteChar: '\u2588',
+        barIncompleteChar: '\u2591'
+      }, cliProgress.Presets.shades_classic);
+      
+      // Map to track progress bars
+      const progressBars = new Map<string, any>();
+      
+      // Execute all children with streaming
+      const childTaskIds: string[] = [];
+      const childPromises = subtasks.map(async (subtask, index) => {
+        const childId = uuidv4();
+        childTaskIds.push(childId);
+        
+        const childTask: TaskStatus = {
+          id: childId,
+          prompt: subtask,
+          status: 'pending',
+          startTime: new Date(),
+          temporalStartTime: execSync('date', { encoding: 'utf-8' }).trim(),
+          depth: rootTask.depth + 1,
+          parentTask: rootTaskId,
+          childTasks: [],
+          taskType: rootTask.taskType,
+          taskTypeId: rootTask.taskTypeId,
+          systemPrompt: rootTask.systemPrompt,
+        };
+        
+        statusManager.addTask(childTask);
+        
+        // Create child conversation in database
+        if (conversationDB) {
+          await conversationDB.createConversation({
+            id: childId,
+            parent_id: rootTaskId,
+            started_at: new Date().toISOString(),
+            status: 'active',
+            depth: childTask.depth,
+            prompt: subtask,
+            task_type: rootTask.taskType,
+            metadata: { index }
+          });
+        }
+        
+        // Create progress bar for this child
+        const bar = multibar.create(100, 0, {
+          taskId: childId.slice(0, 8),
+          lines: 0,
+          interventions: 0
+        });
+        progressBars.set(childId, bar);
+        
+        // Update progress on aggregator events
+        const updateProgress = (event: any) => {
+          if (event.taskId === childId) {
+            const progress = Math.min((event.lines / 50) * 100, 90); // Estimate progress
+            bar.update(progress, {
+              lines: event.lines,
+              interventions: event.interventions || 0
+            });
+          }
+        };
+        
+        aggregator.on('stats', updateProgress);
+        
+        // Determine executor type
+        const childPrompt = `CRITICAL: You must implement actual code, not just describe it.\n\n${subtask}`;
+        const useChildInteractive = needsInteractiveExecution(childPrompt);
+        
+        try {
+          // Create executor but don't await yet
+          let executorPromise: Promise<string>;
+          
+          if (useChildInteractive) {
+            // Attach to aggregator BEFORE execution
+            const executor = new PtyExecutor({
+              cwd: process.cwd(),
+              enableMonitoring: true,
+              enableIntervention: true,
+            });
+            aggregator.attachChild(childId, executor);
+            
+            // Now execute
+            executorPromise = executeWithPty(childPrompt, childId, systemPrompt, conversationDB);
+          } else {
+            // Create SDK executor
+            const executor = new SdkExecutor({
+              cwd: process.cwd(),
+              systemPrompt: systemPrompt,
+              maxTurns: 10
+            });
+            aggregator.attachChild(childId, executor);
+            
+            // Execute
+            executorPromise = executeWithSdk(childPrompt, childId, systemPrompt, conversationDB);
+          }
+          
+          // Handle completion asynchronously
+          executorPromise
+            .then(output => {
+              bar.update(100, { status: 'completed' });
+              statusManager.updateTask(childId, {
+                status: 'completed',
+                output: output,
+                temporalEndTime: execSync('date', { encoding: 'utf-8' }).trim(),
+              });
+              
+              if (conversationDB) {
+                conversationDB.updateConversationStatus(childId, 'completed')
+                  .catch(err => console.error(`[DB] Status update failed:`, err));
+              }
+            })
+            .catch(error => {
+              bar.update(100, { status: 'failed' });
+              console.error(chalk.red(`\n[${childId.slice(0,8)}] Failed: ${error.message}\n`));
+              statusManager.updateTask(childId, {
+                status: 'failed',
+                error: error.message,
+                temporalEndTime: execSync('date', { encoding: 'utf-8' }).trim(),
+              });
+              
+              if (conversationDB) {
+                conversationDB.updateConversationStatus(childId, 'failed')
+                  .catch(err => console.error(`[DB] Status update failed:`, err));
+              }
+            });
+          
+          // Return the promise for optional waiting
+          return executorPromise;
+          
+        } catch (error) {
+          console.error(chalk.red(`\n[${childId.slice(0,8)}] Setup failed: ${error}\n`));
+          throw error;
+        }
+      });
+      
+      // Return immediately with streaming info
+      rootTask.childTasks = childTaskIds;
+      statusManager.updateTask(rootTaskId, {
+        status: 'completed',
+        childTasks: childTaskIds,
+        temporalEndTime: execSync('date', { encoding: 'utf-8' }).trim(),
+      });
+      
+      return {
+        content: [{
+          type: 'text',
+          text: `🚀 **Verbose Master Mode Active!**
+
+**Parent task completed successfully:**
+- Created ${newFiles.length} files
+- Generated ${subtasks.length} subtasks
+
+**Now executing in parallel:**
+${subtasks.map((task, i) => `${i+1}. [${childTaskIds[i]?.slice(0,8) || 'pending'}] ${task.slice(0,60)}...`).join('\n')}
+
+**Real-time output streaming to console with task prefixes.**
+
+You'll see:
+- \`[taskId]\` prefixed output from each child
+- \`[INTERVENTION]\` messages when violations detected
+- Progress bars showing execution status
+- Completion notifications as tasks finish
+
+**Continue working while tasks execute in background.**
+
+To check status later:
+\`\`\`
+axiom_mcp_observe({ mode: "recent", limit: 20 })
+\`\`\`
+
+To see the conversation tree:
+\`\`\`
+axiom_mcp_observe({ 
+  mode: "tree", 
+  conversationId: "${rootTaskId}" 
+})
+\`\`\``
+        }]
+      };
+    }
+    
+    // Original non-verbose mode code
     // Create and optionally execute subtasks
     const childTaskIds: string[] = [];
     const childPromises: Promise<any>[] = [];
