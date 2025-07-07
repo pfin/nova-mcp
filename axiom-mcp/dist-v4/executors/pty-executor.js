@@ -28,23 +28,55 @@ export class PtyExecutor extends EventEmitter {
             const cwd = this.options.cwd || process.cwd();
             logger.debug('PtyExecutor', 'execute', 'Creating PTY instance', { shell, cwd });
             // Create PTY instance
-            this.pty = spawn(shell, [], {
-                name: 'xterm-color',
-                cols: 120,
-                rows: 30,
+            logDebug('PTY', 'About to spawn PTY', {
+                shell,
                 cwd,
-                env: {
-                    ...process.env,
-                    ...this.options.env,
-                    FORCE_COLOR: '0', // Disable ANSI colors
-                    PROMPT: prompt,
-                    SYSTEM_PROMPT: systemPrompt,
-                    TASK_ID: taskId
-                }
+                envKeys: Object.keys({ ...process.env, ...this.options.env })
             });
+            try {
+                this.pty = spawn(shell, [], {
+                    name: 'xterm-color',
+                    cols: 120,
+                    rows: 30,
+                    cwd,
+                    env: {
+                        ...process.env,
+                        ...this.options.env,
+                        FORCE_COLOR: '0', // Disable ANSI colors
+                        PROMPT: prompt,
+                        SYSTEM_PROMPT: systemPrompt,
+                        TASK_ID: taskId
+                    }
+                });
+                logDebug('PTY', 'PTY spawned successfully', {
+                    pid: this.pty.pid,
+                    process: this.pty.process
+                });
+            }
+            catch (error) {
+                logDebug('PTY', 'FAILED to spawn PTY', {
+                    error: error instanceof Error ? error.message : error,
+                    stack: error instanceof Error ? error.stack : undefined
+                });
+                reject(error);
+                return;
+            }
             logger.info('PtyExecutor', 'execute', 'PTY created, setting up handlers', { taskId });
+            // Verify PTY is really alive
+            logDebug('PTY', 'Verifying PTY is alive', {
+                pid: this.pty.pid,
+                cols: this.pty.cols,
+                rows: this.pty.rows
+            });
+            // Setup onData handler first
+            logDebug('PTY', 'Setting up onData handler');
+            let dataHandlerSet = false;
             // Handle data with hook integration
             this.pty.onData(async (data) => {
+                if (!dataHandlerSet) {
+                    dataHandlerSet = true;
+                    logDebug('PTY', 'First onData event received!');
+                }
                 logDebug('PTY', `onData called - received ${data.length} bytes`, {
                     taskId,
                     preview: data.slice(0, 200).replace(/\n/g, '\\n').replace(/\r/g, '\\r')
@@ -76,7 +108,9 @@ export class PtyExecutor extends EventEmitter {
                 this.resetIdleTimer();
             });
             // Handle exit
+            logDebug('PTY', 'Setting up onExit handler');
             this.pty.onExit((exitCode) => {
+                logDebug('PTY', 'onExit triggered', { exitCode });
                 logger.info('PtyExecutor', 'onExit', 'PTY process exited', {
                     taskId,
                     exitCode: exitCode.exitCode,
@@ -99,6 +133,7 @@ export class PtyExecutor extends EventEmitter {
                 });
             }
             // Execute claude command with the prompt
+            // NOTE: We use interactive mode, NOT --print (which cannot be course-corrected)
             const claudeCommand = `claude "${prompt.replace(/"/g, '\\"')}"\n`;
             logger.info('PtyExecutor', 'execute', 'Executing claude command', {
                 taskId,
@@ -106,10 +141,51 @@ export class PtyExecutor extends EventEmitter {
                 commandPreview: claudeCommand.slice(0, 100)
             });
             logDebug('PTY', 'Writing claude command to PTY', {
-                command: claudeCommand.slice(0, 200)
+                command: claudeCommand.slice(0, 200),
+                ptyPid: this.pty.pid,
+                ptyIsAlive: this.pty.pid !== undefined
             });
-            this.pty.write(claudeCommand);
-            logDebug('PTY', 'Claude command written, streaming output...');
+            // CRITICAL DEBUG: Add test to see if PTY is even working
+            logDebug('PTY', 'DEBUG MODE: Testing with simple commands first');
+            // First test if PTY is responsive
+            logDebug('PTY', 'Testing PTY responsiveness with echo');
+            this.pty.write('echo "PTY_TEST_OK"\n');
+            // Small delay to see if we get echo response
+            setTimeout(() => {
+                if (this.output.length === 0) {
+                    logDebug('PTY', 'WARNING: No response from echo test - PTY may be unresponsive');
+                }
+                else {
+                    logDebug('PTY', 'Echo test successful, output so far:', {
+                        outputLength: this.output.length,
+                        preview: this.output.slice(0, 100)
+                    });
+                }
+                // Check if claude is available
+                logDebug('PTY', 'Checking claude availability');
+                if (this.pty)
+                    this.pty.write('which claude\n');
+                // Another delay then write actual command
+                setTimeout(() => {
+                    logDebug('PTY', 'Now writing actual claude command');
+                    if (this.pty) {
+                        this.pty.write(claudeCommand);
+                        logDebug('PTY', 'Claude command written to PTY buffer');
+                        // Add immediate check
+                        setTimeout(() => {
+                            logDebug('PTY', 'Post-command status check', {
+                                outputLength: this.output.length,
+                                isComplete: this.isComplete,
+                                ptyAlive: !!this.pty
+                            });
+                        }, 500);
+                    }
+                    else {
+                        logDebug('PTY', 'ERROR: PTY is undefined, cannot write command');
+                    }
+                }, 200);
+            }, 200);
+            logDebug('PTY', 'Commands queued for execution');
             logger.debug('PtyExecutor', 'execute', 'Command written, starting heartbeat', { taskId });
             // Send heartbeat to prevent hanging
             this.startHeartbeat();
@@ -151,11 +227,24 @@ export class PtyExecutor extends EventEmitter {
     heartbeat;
     startHeartbeat() {
         logDebug('PTY', 'Starting heartbeat timer (10s intervals)');
+        let heartbeatCount = 0;
         // Send periodic newline to keep PTY alive
         this.heartbeat = setInterval(() => {
+            heartbeatCount++;
             if (!this.isComplete && this.pty) {
-                logDebug('PTY', 'Heartbeat - sending newline to keep PTY alive');
+                logDebug('PTY', `Heartbeat #${heartbeatCount} - sending newline to keep PTY alive`, {
+                    isComplete: this.isComplete,
+                    ptyPid: this.pty.pid,
+                    outputLength: this.output.length,
+                    outputPreview: this.output.slice(-100)
+                });
                 this.pty.write('\n');
+            }
+            else {
+                logDebug('PTY', `Heartbeat #${heartbeatCount} - skipped`, {
+                    isComplete: this.isComplete,
+                    hasPty: !!this.pty
+                });
             }
         }, 10000);
     }

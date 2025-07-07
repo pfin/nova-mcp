@@ -111,6 +111,37 @@ export class HookOrchestrator extends EventEmitter {
                     dataLength: data.length,
                     preview: data.slice(0, 50)
                 });
+                // CRITICAL: Check for claude --print IMMEDIATELY
+                if (data.includes('claude --print') || data.includes('claude -p')) {
+                    logDebug('ORCHESTRATOR', 'CRITICAL: claude --print detected in stream!');
+                    this.logger.error('HookOrchestrator', 'streamHandler', 'CRITICAL: claude --print detected', { taskId });
+                    // Immediate intervention
+                    if (executor.interrupt) {
+                        executor.interrupt();
+                    }
+                    const intervention = '\n[AXIOM CRITICAL] STOP! Do NOT use "claude --print" or "claude -p"!\n' +
+                        'claude --print CANNOT be course-corrected once started.\n' +
+                        'You can only kill it, not redirect it. This breaks the entire intervention model.\n' +
+                        'Use interactive claude session instead for bidirectional communication.\n\n';
+                    if (executor.injectCommand) {
+                        await executor.injectCommand(intervention);
+                    }
+                    else if (executor.write) {
+                        executor.write(intervention);
+                    }
+                    // Notify through stream
+                    if (args.notificationSender) {
+                        await args.notificationSender(taskId, intervention);
+                    }
+                    // Mark task as failed
+                    const task = this.activeTasks.get(taskId);
+                    if (task) {
+                        task.status = 'failed';
+                        task.error = 'claude --print detected and blocked';
+                    }
+                    // Don't process further
+                    return;
+                }
                 const streamContext = {
                     ...context,
                     event: HookEvent.EXECUTION_STREAM,
