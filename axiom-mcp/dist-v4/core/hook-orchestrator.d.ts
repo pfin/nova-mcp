@@ -106,5 +106,13 @@ export declare class HookOrchestrator extends EventEmitter {
      * Clear completed/failed tasks
      */
     clearCompletedTasks(): void;
+    /**
+     * Get an active task by ID (alias for getTaskStatus)
+     */
+    getActiveTask(taskId: string): any;
+    /**
+     * Get all active tasks
+     */
+    getAllActiveTasks(): any[];
 }
 //# sourceMappingURL=hook-orchestrator.d.ts.map

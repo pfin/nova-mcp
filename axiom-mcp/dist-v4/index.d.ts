@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * Axiom MCP v4 - Hook-First Architecture
  * Everything flows through the HookOrchestrator

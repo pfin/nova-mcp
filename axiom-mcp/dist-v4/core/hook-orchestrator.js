@@ -4,6 +4,7 @@
  */
 import { EventEmitter } from 'events';
 import { Logger } from './logger.js';
+import { logDebug } from './simple-logger.js';
 export var HookEvent;
 (function (HookEvent) {
     // Request lifecycle
@@ -65,6 +66,8 @@ export class HookOrchestrator extends EventEmitter {
      */
     async handleRequest(tool, args) {
         const taskId = `task-${Date.now()}`;
+        logDebug('ORCHESTRATOR', `handleRequest START - tool: ${tool}, taskId: ${taskId}`);
+        logDebug('ORCHESTRATOR', 'args:', args);
         this.logger.info('HookOrchestrator', 'handleRequest', 'Request received', { tool, taskId, args });
         const context = {
             event: HookEvent.REQUEST_RECEIVED,
@@ -73,7 +76,9 @@ export class HookOrchestrator extends EventEmitter {
             metadata: { taskId }
         };
         // Phase 1: Request validation hooks
+        logDebug('ORCHESTRATOR', 'Phase 1: Triggering validation hooks');
         const validationResult = await this.triggerHooks(HookEvent.REQUEST_RECEIVED, context);
+        logDebug('ORCHESTRATOR', 'Validation result:', validationResult);
         if (validationResult.action === 'block') {
             await this.triggerHooks(HookEvent.REQUEST_BLOCKED, {
                 ...context,
@@ -92,10 +97,13 @@ export class HookOrchestrator extends EventEmitter {
         // Phase 2: Execution
         context.request.args = args;
         context.execution.status = 'running';
+        logDebug('ORCHESTRATOR', 'Phase 2: Starting execution');
         await this.triggerHooks(HookEvent.EXECUTION_STARTED, context);
         try {
             // Get executor through hooks (allows dynamic executor selection)
+            logDebug('ORCHESTRATOR', `Selecting executor for tool: ${tool}`);
             const executor = await this.selectExecutor(tool, args);
+            logDebug('ORCHESTRATOR', `Executor selected: ${executor.constructor.name}`);
             // Set up stream monitoring
             const streamHandler = async (data) => {
                 this.logger.trace('HookOrchestrator', 'streamHandler', 'Stream data received', {
@@ -126,7 +134,9 @@ export class HookOrchestrator extends EventEmitter {
             };
             // Check if verbose mode is enabled
             const isVerbose = args.verboseMasterMode === true;
+            logDebug('ORCHESTRATOR', `Verbose mode: ${isVerbose}`);
             if (isVerbose) {
+                logDebug('ORCHESTRATOR', 'VERBOSE MODE - Starting non-blocking execution');
                 // Track task info
                 const taskInfo = {
                     taskId,
@@ -134,13 +144,16 @@ export class HookOrchestrator extends EventEmitter {
                     startTime: Date.now(),
                     prompt: args.prompt || args.parentPrompt || '',
                     output: '',
-                    streamData: []
+                    streamData: [],
+                    executor: executor // Store executor reference for sending messages
                 };
                 this.activeTasks.set(taskId, taskInfo);
                 // NON-BLOCKING: Start execution without awaiting
+                logDebug('ORCHESTRATOR', 'Starting executor.execute without await');
                 const executionPromise = executor.execute.length === 4
                     ? executor.execute(args.prompt || args.parentPrompt || '', args.systemPrompt || '', taskId, streamHandler)
                     : executor.execute(args, streamHandler);
+                logDebug('ORCHESTRATOR', 'Execution started in background');
                 // Handle completion in background
                 executionPromise
                     .then(async (output) => {
@@ -168,7 +181,8 @@ export class HookOrchestrator extends EventEmitter {
                     this.logger.error('HookOrchestrator', 'backgroundExecution', 'Task failed', { taskId, error });
                 });
                 // Return immediately with task info
-                return {
+                logDebug('ORCHESTRATOR', 'Returning immediate response for verbose mode');
+                const response = {
                     taskId,
                     status: 'executing',
                     message: 'Task started in background. Updates streaming via hooks.',
@@ -179,16 +193,22 @@ export class HookOrchestrator extends EventEmitter {
                         checkStatus: `Use getTaskStatus('${taskId}') to check progress`
                     }
                 };
+                logDebug('ORCHESTRATOR', 'Response:', response);
+                return response;
             }
             else {
                 // BLOCKING: Traditional mode waits for completion
+                logDebug('ORCHESTRATOR', 'BLOCKING MODE - Awaiting execution completion');
                 let result;
                 if (executor.execute.length === 4) {
+                    logDebug('ORCHESTRATOR', 'Calling executor.execute with 4 params');
                     result = await executor.execute(args.prompt || args.parentPrompt || '', args.systemPrompt || '', taskId, streamHandler);
                 }
                 else {
+                    logDebug('ORCHESTRATOR', 'Calling executor.execute with args');
                     result = await executor.execute(args, streamHandler);
                 }
+                logDebug('ORCHESTRATOR', 'Execution completed, result type:', typeof result);
                 context.execution.status = 'completed';
                 context.execution.output = result;
                 await this.triggerHooks(HookEvent.EXECUTION_COMPLETED, context);
@@ -344,6 +364,22 @@ export class HookOrchestrator extends EventEmitter {
                 this.activeTasks.delete(id);
             }
         }
+    }
+    /**
+     * Get an active task by ID (alias for getTaskStatus)
+     */
+    getActiveTask(taskId) {
+        return this.activeTasks.get(taskId);
+    }
+    /**
+     * Get all active tasks
+     */
+    getAllActiveTasks() {
+        const tasks = [];
+        for (const [id, task] of this.activeTasks) {
+            tasks.push({ taskId: id, ...task });
+        }
+        return tasks;
     }
 }
 //# sourceMappingURL=hook-orchestrator.js.map

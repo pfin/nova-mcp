@@ -149,6 +149,50 @@ if (violations.length > 0) {
 
 The entire point of Axiom MCP is to force real implementation. If it doesn't create files, it's not working. The observability system shows us exactly what's happening - use it!
 
+## Critical Update (July 7, 2025): Networking Solution Found
+
+### The Blocking Issue - Root Cause
+Axiom v4 tried to recursively call `claude --text "prompt"` but this command doesn't exist. The PTY executor hangs forever waiting for output from a non-existent subprocess.
+
+### The Solution: Hybrid Client-Server Architecture
+Instead of recursive Claude calls, we need:
+1. **WebSocket Server** in Axiom MCP (port 8080)
+2. **axiom-worker** executable that connects back via WebSocket
+3. **Message routing** between Claude and workers
+
+📚 **Essential Reading**: [`docs/AXIOM_V4_NETWORKING_KNOWLEDGE.md`](docs/AXIOM_V4_NETWORKING_KNOWLEDGE.md) - Complete technical deep-dive with implementation code
+
+## Critical Insight: The Claude Chat Model (January 7, 2025)
+
+### The Breakthrough
+Axiom should work exactly like the Claude chat interface:
+- **User types** → Claude streams response in real-time
+- **User sees output** character-by-character as it's generated
+- **User can interrupt** by sending a message while streaming
+- **Timer shows** work in progress
+- **User can read and react** before completion
+
+📚 **Essential Reading**: [`docs/AXIOM_V4_USER_EXPERIENCE_DESIGN.md`](docs/AXIOM_V4_USER_EXPERIENCE_DESIGN.md) - Complete UX vision
+
+### Why This Changes Everything
+1. **MCP already supports streaming** - We just need to use it properly
+2. **Claude CLI exists** - `claude "prompt"` works on command line
+3. **PTY provides real streams** - Character-by-character output
+4. **Interrupts are just new messages** - Not signals or special commands
+
+### Implementation Focus
+```typescript
+// What we have now (blocking):
+const result = await executor.execute(prompt);
+return result;  // User waits for everything
+
+// What we need (streaming):
+executor.execute(prompt);  // Start execution
+return { taskId, status: "streaming" };  // Return immediately
+// Output streams through MCP response streaming
+// User can send new messages to interrupt
+```
+
 ## Next Steps (Priority Order)
 
 ### 1. ✅ Connect Real-Time Intervention (COMPLETED July 6, 18:43)

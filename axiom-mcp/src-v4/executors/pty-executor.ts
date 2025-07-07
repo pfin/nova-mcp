@@ -3,6 +3,7 @@ import { EventEmitter } from 'events';
 import * as os from 'os';
 import { HookOrchestrator, HookEvent } from '../core/hook-orchestrator.js';
 import { Logger } from '../core/logger.js';
+import { logDebug } from '../core/simple-logger.js';
 
 const logger = Logger.getInstance();
 
@@ -32,9 +33,17 @@ export class PtyExecutor extends EventEmitter {
     taskId: string,
     streamHandler?: (data: string) => void
   ): Promise<string> {
+    logger.info('PtyExecutor', 'execute', 'Starting execution', { 
+      taskId, 
+      promptLength: prompt.length,
+      hasStreamHandler: !!streamHandler 
+    });
+    
     return new Promise((resolve, reject) => {
       const shell = this.options.shell || (os.platform() === 'win32' ? 'powershell.exe' : 'bash');
       const cwd = this.options.cwd || process.cwd();
+      
+      logger.debug('PtyExecutor', 'execute', 'Creating PTY instance', { shell, cwd });
       
       // Create PTY instance
       this.pty = spawn(shell, [], {
@@ -52,8 +61,21 @@ export class PtyExecutor extends EventEmitter {
         } as any
       });
       
+      logger.info('PtyExecutor', 'execute', 'PTY created, setting up handlers', { taskId });
+      
       // Handle data with hook integration
       this.pty.onData(async (data: string) => {
+        logDebug('PTY', `onData called - received ${data.length} bytes`, {
+          taskId,
+          preview: data.slice(0, 200).replace(/\n/g, '\\n').replace(/\r/g, '\\r')
+        });
+        
+        logger.trace('PtyExecutor', 'onData', 'Received data', { 
+          taskId,
+          dataLength: data.length,
+          preview: data.slice(0, 100).replace(/\n/g, '\\n')
+        });
+        
         this.output += data;
         
         // v4: Process stream through hooks
@@ -83,6 +105,12 @@ export class PtyExecutor extends EventEmitter {
       
       // Handle exit
       this.pty.onExit((exitCode) => {
+        logger.info('PtyExecutor', 'onExit', 'PTY process exited', { 
+          taskId,
+          exitCode: exitCode.exitCode,
+          outputLength: this.output.length 
+        });
+        
         this.isComplete = true;
         
         if (exitCode.exitCode === 0) {
@@ -92,22 +120,55 @@ export class PtyExecutor extends EventEmitter {
         }
       });
       
-      // Write the Claude executable path
-      const claudePath = process.env.CLAUDE_CODE_PATH || 'claude';
-      
       // v4: Notify hooks of execution start
       if (this.hookOrchestrator) {
+        logger.debug('PtyExecutor', 'execute', 'Triggering execution started hooks', { taskId });
         this.hookOrchestrator.triggerHooks(HookEvent.EXECUTION_STARTED, {
           execution: { taskId, status: 'running' },
           request: { tool: 'pty_executor', args: { prompt, systemPrompt } }
         });
       }
       
-      // Execute Claude with the prompt
-      this.pty.write(`${claudePath} --text "${prompt.replace(/"/g, '\\"')}"\n`);
+      // Execute claude command with the prompt
+      const claudeCommand = `claude "${prompt.replace(/"/g, '\\"')}"\n`;
+      
+      logger.info('PtyExecutor', 'execute', 'Executing claude command', { 
+        taskId,
+        commandLength: claudeCommand.length,
+        commandPreview: claudeCommand.slice(0, 100) 
+      });
+      
+      logDebug('PTY', 'Writing claude command to PTY', {
+        command: claudeCommand.slice(0, 200)
+      });
+      
+      this.pty.write(claudeCommand);
+      
+      logDebug('PTY', 'Claude command written, streaming output...');
+      
+      logger.debug('PtyExecutor', 'execute', 'Command written, starting heartbeat', { taskId });
       
       // Send heartbeat to prevent hanging
       this.startHeartbeat();
+      
+      // Add early detection of no output
+      setTimeout(() => {
+        if (this.output.length === 0) {
+          logDebug('PTY', 'WARNING: No output after 2s - checking PTY status');
+          if (this.pty) this.pty.write('echo "PTY alive"\n');
+        }
+      }, 2000);
+      
+      setTimeout(() => {
+        if (this.output.length === 0) {
+          logDebug('PTY', 'ERROR: No output after 5s - PTY may be stuck', {
+            taskId,
+            isComplete: this.isComplete
+          });
+          // Try to get some output
+          if (this.pty) this.pty.write('echo "PTY TEST"\n');
+        }
+      }, 5000);
     });
   }
   
@@ -121,6 +182,7 @@ export class PtyExecutor extends EventEmitter {
     this.idleTimer = setTimeout(() => {
       if (!this.isComplete) {
         logger.warn('PtyExecutor', 'checkIdleTimeout', 'Process appears idle, sending interrupt');
+        logDebug('PTY', 'IDLE TIMEOUT - Process hasn\'t produced output for 30s, interrupting');
         this.interrupt();
       }
     }, 30000);
@@ -128,9 +190,11 @@ export class PtyExecutor extends EventEmitter {
   
   private heartbeat?: NodeJS.Timeout;
   private startHeartbeat(): void {
+    logDebug('PTY', 'Starting heartbeat timer (10s intervals)');
     // Send periodic newline to keep PTY alive
     this.heartbeat = setInterval(() => {
       if (!this.isComplete && this.pty) {
+        logDebug('PTY', 'Heartbeat - sending newline to keep PTY alive');
         this.pty.write('\n');
       }
     }, 10000);
