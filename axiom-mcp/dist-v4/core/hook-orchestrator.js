@@ -24,14 +24,16 @@ export var HookEvent;
 })(HookEvent || (HookEvent = {}));
 export class HookOrchestrator extends EventEmitter {
     hooks = new Map();
-    db;
-    eventBus;
+    db; // ConversationDB
+    eventBus; // EventBus
+    statusManager; // StatusManager
     executors = new Map();
     monitors = new Set();
-    constructor(db, eventBus) {
+    constructor(db, eventBus, statusManager) {
         super();
         this.db = db;
         this.eventBus = eventBus;
+        this.statusManager = statusManager;
     }
     /**
      * Register a hook
@@ -99,7 +101,15 @@ export class HookOrchestrator extends EventEmitter {
                 this.notifyMonitors('stream', { taskId, data });
             };
             // Execute with streaming
-            const result = await executor.execute(args, streamHandler);
+            let result;
+            if (executor.execute.length === 4) {
+                // PTY executor with full args
+                result = await executor.execute(args.prompt || args.parentPrompt || '', args.systemPrompt || '', taskId, streamHandler);
+            }
+            else {
+                // Simple executor
+                result = await executor.execute(args, streamHandler);
+            }
             // Phase 3: Completion
             context.execution.status = 'completed';
             context.execution.output = result;
@@ -117,11 +127,19 @@ export class HookOrchestrator extends EventEmitter {
      * Trigger hooks for an event
      */
     async triggerHooks(event, context) {
+        // Build full context
+        const fullContext = {
+            event: event,
+            db: this.db,
+            eventBus: this.eventBus,
+            statusManager: this.statusManager,
+            ...context
+        };
         const hooks = this.hooks.get(event) || [];
         let result = { action: 'continue' };
         for (const hook of hooks) {
             try {
-                const hookResult = await hook.handler(context);
+                const hookResult = await hook.handler(fullContext);
                 // First blocking/redirecting hook wins
                 if (hookResult.action !== 'continue') {
                     return hookResult;

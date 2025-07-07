@@ -3,8 +3,6 @@
  * HookOrchestrator is the central hub for ALL execution
  */
 import { EventEmitter } from 'events';
-import { ConversationDB } from '../hooks/conversation-db.js';
-import { EventBus } from '../hooks/event-bus.js';
 export declare enum HookEvent {
     REQUEST_RECEIVED = "request_received",
     REQUEST_VALIDATED = "request_validated",
@@ -35,6 +33,9 @@ export interface HookContext {
         source: string;
     };
     metadata?: Record<string, any>;
+    db?: any;
+    eventBus?: any;
+    statusManager?: any;
 }
 export interface HookResult {
     action: 'continue' | 'block' | 'modify' | 'redirect';
@@ -56,9 +57,10 @@ export declare class HookOrchestrator extends EventEmitter {
     private hooks;
     private db;
     private eventBus;
+    private statusManager;
     private executors;
     private monitors;
-    constructor(db: ConversationDB, eventBus: EventBus);
+    constructor(db: any, eventBus: any, statusManager?: any);
     /**
      * Register a hook
      */
@@ -70,7 +72,7 @@ export declare class HookOrchestrator extends EventEmitter {
     /**
      * Trigger hooks for an event
      */
-    private triggerHooks;
+    triggerHooks(event: HookEvent | string, context: Partial<HookContext>): Promise<HookResult>;
     /**
      * Select executor based on tool and args
      */

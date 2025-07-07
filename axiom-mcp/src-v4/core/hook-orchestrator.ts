@@ -45,6 +45,10 @@ export interface HookContext {
     source: string;
   };
   metadata?: Record<string, any>;
+  // v4: Access to core components
+  db?: any;
+  eventBus?: any;
+  statusManager?: any;
 }
 
 export interface HookResult {
@@ -67,16 +71,18 @@ export interface Hook {
 }
 
 export class HookOrchestrator extends EventEmitter {
-  private hooks: Map<HookEvent, Hook[]> = new Map();
-  private db: ConversationDB;
-  private eventBus: EventBus;
+  private hooks: Map<HookEvent | string, Hook[]> = new Map();
+  private db: any; // ConversationDB
+  private eventBus: any; // EventBus
+  private statusManager: any; // StatusManager
   private executors: Map<string, any> = new Map();
   private monitors: Set<any> = new Set();
   
-  constructor(db: ConversationDB, eventBus: EventBus) {
+  constructor(db: any, eventBus: any, statusManager?: any) {
     super();
     this.db = db;
     this.eventBus = eventBus;
+    this.statusManager = statusManager;
   }
   
   /**
@@ -162,7 +168,19 @@ export class HookOrchestrator extends EventEmitter {
       };
       
       // Execute with streaming
-      const result = await executor.execute(args, streamHandler);
+      let result;
+      if (executor.execute.length === 4) {
+        // PTY executor with full args
+        result = await executor.execute(
+          args.prompt || args.parentPrompt || '',
+          args.systemPrompt || '',
+          taskId,
+          streamHandler
+        );
+      } else {
+        // Simple executor
+        result = await executor.execute(args, streamHandler);
+      }
       
       // Phase 3: Completion
       context.execution!.status = 'completed';
@@ -184,13 +202,22 @@ export class HookOrchestrator extends EventEmitter {
   /**
    * Trigger hooks for an event
    */
-  private async triggerHooks(event: HookEvent, context: HookContext): Promise<HookResult> {
+  async triggerHooks(event: HookEvent | string, context: Partial<HookContext>): Promise<HookResult> {
+    // Build full context
+    const fullContext: HookContext = {
+      event: event as HookEvent,
+      db: this.db,
+      eventBus: this.eventBus,
+      statusManager: this.statusManager,
+      ...context
+    };
+    
     const hooks = this.hooks.get(event) || [];
     let result: HookResult = { action: 'continue' };
     
     for (const hook of hooks) {
       try {
-        const hookResult = await hook.handler(context);
+        const hookResult = await hook.handler(fullContext);
         
         // First blocking/redirecting hook wins
         if (hookResult.action !== 'continue') {
