@@ -7,15 +7,19 @@
   "scripts": {
     "build": "tsc && chmod +x dist/index.js",
     "build:v3": "tsc -p tsconfig.v3.json && chmod +x dist-v3/index.js",
+    "build:v4": "tsc -p tsconfig.v4.json && chmod +x dist-v4/index.js",
     "dev": "tsc --watch",
     "dev:v3": "tsc -p tsconfig.v3.json --watch",
+    "dev:v4": "tsc -p tsconfig.v4.json --watch",
     "start": "node dist/index.js",
     "start:v3": "node dist-v3/index.js",
+    "start:v4": "node dist-v4/index.js",
     "master": "node dist/master-terminal.js",
     "axiom-master": "npm run build && node dist/master-terminal.js",
     "test": "jest --config jest.config.v3.js",
     "inspect:v3": "npx @modelcontextprotocol/inspector ./dist-v3/index.js",
-    "inspect:v3-simple": "npx @modelcontextprotocol/inspector ./dist-v3/index-simple.js"
+    "inspect:v3-simple": "npx @modelcontextprotocol/inspector ./dist-v3/index-simple.js",
+    "inspect:v4": "npx @modelcontextprotocol/inspector ./dist-v4/index.js"
   },
   "keywords": [
     "mcp",

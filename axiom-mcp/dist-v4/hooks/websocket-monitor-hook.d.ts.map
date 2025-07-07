@@ -1,1 +1,1 @@
-{"version":3,"file":"websocket-monitor-hook.d.ts","sourceRoot":"","sources":["../../src-v4/hooks/websocket-monitor-hook.ts"],"names":[],"mappings":"AAAA;;;GAGG;AAEH,OAAO,EAAE,IAAI,EAAsC,MAAM,8BAA8B,CAAC;AAgCxF,eAAO,MAAM,oBAAoB,EAAE,IAkElC,CAAC;AAEF,eAAe,oBAAoB,CAAC"}
+{"version":3,"file":"websocket-monitor-hook.d.ts","sourceRoot":"","sources":["../../src-v4/hooks/websocket-monitor-hook.ts"],"names":[],"mappings":"AAAA;;;GAGG;AAEH,OAAO,EAAE,IAAI,EAAsC,MAAM,8BAA8B,CAAC;AAgCxF,eAAO,MAAM,oBAAoB,EAAE,IAoElC,CAAC;AAEF,eAAe,oBAAoB,CAAC"}

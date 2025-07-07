@@ -60,6 +60,8 @@ export declare class HookOrchestrator extends EventEmitter {
     private statusManager;
     private executors;
     private monitors;
+    private activeTasks;
+    private logger;
     constructor(db: any, eventBus: any, statusManager?: any);
     /**
      * Register a hook
@@ -96,5 +98,13 @@ export declare class HookOrchestrator extends EventEmitter {
         tool: string;
         args: any;
     }>): Promise<any[]>;
+    /**
+     * Get status of active tasks
+     */
+    getTaskStatus(taskId?: string): any;
+    /**
+     * Clear completed/failed tasks
+     */
+    clearCompletedTasks(): void;
 }
 //# sourceMappingURL=hook-orchestrator.d.ts.map

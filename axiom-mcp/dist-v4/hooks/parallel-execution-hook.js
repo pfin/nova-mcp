@@ -3,6 +3,8 @@
  * Shows how v4 can dynamically spawn parallel executions
  */
 import { HookEvent } from '../core/hook-orchestrator.js';
+import { Logger } from '../core/logger.js';
+const logger = Logger.getInstance();
 export const parallelExecutionHook = {
     name: 'parallel-execution-hook',
     events: [HookEvent.REQUEST_VALIDATED, HookEvent.PARALLEL_MERGE],
@@ -13,7 +15,7 @@ export const parallelExecutionHook = {
             // Check if we should parallelize this request
             const args = request?.args;
             if (args?.spawnPattern === 'parallel' && args?.spawnCount > 1) {
-                console.error(`\n[PARALLEL] Spawning ${args.spawnCount} parallel executions\n`);
+                logger.info('ParallelExecutionHook', 'spawn', `Spawning ${args.spawnCount} parallel executions`);
                 // Create variations of the prompt
                 const variations = generatePromptVariations(args.prompt, args.spawnCount);
                 // Redirect to parallel execution
@@ -34,9 +36,9 @@ export const parallelExecutionHook = {
         if (event === HookEvent.PARALLEL_MERGE) {
             // Merge parallel results
             const results = context.metadata?.results || [];
-            console.error(`\n[PARALLEL] Merging ${results.length} results\n`);
+            logger.info('ParallelExecutionHook', 'merge', `Merging ${results.length} results`);
             // Simple merge strategy - in real v4, this would be sophisticated
-            const bestResult = results.find(r => r.includes('success')) || results[0];
+            const bestResult = results.find((r) => r.includes('success')) || results[0];
             return {
                 action: 'modify',
                 modifications: {

@@ -2,6 +2,9 @@ import { spawn, IPty } from 'node-pty';
 import { EventEmitter } from 'events';
 import * as os from 'os';
 import { HookOrchestrator, HookEvent } from '../core/hook-orchestrator.js';
+import { Logger } from '../core/logger.js';
+
+const logger = Logger.getInstance();
 
 export interface ExecutorOptions {
   shell?: string;
@@ -117,7 +120,7 @@ export class PtyExecutor extends EventEmitter {
     // Consider process idle after 30 seconds of no output
     this.idleTimer = setTimeout(() => {
       if (!this.isComplete) {
-        console.error('[PtyExecutor] Process appears idle, sending interrupt');
+        logger.warn('PtyExecutor', 'checkIdleTimeout', 'Process appears idle, sending interrupt');
         this.interrupt();
       }
     }, 30000);
@@ -135,7 +138,7 @@ export class PtyExecutor extends EventEmitter {
   
   injectCommand(command: string): void {
     if (this.pty && !this.isComplete) {
-      console.error(`[PtyExecutor] Injecting command: ${command.trim()}`);
+      logger.info('PtyExecutor', 'injectCommand', `Injecting command: ${command.trim()}`);
       this.pty.write(command);
       
       // v4: Log intervention

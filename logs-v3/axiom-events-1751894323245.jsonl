@@ -1,0 +1,2 @@
+{"taskId":"system","workerId":"main","event":"task_start","payload":{"message":"Event bus initialized"},"timestamp":"2025-07-07T13:18:43.245Z"}
+{"taskId":"system","workerId":"main","event":"tool_call","payload":{"tool":"axiom_mcp_spawn","args":{"parentPrompt":"Create a factorial function in Python with proper error handling. Save it to factorial.py","spawnPattern":"single","verboseMasterMode":true}},"timestamp":"2025-07-07T13:27:55.491Z"}

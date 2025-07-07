@@ -53,7 +53,9 @@ export const websocketMonitorHook = {
             case HookEvent.REQUEST_RECEIVED:
                 message.data = {
                     tool: request?.tool,
-                    preview: request?.args?.prompt?.slice(0, 100) + '...'
+                    preview: typeof (request?.args?.prompt || request?.args?.parentPrompt) === 'string'
+                        ? (request?.args?.prompt || request?.args?.parentPrompt)?.slice(0, 100) + '...'
+                        : String(request?.args?.prompt || request?.args?.parentPrompt)
                 };
                 break;
             case HookEvent.EXECUTION_STREAM:

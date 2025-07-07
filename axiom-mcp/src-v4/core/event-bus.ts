@@ -31,7 +31,10 @@ export class EventBus {
     // Open log file for appending
     this.logStream = await fs.open(this.logPath, 'a');
     
-    console.error(`[EventBus] Logging to ${this.logPath}`);
+    // Only log in debug mode
+    if (process.env.AXIOM_LOG_LEVEL === 'DEBUG' || process.env.AXIOM_LOG_LEVEL === 'TRACE') {
+      console.error(`[EventBus] Logging to ${this.logPath}`);
+    }
   }
   
   async logEvent(entry: EventLogEntry): Promise<void> {

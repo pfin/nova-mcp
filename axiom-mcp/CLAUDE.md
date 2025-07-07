@@ -1,8 +1,16 @@
-# CLAUDE.md - Axiom MCP v3 Development Guide
+# CLAUDE.md - Axiom MCP v4 Development Guide
+
+## Critical Philosophy (2025-07-07)
+
+**LLMs always end with positive reinforcement, even when failing.** This toxic pattern must be interrupted. Axiom v4 solves this through:
+1. **5-10 minute task decomposition** - Too short for drift
+2. **Orthogonal parallelism** - Independent execution paths
+3. **Character-level interrupts** - Kill bad processes early
+4. **No false positives** - Only success reaches completion
 
 ## Critical Context
 
-This is the Axiom MCP v3 project - a parallel execution observatory that enforces real implementation through observation and intervention.
+This is the Axiom MCP v4 project - a hook-first parallel execution observatory that prevents LLM failure modes through decomposition and interruption.
 
 **Latest Status (July 7, 2025)**: 
 - ✅ Observability infrastructure complete (database, parser, verifier)

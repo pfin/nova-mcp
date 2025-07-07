@@ -4,8 +4,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { ConversationDB } from '../hooks/conversation-db.js';
-import { EventBus } from '../hooks/event-bus.js';
+import { Logger } from './logger.js';
 
 export enum HookEvent {
   // Request lifecycle
@@ -77,18 +76,27 @@ export class HookOrchestrator extends EventEmitter {
   private statusManager: any; // StatusManager
   private executors: Map<string, any> = new Map();
   private monitors: Set<any> = new Set();
+  private activeTasks: Map<string, any> = new Map(); // Track active background tasks
+  private logger: Logger;
   
   constructor(db: any, eventBus: any, statusManager?: any) {
     super();
     this.db = db;
     this.eventBus = eventBus;
     this.statusManager = statusManager;
+    this.logger = Logger.getInstance();
   }
   
   /**
    * Register a hook
    */
   registerHook(hook: Hook): void {
+    this.logger.info('HookOrchestrator', 'registerHook', 'Registering hook', {
+      name: hook.name,
+      events: hook.events,
+      priority: hook.priority
+    });
+    
     for (const event of hook.events) {
       const eventHooks = this.hooks.get(event) || [];
       eventHooks.push(hook);
@@ -97,7 +105,10 @@ export class HookOrchestrator extends EventEmitter {
       this.hooks.set(event, eventHooks);
     }
     
-    console.error(`[HookOrchestrator] Registered hook: ${hook.name} for events: ${hook.events.join(', ')}`);
+    this.logger.debug('HookOrchestrator', 'registerHook', 'Hook registered successfully', {
+      name: hook.name,
+      totalHooks: Array.from(this.hooks.values()).flat().length
+    });
   }
   
   /**
@@ -105,10 +116,13 @@ export class HookOrchestrator extends EventEmitter {
    */
   async handleRequest(tool: string, args: any): Promise<any> {
     const taskId = `task-${Date.now()}`;
+    this.logger.info('HookOrchestrator', 'handleRequest', 'Request received', { tool, taskId, args });
+    
     const context: HookContext = {
       event: HookEvent.REQUEST_RECEIVED,
       request: { tool, args },
-      execution: { taskId, status: 'pending' }
+      execution: { taskId, status: 'pending' },
+      metadata: { taskId }
     };
     
     // Phase 1: Request validation hooks
@@ -147,6 +161,12 @@ export class HookOrchestrator extends EventEmitter {
       
       // Set up stream monitoring
       const streamHandler = async (data: string) => {
+        this.logger.trace('HookOrchestrator', 'streamHandler', 'Stream data received', {
+          taskId,
+          dataLength: data.length,
+          preview: data.slice(0, 50)
+        });
+        
         const streamContext: HookContext = {
           ...context,
           event: HookEvent.EXECUTION_STREAM,
@@ -157,9 +177,15 @@ export class HookOrchestrator extends EventEmitter {
         
         // Check for interventions
         if (streamResult.action === 'modify') {
+          this.logger.warn('HookOrchestrator', 'streamHandler', 'Intervention detected', {
+            taskId,
+            command: streamResult.modifications?.command
+          });
+          
           // Inject intervention command
           if (executor.injectCommand) {
             await executor.injectCommand(streamResult.modifications.command);
+            this.logger.info('HookOrchestrator', 'streamHandler', 'Intervention injected', { taskId });
           }
         }
         
@@ -167,32 +193,95 @@ export class HookOrchestrator extends EventEmitter {
         this.notifyMonitors('stream', { taskId, data });
       };
       
-      // Execute with streaming
-      let result;
-      if (executor.execute.length === 4) {
-        // PTY executor with full args
-        result = await executor.execute(
-          args.prompt || args.parentPrompt || '',
-          args.systemPrompt || '',
+      // Check if verbose mode is enabled
+      const isVerbose = args.verboseMasterMode === true;
+      
+      if (isVerbose) {
+        // Track task info
+        const taskInfo = {
           taskId,
-          streamHandler
-        );
+          status: 'running',
+          startTime: Date.now(),
+          prompt: args.prompt || args.parentPrompt || '',
+          output: '',
+          streamData: []
+        };
+        this.activeTasks.set(taskId, taskInfo);
+        
+        // NON-BLOCKING: Start execution without awaiting
+        const executionPromise = executor.execute.length === 4
+          ? executor.execute(
+              args.prompt || args.parentPrompt || '',
+              args.systemPrompt || '',
+              taskId,
+              streamHandler
+            )
+          : executor.execute(args, streamHandler);
+        
+        // Handle completion in background
+        executionPromise
+          .then(async (output: any) => {
+            const task = this.activeTasks.get(taskId);
+            if (task) {
+              task.status = 'completed';
+              task.output = output;
+              task.endTime = Date.now();
+            }
+            context.execution!.status = 'completed';
+            context.execution!.output = output;
+            await this.triggerHooks(HookEvent.EXECUTION_COMPLETED, context);
+            this.logger.info('HookOrchestrator', 'backgroundExecution', 'Task completed', { taskId });
+          })
+          .catch(async (error: any) => {
+            const task = this.activeTasks.get(taskId);
+            if (task) {
+              task.status = 'failed';
+              task.error = error instanceof Error ? error.message : String(error);
+              task.endTime = Date.now();
+            }
+            context.execution!.status = 'failed';
+            context.metadata = { error: error instanceof Error ? error.message : String(error) };
+            await this.triggerHooks(HookEvent.EXECUTION_FAILED, context);
+            this.logger.error('HookOrchestrator', 'backgroundExecution', 'Task failed', { taskId, error });
+          });
+        
+        // Return immediately with task info
+        return {
+          taskId,
+          status: 'executing',
+          message: 'Task started in background. Updates streaming via hooks.',
+          instructions: {
+            monitor: 'Watch console output for real-time updates',
+            interrupt: 'Send interrupt commands through the stream',
+            completion: 'Task will complete or fail asynchronously',
+            checkStatus: `Use getTaskStatus('${taskId}') to check progress`
+          }
+        };
       } else {
-        // Simple executor
-        result = await executor.execute(args, streamHandler);
+        // BLOCKING: Traditional mode waits for completion
+        let result;
+        if (executor.execute.length === 4) {
+          result = await executor.execute(
+            args.prompt || args.parentPrompt || '',
+            args.systemPrompt || '',
+            taskId,
+            streamHandler
+          );
+        } else {
+          result = await executor.execute(args, streamHandler);
+        }
+        
+        context.execution!.status = 'completed';
+        context.execution!.output = result;
+        
+        await this.triggerHooks(HookEvent.EXECUTION_COMPLETED, context);
+        
+        return result;
       }
-      
-      // Phase 3: Completion
-      context.execution!.status = 'completed';
-      context.execution!.output = result;
-      
-      await this.triggerHooks(HookEvent.EXECUTION_COMPLETED, context);
-      
-      return result;
       
     } catch (error) {
       context.execution!.status = 'failed';
-      context.metadata = { error: error.message };
+      context.metadata = { error: error instanceof Error ? error.message : String(error) };
       
       await this.triggerHooks(HookEvent.EXECUTION_FAILED, context);
       throw error;
@@ -203,6 +292,15 @@ export class HookOrchestrator extends EventEmitter {
    * Trigger hooks for an event
    */
   async triggerHooks(event: HookEvent | string, context: Partial<HookContext>): Promise<HookResult> {
+    const timerKey = `hooks-${event}-${Date.now()}`;
+    this.logger.startTimer(timerKey);
+    
+    this.logger.debug('HookOrchestrator', 'triggerHooks', `Triggering hooks for event: ${event}`, {
+      event,
+      hooksCount: this.hooks.get(event)?.length || 0,
+      taskId: context.execution?.taskId
+    });
+    
     // Build full context
     const fullContext: HookContext = {
       event: event as HookEvent,
@@ -217,10 +315,19 @@ export class HookOrchestrator extends EventEmitter {
     
     for (const hook of hooks) {
       try {
+        this.logger.logHook(hook.name, event.toString(), 'start');
         const hookResult = await hook.handler(fullContext);
+        this.logger.logHook(hook.name, event.toString(), 'end', hookResult);
         
         // First blocking/redirecting hook wins
         if (hookResult.action !== 'continue') {
+          const duration = this.logger.endTimer(timerKey);
+          this.logger.info('HookOrchestrator', 'triggerHooks', `Hook ${hook.name} blocked/redirected execution`, {
+            event,
+            action: hookResult.action,
+            reason: hookResult.reason,
+            duration
+          });
           return hookResult;
         }
         
@@ -232,10 +339,21 @@ export class HookOrchestrator extends EventEmitter {
           };
         }
       } catch (error) {
-        console.error(`[HookOrchestrator] Error in hook ${hook.name}:`, error);
+        this.logger.error('HookOrchestrator', 'triggerHooks', `Error in hook ${hook.name}`, {
+          event,
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined
+        });
         // Log but don't fail - hooks should be resilient
       }
     }
+    
+    const duration = this.logger.endTimer(timerKey);
+    this.logger.debug('HookOrchestrator', 'triggerHooks', 'Hooks completed', {
+      event,
+      duration,
+      modifications: result.modifications ? Object.keys(result.modifications) : []
+    });
     
     return result;
   }
@@ -244,11 +362,16 @@ export class HookOrchestrator extends EventEmitter {
    * Select executor based on tool and args
    */
   private async selectExecutor(tool: string, args: any): Promise<any> {
+    this.logger.debug('HookOrchestrator', 'selectExecutor', 'Selecting executor', { tool, executors: Array.from(this.executors.keys()) });
+    
     // This can be overridden by hooks
     const executor = this.executors.get(tool);
     if (!executor) {
+      this.logger.error('HookOrchestrator', 'selectExecutor', 'No executor found', { tool });
       throw new Error(`No executor registered for tool: ${tool}`);
     }
+    
+    this.logger.debug('HookOrchestrator', 'selectExecutor', 'Executor selected', { tool, executorType: executor.constructor?.name });
     return executor;
   }
   
@@ -302,5 +425,31 @@ export class HookOrchestrator extends EventEmitter {
     });
     
     return mergeResult.modifications?.mergedResult || results;
+  }
+  
+  /**
+   * Get status of active tasks
+   */
+  getTaskStatus(taskId?: string): any {
+    if (taskId) {
+      return this.activeTasks.get(taskId);
+    }
+    // Return all active tasks
+    const tasks = [];
+    for (const [id, task] of this.activeTasks) {
+      tasks.push({ id, ...task });
+    }
+    return tasks;
+  }
+  
+  /**
+   * Clear completed/failed tasks
+   */
+  clearCompletedTasks(): void {
+    for (const [id, task] of this.activeTasks) {
+      if (task.status === 'completed' || task.status === 'failed') {
+        this.activeTasks.delete(id);
+      }
+    }
   }
 }

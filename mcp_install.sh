@@ -6,4 +6,4 @@ claude mcp add gemini -- npx /home/peter/nova-mcp/gemini/dist/index.js
 claude mcp add chatgpt -- /home/peter/nova-mcp/chatgpt-puppeteer/run-with-env.sh
 claude mcp add puppeteer -- npx /home/peter/nova-mcp/nova-playwright/dist/index.js
 claude mcp add nova-scraper -- npx /home/peter/nova-mcp/nova-scraper/dist/index.js
-claude mcp add axiom-mcp -- npx /home/peter/nova-mcp/axiom-mcp/dist/index.js
+claude mcp add axiom-mcp -- npx /home/peter/nova-mcp/axiom-mcp/dist-v4/index.js

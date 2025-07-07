@@ -4,6 +4,9 @@
  */
 
 import { Hook, HookContext, HookResult, HookEvent } from '../core/hook-orchestrator.js';
+import { Logger } from '../core/logger.js';
+
+const logger = Logger.getInstance();
 
 export const parallelExecutionHook: Hook = {
   name: 'parallel-execution-hook',
@@ -18,7 +21,7 @@ export const parallelExecutionHook: Hook = {
       const args = request?.args;
       
       if (args?.spawnPattern === 'parallel' && args?.spawnCount > 1) {
-        console.error(`\n[PARALLEL] Spawning ${args.spawnCount} parallel executions\n`);
+        logger.info('ParallelExecutionHook', 'spawn', `Spawning ${args.spawnCount} parallel executions`);
         
         // Create variations of the prompt
         const variations = generatePromptVariations(args.prompt, args.spawnCount);
@@ -43,10 +46,10 @@ export const parallelExecutionHook: Hook = {
       // Merge parallel results
       const results = context.metadata?.results || [];
       
-      console.error(`\n[PARALLEL] Merging ${results.length} results\n`);
+      logger.info('ParallelExecutionHook', 'merge', `Merging ${results.length} results`);
       
       // Simple merge strategy - in real v4, this would be sophisticated
-      const bestResult = results.find(r => r.includes('success')) || results[0];
+      const bestResult = results.find((r: any) => r.includes('success')) || results[0];
       
       return {
         action: 'modify',
