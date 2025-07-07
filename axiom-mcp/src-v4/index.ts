@@ -180,6 +180,24 @@ async function main() {
             required: ['taskId'],
           },
         },
+        {
+          name: 'axiom_interrupt',
+          description: 'Interrupt a running task (sends Ctrl+C)',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              taskId: {
+                type: 'string',
+                description: 'Task ID to interrupt',
+              },
+              followUp: {
+                type: 'string',
+                description: 'Optional follow-up command to send after interrupt',
+              },
+            },
+            required: ['taskId'],
+          },
+        },
       ],
     };
   });
@@ -328,6 +346,61 @@ async function main() {
             text: output || '(no output yet)'
           }],
         };
+      } catch (error: any) {
+        return {
+          content: [{
+            type: 'text',
+            text: `Error: ${error.message}`
+          }],
+          isError: true,
+        };
+      }
+    }
+    
+    if (request.params.name === 'axiom_interrupt') {
+      try {
+        const args = request.params.arguments as { taskId: string; followUp?: string };
+        const { taskId, followUp } = args;
+        const task = orchestrator.getActiveTask(taskId);
+        
+        if (!task || task.status !== 'running') {
+          return {
+            content: [{
+              type: 'text',
+              text: `Task ${taskId} is not running or not found`
+            }],
+          };
+        }
+        
+        // Send interrupt (Ctrl+C) to the task
+        if (task.executor && task.executor.interrupt) {
+          task.executor.interrupt();
+          logDebug('MCP', `Sent interrupt to task ${taskId}`);
+          
+          // Send follow-up command if provided
+          if (followUp && task.executor.write) {
+            setTimeout(() => {
+              task.executor.write(followUp + '\n');
+              logDebug('MCP', `Sent follow-up to task ${taskId}:`, followUp);
+            }, 500); // Small delay to let interrupt process
+          }
+          
+          return {
+            content: [{
+              type: 'text',
+              text: followUp 
+                ? `Task ${taskId} interrupted. Follow-up sent: ${followUp}`
+                : `Task ${taskId} interrupted`
+            }],
+          };
+        } else {
+          return {
+            content: [{
+              type: 'text',
+              text: `Task ${taskId} does not support interruption`
+            }],
+          };
+        }
       } catch (error: any) {
         return {
           content: [{
