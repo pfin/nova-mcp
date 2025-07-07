@@ -9,8 +9,9 @@ This is the Axiom MCP v3 project - a parallel execution observatory that enforce
 - ✅ Universal principles system with temporal awareness
 - ✅ Real-time intervention CONNECTED! (as of July 6, 18:43)
 - ✅ SDK Streaming IMPLEMENTED! (as of July 6, 20:10)
-- ✅ **VERBOSE MASTER MODE IMPLEMENTED!** (as of July 7, 01:05)
-- 📊 **System Completion**: 35% → 50% (Verbose Mode complete!)
+- ✅ **MCP TOOLS WORKING!** All 4 tools callable from Claude (as of July 7, 04:45)
+- 🚧 Verbose Master Mode started (schema ready, implementation next)
+- 📊 **System Completion**: 35% → 50% (MCP tools operational!)
 
 ### Intervention System (Working!)
 - **30-second planning timeout**: Forces implementation
@@ -85,9 +86,15 @@ Axiom MCP:
 - ❌ Claude CLI doesn't execute directly (bottleneck identified)
 - 🔧 Need alternative execution method
 
-## Critical Discovery (July 6, 2025)
+## Critical Fix (July 7, 2025)
 
-**The observer exists but doesn't intervene during execution!** 
+**MCP Tools are now working!** The issue was a configuration typo: `insex.js` → `index.js`
+
+All tools are now callable:
+- axiom_mcp_spawn({ parentPrompt, spawnPattern, spawnCount, verboseMasterMode })
+- axiom_test_v3({ prompt, useStreaming })
+- axiom_mcp_observe({ mode, conversationId, limit })
+- axiom_mcp_principles({ action, category, principleId }) 
 
 Current flow:
 1. PTY executor captures output

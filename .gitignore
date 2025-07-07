@@ -45,3 +45,4 @@ watch-status.json
 
 # Reference repositories (not part of our codebase)
 typescript-sdk/
+claude-code-is-programmable/
