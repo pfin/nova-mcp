@@ -1,0 +1,90 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "comment": "Validate concrete deliverables for spawn tasks",
+        "matcher": "axiom_mcp_spawn|axiom_test_v3",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/peter/nova-mcp/axiom-mcp/hooks/axiom-validate-concrete.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "comment": "Stream monitor for real-time observation",
+        "matcher": "axiom_mcp_spawn",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/peter/nova-mcp/axiom-mcp/hooks/axiom-stream-monitor.sh"
+          }
+        ]
+      },
+      {
+        "comment": "Verify implementation actually happened",
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/peter/nova-mcp/axiom-mcp/hooks/axiom-verify-implementation.sh"
+          }
+        ]
+      },
+      {
+        "comment": "Auto-format code files",
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/peter/nova-mcp/axiom-mcp/hooks/axiom-format-code.sh"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "comment": "Show progress when waiting",
+        "matcher": ".*waiting.*|.*input.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/peter/nova-mcp/axiom-mcp/hooks/axiom-show-progress.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "comment": "Final verification and cleanup",
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/peter/nova-mcp/axiom-mcp/hooks/axiom-finalize.sh"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "comment": "Track parallel execution results",
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/peter/nova-mcp/axiom-mcp/hooks/axiom-subagent-complete.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "settings": {
+    "logLevel": "info",
+    "timeout": 5000,
+    "continueOnError": true,
+    "parallelExecution": true
+  }
+}
