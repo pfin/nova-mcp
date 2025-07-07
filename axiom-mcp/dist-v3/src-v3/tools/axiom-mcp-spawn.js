@@ -15,6 +15,17 @@ export const axiomMcpSpawnSchema = z.object({
     spawnCount: z.number().min(1).max(10).default(3).describe('Number of subtasks to spawn'),
     maxDepth: z.number().min(1).max(5).default(3).describe('Maximum recursion depth'),
     autoExecute: z.boolean().default(true).describe('Automatically execute spawned tasks'),
+    verboseMasterMode: z.boolean()
+        .default(false)
+        .describe('Stream all child output in real-time with prefixes'),
+    streamingOptions: z.object({
+        outputMode: z.enum(['console', 'websocket', 'both']).default('console'),
+        colorize: z.boolean().default(true),
+        bufferSize: z.number().default(1000),
+        flushInterval: z.number().default(100),
+        includeTimestamps: z.boolean().default(false),
+        prefixLength: z.number().default(8)
+    }).optional().describe('Advanced streaming configuration')
 });
 export const axiomMcpSpawnTool = {
     name: 'axiom_mcp_spawn',

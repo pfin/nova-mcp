@@ -11,16 +11,16 @@ export declare const axiomMcpVisualizeSchema: z.ZodObject<{
     taskId?: string;
     depth?: number;
     format?: "ascii" | "tree" | "progress" | "box" | "compact";
+    colorize?: boolean;
     width?: number;
     showMetrics?: boolean;
-    colorize?: boolean;
 }, {
     taskId?: string;
     depth?: number;
     format?: "ascii" | "tree" | "progress" | "box" | "compact";
+    colorize?: boolean;
     width?: number;
     showMetrics?: boolean;
-    colorize?: boolean;
 }>;
 export type axiomMcpVisualizeInput = z.infer<typeof axiomMcpVisualizeSchema>;
 export declare const axiomMcpVisualizeTool: {
