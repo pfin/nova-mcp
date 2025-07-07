@@ -14,12 +14,7 @@ export type AxiomMcpDemoInput = z.infer<typeof axiomMcpDemoSchema>;
 export declare const axiomMcpDemoTool: {
     name: string;
     description: string;
-    inputSchema: import("zod-to-json-schema").JsonSchema7Type & {
-        $schema?: string | undefined;
-        definitions?: {
-            [key: string]: import("zod-to-json-schema").JsonSchema7Type;
-        };
-    };
+    inputSchema: import("../utils/mcp-schema.js").McpJsonSchema;
 };
 export declare function handleAxiomMcpDemo(input: AxiomMcpDemoInput, conversationDB: ConversationDB): Promise<{
     content: Array<{

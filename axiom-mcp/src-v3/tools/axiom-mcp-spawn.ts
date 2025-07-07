@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
 import { PtyExecutor } from '../executors/pty-executor.js';
 import { SdkExecutor } from '../executors/sdk-executor.js';
 import { StatusManager, TaskStatus } from '../managers/status-manager.js';
@@ -14,6 +13,7 @@ import { RuleVerifier } from '../verifiers/rule-verifier.js';
 import { StreamAggregator } from '../aggregators/stream-aggregator.js';
 import chalk from 'chalk';
 import cliProgress from 'cli-progress';
+import { createMcpCompliantSchema } from '../utils/mcp-schema.js';
 
 // Version tracking
 export const AXIOM_VERSION = '0.5.0-verbose';
@@ -43,7 +43,7 @@ export type AxiomMcpSpawnInput = z.infer<typeof axiomMcpSpawnSchema>;
 export const axiomMcpSpawnTool = {
   name: 'axiom_mcp_spawn',
   description: 'Execute a task that spawns multiple subtasks with recursive capabilities (v0.5.0 - Verbose Mode)',
-  inputSchema: zodToJsonSchema(axiomMcpSpawnSchema),
+  inputSchema: createMcpCompliantSchema(axiomMcpSpawnSchema, 'AxiomMcpSpawnInput'),
 };
 
 // Intervention statistics

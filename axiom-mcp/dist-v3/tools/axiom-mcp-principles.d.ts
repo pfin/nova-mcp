@@ -82,12 +82,7 @@ export type AxiomMcpPrinciplesInput = z.infer<typeof axiomMcpPrinciplesSchema>;
 export declare const axiomMcpPrinciplesTool: {
     name: string;
     description: string;
-    inputSchema: import("zod-to-json-schema").JsonSchema7Type & {
-        $schema?: string | undefined;
-        definitions?: {
-            [key: string]: import("zod-to-json-schema").JsonSchema7Type;
-        };
-    };
+    inputSchema: import("../utils/mcp-schema.js").McpJsonSchema;
 };
 export declare function handleAxiomMcpPrinciples(input: AxiomMcpPrinciplesInput, conversationDB?: ConversationDB): Promise<{
     content: Array<{

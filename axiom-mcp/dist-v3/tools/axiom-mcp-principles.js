@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
 import { UNIVERSAL_CODING_PRINCIPLES, UNIVERSAL_THINKING_PRINCIPLES, PrincipleEnforcer } from '../principles/universal-principles.js';
 import { RuleVerifier } from '../verifiers/rule-verifier.js';
+import { createMcpCompliantSchema } from '../utils/mcp-schema.js';
 export const axiomMcpPrinciplesSchema = z.object({
     action: z.enum(['list', 'check', 'enforce', 'add', 'remove', 'verify']).describe('Action to perform'),
     category: z.enum(['coding', 'thinking', 'execution', 'all']).optional().describe('Filter by category'),
@@ -23,7 +23,7 @@ export const axiomMcpPrinciplesSchema = z.object({
 export const axiomMcpPrinciplesTool = {
     name: 'axiom_mcp_principles',
     description: 'Manage and enforce universal coding and thinking principles',
-    inputSchema: zodToJsonSchema(axiomMcpPrinciplesSchema),
+    inputSchema: createMcpCompliantSchema(axiomMcpPrinciplesSchema, 'AxiomMcpPrinciplesInput'),
 };
 // Store custom principles in memory (in production, use database)
 const customPrinciples = new Map();

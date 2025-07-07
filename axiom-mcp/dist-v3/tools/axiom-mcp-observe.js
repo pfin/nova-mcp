@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
+import { createMcpCompliantSchema } from '../utils/mcp-schema.js';
 export const axiomMcpObserveSchema = z.object({
     mode: z.enum(['all', 'tree', 'recent', 'live']).describe('Observation mode'),
     conversationId: z.string().optional().describe('Conversation ID for tree mode'),
@@ -13,7 +13,7 @@ export const axiomMcpObserveSchema = z.object({
 export const axiomMcpObserveTool = {
     name: 'axiom_mcp_observe',
     description: 'Observe active conversations and their progress across multiple execution branches',
-    inputSchema: zodToJsonSchema(axiomMcpObserveSchema),
+    inputSchema: createMcpCompliantSchema(axiomMcpObserveSchema, 'AxiomMcpObserveInput'),
 };
 export async function handleAxiomMcpObserve(input, db) {
     try {

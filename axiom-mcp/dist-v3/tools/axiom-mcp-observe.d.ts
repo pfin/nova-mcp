@@ -40,12 +40,7 @@ export type AxiomMcpObserveInput = z.infer<typeof axiomMcpObserveSchema>;
 export declare const axiomMcpObserveTool: {
     name: string;
     description: string;
-    inputSchema: import("zod-to-json-schema").JsonSchema7Type & {
-        $schema?: string | undefined;
-        definitions?: {
-            [key: string]: import("zod-to-json-schema").JsonSchema7Type;
-        };
-    };
+    inputSchema: import("../utils/mcp-schema.js").McpJsonSchema;
 };
 export declare function handleAxiomMcpObserve(input: AxiomMcpObserveInput, db: ConversationDB): Promise<{
     content: Array<{

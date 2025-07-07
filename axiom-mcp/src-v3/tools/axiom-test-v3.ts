@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
 import { ClaudeCodeSubprocessV3 } from '../claude-subprocess-v3.js';
+import { createMcpCompliantSchema } from '../utils/mcp-schema.js';
 
 // Define the schema separately
 const axiomTestV3Schema = z.object({
@@ -12,7 +12,7 @@ const axiomTestV3Schema = z.object({
 export const axiomTestV3Tool = {
   name: 'axiom_test_v3',
   description: 'Test Axiom v3 with PTY executor (no timeout!)',
-  inputSchema: zodToJsonSchema(axiomTestV3Schema)
+  inputSchema: createMcpCompliantSchema(axiomTestV3Schema, 'AxiomTestV3Input')
 };
 
 export async function handleAxiomTestV3(

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
+import { createMcpCompliantSchema } from '../utils/mcp-schema.js';
 // Define the schema separately
 const axiomTestV3Schema = z.object({
     prompt: z.string().describe('The prompt to execute'),
@@ -9,7 +9,7 @@ const axiomTestV3Schema = z.object({
 export const axiomTestV3Tool = {
     name: 'axiom_test_v3',
     description: 'Test Axiom v3 with PTY executor (no timeout!)',
-    inputSchema: zodToJsonSchema(axiomTestV3Schema)
+    inputSchema: createMcpCompliantSchema(axiomTestV3Schema, 'AxiomTestV3Input')
 };
 export async function handleAxiomTestV3(args, claudeCode) {
     console.error('[TEST-V3] Starting test with prompt:', args.prompt.substring(0, 50));

@@ -66,12 +66,7 @@ export type AxiomMcpSpawnInput = z.infer<typeof axiomMcpSpawnSchema>;
 export declare const axiomMcpSpawnTool: {
     name: string;
     description: string;
-    inputSchema: import("zod-to-json-schema").JsonSchema7Type & {
-        $schema?: string | undefined;
-        definitions?: {
-            [key: string]: import("zod-to-json-schema").JsonSchema7Type;
-        };
-    };
+    inputSchema: import("../utils/mcp-schema.js").McpJsonSchema;
 };
 export declare function handleAxiomMcpSpawn(input: AxiomMcpSpawnInput, statusManager: StatusManager, conversationDB?: ConversationDB): Promise<{
     content: Array<{

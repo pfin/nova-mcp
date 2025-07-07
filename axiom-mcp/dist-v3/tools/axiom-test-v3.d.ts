@@ -13,12 +13,7 @@ declare const axiomTestV3Schema: z.ZodObject<{
 export declare const axiomTestV3Tool: {
     name: string;
     description: string;
-    inputSchema: import("zod-to-json-schema").JsonSchema7Type & {
-        $schema?: string | undefined;
-        definitions?: {
-            [key: string]: import("zod-to-json-schema").JsonSchema7Type;
-        };
-    };
+    inputSchema: import("../utils/mcp-schema.js").McpJsonSchema;
 };
 export declare function handleAxiomTestV3(args: z.infer<typeof axiomTestV3Schema>, claudeCode: ClaudeCodeSubprocessV3): Promise<{
     content: {
