@@ -15,6 +15,8 @@ import {
 import { HookOrchestrator } from './core/hook-orchestrator.js';
 import { logDebug, getLogFile } from './core/simple-logger.js';
 import * as fs from 'fs/promises';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 
 // Import real components
 import { ConversationDB } from './database/conversation-db.js';
@@ -113,7 +115,7 @@ async function main() {
       tools: [
         {
           name: 'axiom_spawn',
-          description: 'Execute a task with hook-based validation and monitoring',
+          description: 'Execute a task with validation and monitoring. Returns taskId immediately. Use axiom_status to check progress and axiom_output to get results.',
           inputSchema: {
             type: 'object',
             properties: {
@@ -143,7 +145,7 @@ async function main() {
         },
         {
           name: 'axiom_send',
-          description: 'Send a message/command to a running task',
+          description: 'Send input to a running task (e.g., answer prompts, provide data). Include \\n for Enter key.',
           inputSchema: {
             type: 'object',
             properties: {
@@ -161,7 +163,7 @@ async function main() {
         },
         {
           name: 'axiom_status',
-          description: 'Check status of running tasks',
+          description: 'Check task status. Omit taskId to see all tasks. Returns: status, runtime, output lines.',
           inputSchema: {
             type: 'object',
             properties: {
@@ -174,7 +176,7 @@ async function main() {
         },
         {
           name: 'axiom_output',
-          description: 'Get accumulated output from a task',
+          description: 'Get task output (stdout/stderr). Use tail parameter to limit lines returned.',
           inputSchema: {
             type: 'object',
             properties: {
@@ -192,7 +194,7 @@ async function main() {
         },
         {
           name: 'axiom_interrupt',
-          description: 'Interrupt a running task (sends Ctrl+C)',
+          description: 'Stop/interrupt a running task with Ctrl+C. Optional followUp command executes after interrupt.',
           inputSchema: {
             type: 'object',
             properties: {
@@ -206,6 +208,33 @@ async function main() {
               },
             },
             required: ['taskId'],
+          },
+        },
+        {
+          name: 'axiom_claude_orchestrate',
+          description: 'Control Claude instances: spawn/prompt/steer/get_output/status/cleanup. Enables multi-agent orchestration.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              action: {
+                type: 'string',
+                enum: ['spawn', 'prompt', 'steer', 'get_output', 'status', 'cleanup'],
+                description: 'Action to perform',
+              },
+              instanceId: {
+                type: 'string',
+                description: 'Claude instance identifier',
+              },
+              prompt: {
+                type: 'string',
+                description: 'Prompt text (for prompt/steer actions)',
+              },
+              lines: {
+                type: 'number',
+                description: 'Number of output lines to return (for get_output)',
+              },
+            },
+            required: ['action', 'instanceId'],
           },
         },
       ],
@@ -495,6 +524,31 @@ async function main() {
       }
     }
     
+    if (request.params.name === 'axiom_claude_orchestrate') {
+      try {
+        const { axiomClaudeOrchestrate } = await import('./tools/axiom-claude-orchestrate.js');
+        const result = await axiomClaudeOrchestrate(request.params.arguments as any);
+        
+        logDebug('MCP', 'axiom_claude_orchestrate result:', result);
+        
+        return {
+          content: [{
+            type: 'text',
+            text: typeof result === 'string' ? result : JSON.stringify(result, null, 2)
+          }],
+        };
+      } catch (error: any) {
+        logDebug('MCP', 'axiom_claude_orchestrate error:', error);
+        return {
+          content: [{
+            type: 'text',
+            text: `Error: ${error.message}`
+          }],
+          isError: true,
+        };
+      }
+    }
+    
     throw new Error(`Unknown tool: ${request.params.name}`);
   });
   
@@ -524,6 +578,12 @@ async function main() {
           uri: 'axiom://help',
           name: 'Axiom v4 Help',
           description: 'Axiom v4 documentation and usage guide',
+          mimeType: 'text/markdown',
+        },
+        {
+          uri: 'axiom://tools-guide',
+          name: 'Tools Guide for LLMs',
+          description: 'Comprehensive guide for using Axiom MCP tools as an LLM terminal',
           mimeType: 'text/markdown',
         },
       ],
@@ -640,6 +700,30 @@ axiom_spawn({
             },
           ],
         };
+        
+      case 'axiom://tools-guide':
+        try {
+          const toolsGuide = await fs.readFile(join(dirname(fileURLToPath(import.meta.url)), '..', 'AXIOM_MCP_TOOLS_GUIDE.md'), 'utf-8');
+          return {
+            contents: [
+              {
+                uri,
+                mimeType: 'text/markdown',
+                text: toolsGuide,
+              },
+            ],
+          };
+        } catch (err) {
+          return {
+            contents: [
+              {
+                uri,
+                mimeType: 'text/markdown',
+                text: '# Tools Guide\n\nError loading guide. Please check AXIOM_MCP_TOOLS_GUIDE.md exists.',
+              },
+            ],
+          };
+        }
         
       default:
         throw new Error(`Unknown resource: ${uri}`);
