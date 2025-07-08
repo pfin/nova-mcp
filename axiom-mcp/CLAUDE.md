@@ -8,6 +8,38 @@
 3. **Character-level interrupts** - Kill bad processes early
 4. **No false positives** - Only success reaches completion
 
+## CRITICAL LESSON (2025-07-07 18:42)
+**This is EXACTLY why Axiom exists** - to stop me from implementing the wrong thing!
+
+I just spent time implementing `claude --print` which CANNOT be course-corrected. Once it starts, you can only watch or kill it - you cannot redirect it. This completely breaks the Axiom vision of real-time intervention.
+
+**Verified**: `claude --print` ignores all input during execution. It will complete its original task no matter what you try to send it.
+
+This is a perfect example of why we need Axiom - to catch these architectural mistakes BEFORE wasting time on dead-end implementations.
+
+### Why PTY is Required (2025-07-07 18:24)
+After testing multiple approaches:
+1. **child_process.spawn() doesn't work** - Claude detects it's not in a terminal and hangs
+2. **DesktopCommander approach is wrong** - They handle simple commands, not interactive sessions
+3. **PTY (Pseudo-Terminal) is essential** - Claude requires terminal emulation to run interactively
+4. **Shell spawning is needed** - Spawn bash first, then run `claude` inside the shell
+
+Key insight: Interactive programs like Claude check if they're connected to a TTY and behave differently if not.
+
+### Game Bot Analogy Validated (2025-07-07 19:36)
+Gemini confirms: "The game bot analogy is not only useful, it's an exceptionally powerful framework. You're not prompting, you're *playing* the LLM."
+
+Key shift: From **prompt engineering** to **behavioral engineering**. We're building a bot that plays against Claude's training to force code output.
+
+**Critical Implementation Requirements**:
+1. **PTY is mandatory** - Claude detects if it's in a terminal, won't work without it
+2. **State machine for granular control** - Track Claude's "moves" like a fighting game
+3. **Pattern matching for "tells"** - Detect planning behavior early for intervention
+4. **Input buffering** - Queue interventions for frame-perfect timing
+5. **Tmux/expect patterns** - Use Linux automation tools designed for this
+
+See: [`docs/AXIOM_V4_GAME_BOT_ANALOGY.md`](docs/AXIOM_V4_GAME_BOT_ANALOGY.md) & [`docs/AXIOM_V4_GAME_BOT_RESEARCH.md`](docs/AXIOM_V4_GAME_BOT_RESEARCH.md)
+
 ## Critical Context
 
 This is the Axiom MCP v4 project - a hook-first parallel execution observatory that prevents LLM failure modes through decomposition and interruption.
@@ -123,10 +155,11 @@ if (violations.length > 0) {
 
 ## Development Workflow
 
-1. **Always use temporal awareness**:
+1. **ALWAYS use temporal awareness - CRITICAL RULE**:
    ```bash
-   bash date  # Know when you are!
+   bash date  # ALWAYS run this first - NO EXCEPTIONS!
    ```
+   **This is mandatory before ANY action. Files show incorrect dates if you don't check the actual date first.**
 
 2. **Check observability status**:
    ```

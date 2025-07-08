@@ -14,6 +14,9 @@ import { ConversationDB } from './database/conversation-db.js';
 import { EventBus } from './core/event-bus.js';
 import { PtyExecutor } from './executors/pty-executor.js';
 import { StatusManager } from './managers/status-manager.js';
+import { SimpleExecutor } from './executors/simple-executor.js';
+import { SessionBasedExecutor } from './executors/session-based-executor.js';
+import { ProcessExecutor } from './executors/process-executor.js';
 // Import built-in hooks
 import validationHook from './hooks/validation-hook.js';
 import verboseMonitorHook from './hooks/verbose-monitor-hook.js';
@@ -57,12 +60,23 @@ async function main() {
         orchestrator.registerHook(enhancedVerboseHook);
         orchestrator.registerHook(interruptHandlerHook);
         orchestrator.registerHook(monitoringDashboardHook);
-        // Register PTY executor for real streaming
+        // Register Process-based executor (inspired by DesktopCommander)
+        const processExecutor = new ProcessExecutor({
+            hookOrchestrator: orchestrator
+        });
+        orchestrator.registerExecutor('axiom_spawn', processExecutor);
+        // Other executors available but not used
+        const sessionExecutor = new SessionBasedExecutor({
+            hookOrchestrator: orchestrator
+        });
+        const simpleExecutor = new SimpleExecutor({
+            hookOrchestrator: orchestrator
+        });
+        // PTY executor ready but not used yet
         const ptyExecutor = new PtyExecutor({
             enableMonitoring: true,
             hookOrchestrator: orchestrator
         });
-        orchestrator.registerExecutor('axiom_spawn', ptyExecutor);
         // Create MCP server
         const server = new Server({
             name: 'axiom-mcp-v4',
@@ -255,8 +269,22 @@ async function main() {
                         };
                     }
                     // Send message to the task's executor
-                    if (task.executor && task.executor.write) {
-                        task.executor.write(message + '\n');
+                    if (task.executor) {
+                        // Use writeToTask if available (ProcessExecutor)
+                        if ('writeToTask' in task.executor && typeof task.executor.writeToTask === 'function') {
+                            task.executor.writeToTask(taskId, message);
+                        }
+                        else if (task.executor.write) {
+                            task.executor.write(message);
+                        }
+                        else {
+                            return {
+                                content: [{
+                                        type: 'text',
+                                        text: `Task ${taskId} does not support message input`
+                                    }],
+                            };
+                        }
                         logDebug('MCP', `Sent message to task ${taskId}:`, message);
                         return {
                             content: [{
@@ -269,7 +297,7 @@ async function main() {
                         return {
                             content: [{
                                     type: 'text',
-                                    text: `Task ${taskId} does not support message input`
+                                    text: `Task ${taskId} executor not found`
                                 }],
                         };
                     }

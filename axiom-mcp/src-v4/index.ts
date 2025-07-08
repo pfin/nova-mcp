@@ -22,6 +22,8 @@ import { EventBus } from './core/event-bus.js';
 import { PtyExecutor } from './executors/pty-executor.js';
 import { CommandExecutor } from './executors/command-executor.js';
 import { StatusManager } from './managers/status-manager.js';
+import { SimpleExecutor } from './executors/simple-executor.js';
+import { SessionBasedExecutor } from './executors/session-based-executor.js';
 
 // Import built-in hooks
 import validationHook from './hooks/validation-hook.js';
@@ -76,12 +78,20 @@ async function main() {
   orchestrator.registerHook(interruptHandlerHook);
   orchestrator.registerHook(monitoringDashboardHook);
   
-  // Register PTY executor for real streaming
+  // Register PTY executor - the only one that works for interactive Claude
   const ptyExecutor = new PtyExecutor({ 
     enableMonitoring: true,
     hookOrchestrator: orchestrator
   });
   orchestrator.registerExecutor('axiom_spawn', ptyExecutor);
+  
+  // Other executors available but not used
+  const sessionExecutor = new SessionBasedExecutor({ 
+    hookOrchestrator: orchestrator
+  });
+  const simpleExecutor = new SimpleExecutor({ 
+    hookOrchestrator: orchestrator
+  });
   
   // Create MCP server
   const server = new Server(
@@ -287,8 +297,21 @@ async function main() {
         }
         
         // Send message to the task's executor
-        if (task.executor && task.executor.write) {
-          task.executor.write(message + '\n');
+        if (task.executor) {
+          // Use writeToTask if available (ProcessExecutor)
+          if ('writeToTask' in task.executor && typeof task.executor.writeToTask === 'function') {
+            task.executor.writeToTask(taskId, message);
+          } else if (task.executor.write) {
+            task.executor.write(message);
+          } else {
+            return {
+              content: [{
+                type: 'text',
+                text: `Task ${taskId} does not support message input`
+              }],
+            };
+          }
+          
           logDebug('MCP', `Sent message to task ${taskId}:`, message);
           
           return {
@@ -301,7 +324,7 @@ async function main() {
           return {
             content: [{
               type: 'text',
-              text: `Task ${taskId} does not support message input`
+              text: `Task ${taskId} executor not found`
             }],
           };
         }

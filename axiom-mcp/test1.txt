@@ -1,0 +1,2 @@
+Task 1 started at: ${new Date().toISOString()}
+This is from the first parallel task.

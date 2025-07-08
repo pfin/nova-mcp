@@ -235,6 +235,14 @@ export class HookOrchestrator extends EventEmitter {
           }
         }
         
+        // Update task output
+        const task = this.activeTasks.get(taskId);
+        if (task) {
+          task.output += data;
+          if (!task.streamData) task.streamData = [];
+          task.streamData.push(data);
+        }
+        
         // Send notification if sender provided
         if (args.notificationSender) {
           try {

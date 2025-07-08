@@ -160,6 +160,14 @@ export class HookOrchestrator extends EventEmitter {
                         this.logger.info('HookOrchestrator', 'streamHandler', 'Intervention injected', { taskId });
                     }
                 }
+                // Update task output
+                const task = this.activeTasks.get(taskId);
+                if (task) {
+                    task.output += data;
+                    if (!task.streamData)
+                        task.streamData = [];
+                    task.streamData.push(data);
+                }
                 // Send notification if sender provided
                 if (args.notificationSender) {
                     try {

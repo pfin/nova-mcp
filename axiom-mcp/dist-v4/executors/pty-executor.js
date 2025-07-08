@@ -132,59 +132,25 @@ export class PtyExecutor extends EventEmitter {
                     request: { tool: 'pty_executor', args: { prompt, systemPrompt } }
                 });
             }
-            // Execute claude command with the prompt
-            // NOTE: We use interactive mode, NOT --print (which cannot be course-corrected)
-            const claudeCommand = `claude "${prompt.replace(/"/g, '\\"')}"\n`;
-            logger.info('PtyExecutor', 'execute', 'Executing claude command', {
+            // Start claude in interactive mode
+            const claudeCommand = `claude\n`;
+            logger.info('PtyExecutor', 'execute', 'Starting interactive Claude', {
                 taskId,
-                commandLength: claudeCommand.length,
-                commandPreview: claudeCommand.slice(0, 100)
+                prompt: prompt.slice(0, 100)
             });
-            logDebug('PTY', 'Writing claude command to PTY', {
-                command: claudeCommand.slice(0, 200),
-                ptyPid: this.pty.pid,
-                ptyIsAlive: this.pty.pid !== undefined
+            logDebug('PTY', 'Starting Claude interactive session', {
+                ptyPid: this.pty.pid
             });
-            // CRITICAL DEBUG: Add test to see if PTY is even working
-            logDebug('PTY', 'DEBUG MODE: Testing with simple commands first');
-            // First test if PTY is responsive
-            logDebug('PTY', 'Testing PTY responsiveness with echo');
-            this.pty.write('echo "PTY_TEST_OK"\n');
-            // Small delay to see if we get echo response
+            // Start Claude
+            this.pty.write(claudeCommand);
+            // Wait for Claude to start, then send the prompt
             setTimeout(() => {
-                if (this.output.length === 0) {
-                    logDebug('PTY', 'WARNING: No response from echo test - PTY may be unresponsive');
-                }
-                else {
-                    logDebug('PTY', 'Echo test successful, output so far:', {
-                        outputLength: this.output.length,
-                        preview: this.output.slice(0, 100)
-                    });
-                }
-                // Check if claude is available
-                logDebug('PTY', 'Checking claude availability');
+                logDebug('PTY', 'Sending prompt to Claude', {
+                    prompt: prompt.slice(0, 100)
+                });
                 if (this.pty)
-                    this.pty.write('which claude\n');
-                // Another delay then write actual command
-                setTimeout(() => {
-                    logDebug('PTY', 'Now writing actual claude command');
-                    if (this.pty) {
-                        this.pty.write(claudeCommand);
-                        logDebug('PTY', 'Claude command written to PTY buffer');
-                        // Add immediate check
-                        setTimeout(() => {
-                            logDebug('PTY', 'Post-command status check', {
-                                outputLength: this.output.length,
-                                isComplete: this.isComplete,
-                                ptyAlive: !!this.pty
-                            });
-                        }, 500);
-                    }
-                    else {
-                        logDebug('PTY', 'ERROR: PTY is undefined, cannot write command');
-                    }
-                }, 200);
-            }, 200);
+                    this.pty.write(prompt + '\n');
+            }, 1000);
             logDebug('PTY', 'Commands queued for execution');
             logger.debug('PtyExecutor', 'execute', 'Command written, starting heartbeat', { taskId });
             // Send heartbeat to prevent hanging
