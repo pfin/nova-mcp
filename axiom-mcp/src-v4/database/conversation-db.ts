@@ -50,7 +50,10 @@ export class ConversationDB {
   private hookOrchestrator?: any; // Will be injected
   
   constructor(dbPath?: string) {
-    this.dbPath = dbPath || path.join(process.cwd(), 'axiom-v4.db');
+    // Use environment variable or fallback to temp directory
+    const defaultPath = process.env.AXIOM_DB_PATH || 
+                       path.join(process.env.HOME || process.env.USERPROFILE || '/tmp', '.axiom-mcp', 'axiom-v4.db');
+    this.dbPath = dbPath || defaultPath;
   }
   
   // v4 addition: Set hook orchestrator for DB events

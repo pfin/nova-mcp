@@ -212,13 +212,13 @@ async function main() {
         },
         {
           name: 'axiom_claude_orchestrate',
-          description: 'Control Claude instances: spawn/prompt/steer/get_output/status/cleanup. Enables multi-agent orchestration.',
+          description: 'Control Claude instances with pattern-based intervention: spawn/prompt/steer/get_output/status/cleanup/add_pattern/get_interventions. Detects toxic patterns and intervenes automatically.',
           inputSchema: {
             type: 'object',
             properties: {
               action: {
                 type: 'string',
-                enum: ['spawn', 'prompt', 'steer', 'get_output', 'status', 'cleanup'],
+                enum: ['spawn', 'prompt', 'steer', 'get_output', 'status', 'cleanup', 'add_pattern', 'get_interventions'],
                 description: 'Action to perform',
               },
               instanceId: {
@@ -232,6 +232,18 @@ async function main() {
               lines: {
                 type: 'number',
                 description: 'Number of output lines to return (for get_output)',
+              },
+              pattern: {
+                type: 'object',
+                description: 'Pattern rule for add_pattern action',
+                properties: {
+                  id: { type: 'string' },
+                  pattern: { type: 'string' },
+                  action: { type: 'string' },
+                  priority: { type: 'number' },
+                  cooldown: { type: 'number' },
+                  description: { type: 'string' }
+                }
               },
             },
             required: ['action', 'instanceId'],
@@ -526,8 +538,8 @@ async function main() {
     
     if (request.params.name === 'axiom_claude_orchestrate') {
       try {
-        const { axiomClaudeOrchestrate } = await import('./tools/axiom-claude-orchestrate.js');
-        const result = await axiomClaudeOrchestrate(request.params.arguments as any);
+        const { axiomClaudeOrchestrateEnhanced } = await import('./tools/claude-orchestrate-with-patterns.js');
+        const result = await axiomClaudeOrchestrateEnhanced(request.params.arguments as any);
         
         logDebug('MCP', 'axiom_claude_orchestrate result:', result);
         
@@ -584,6 +596,24 @@ async function main() {
           uri: 'axiom://tools-guide',
           name: 'Tools Guide for LLMs',
           description: 'Comprehensive guide for using Axiom MCP tools as an LLM terminal',
+          mimeType: 'text/markdown',
+        },
+        {
+          uri: 'axiom://claude-control-guide',
+          name: 'Claude Control Guide',
+          description: 'Step-by-step guide for controlling Claude instances via axiom_spawn',
+          mimeType: 'text/markdown',
+        },
+        {
+          uri: 'axiom://integration-guide',
+          name: 'Claude Code + Axiom Integration Guide',
+          description: 'Complete guide for using Claude Code through Axiom MCP tools',
+          mimeType: 'text/markdown',
+        },
+        {
+          uri: 'axiom://quick-start',
+          name: 'Axiom Quick Start',
+          description: 'Essential quick reference for using Axiom MCP with Claude',
           mimeType: 'text/markdown',
         },
       ],
@@ -725,6 +755,78 @@ axiom_spawn({
           };
         }
         
+      case 'axiom://claude-control-guide':
+        try {
+          const controlGuide = await fs.readFile(join(dirname(fileURLToPath(import.meta.url)), '..', 'AXIOM_CLAUDE_CONTROL_GUIDE.md'), 'utf-8');
+          return {
+            contents: [
+              {
+                uri,
+                mimeType: 'text/markdown',
+                text: controlGuide,
+              },
+            ],
+          };
+        } catch (err) {
+          return {
+            contents: [
+              {
+                uri,
+                mimeType: 'text/markdown',
+                text: '# Claude Control Guide\n\nError loading guide. Please check AXIOM_CLAUDE_CONTROL_GUIDE.md exists.',
+              },
+            ],
+          };
+        }
+        
+      case 'axiom://integration-guide':
+        try {
+          const integrationGuide = await fs.readFile(join(dirname(fileURLToPath(import.meta.url)), '..', 'CLAUDE_CODE_AXIOM_INTEGRATION_GUIDE.md'), 'utf-8');
+          return {
+            contents: [
+              {
+                uri,
+                mimeType: 'text/markdown',
+                text: integrationGuide,
+              },
+            ],
+          };
+        } catch (err) {
+          return {
+            contents: [
+              {
+                uri,
+                mimeType: 'text/markdown',
+                text: '# Integration Guide\n\nError loading guide. Please check CLAUDE_CODE_AXIOM_INTEGRATION_GUIDE.md exists.',
+              },
+            ],
+          };
+        }
+        
+      case 'axiom://quick-start':
+        try {
+          const quickStart = await fs.readFile(join(dirname(fileURLToPath(import.meta.url)), '..', 'AXIOM_QUICK_START.md'), 'utf-8');
+          return {
+            contents: [
+              {
+                uri,
+                mimeType: 'text/markdown',
+                text: quickStart,
+              },
+            ],
+          };
+        } catch (err) {
+          return {
+            contents: [
+              {
+                uri,
+                mimeType: 'text/markdown',
+                text: '# Quick Start\n\nError loading guide. Please check AXIOM_QUICK_START.md exists.',
+              },
+            ],
+          };
+        }
+        
       default:
         throw new Error(`Unknown resource: ${uri}`);
     }
@@ -734,9 +836,11 @@ axiom_spawn({
   const transport = new StdioServerTransport();
   await server.connect(transport);
   
-  // Only log startup messages in debug mode
+  // Follow the pattern from other MCP servers
+  console.error('Axiom MCP Server v4 running on stdio');
+  
+  // Show detailed startup messages in debug mode
   if (process.env.AXIOM_LOG_LEVEL === 'DEBUG' || process.env.AXIOM_LOG_LEVEL === 'TRACE') {
-    console.error('[Axiom v4] Hook-first MCP server started');
     console.error('[Axiom v4] Database:', db.constructor.name);
     console.error('[Axiom v4] Executor:', ptyExecutor.constructor.name);
     console.error('[Axiom v4] Registered hooks:', [

@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "axiom-mcp-v4": {
+      "command": "node",
+      "args": ["/home/peter/nova-mcp/axiom-mcp/dist-v4/index.js"],
+      "env": {
+        "AXIOM_LOG_LEVEL": "INFO",
+        "AXIOM_DB_PATH": "/home/peter/nova-mcp/axiom-mcp/axiom-v4.db"
+      }
+    }
+  }
+}
