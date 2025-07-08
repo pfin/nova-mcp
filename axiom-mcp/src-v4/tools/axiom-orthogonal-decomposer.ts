@@ -52,18 +52,26 @@ export class OrthogonalDecomposer extends EventEmitter {
   private cleanupTasks: Map<string, CleanupTask> = new Map();
   private maxParallel = 10;
   private taskTimeout = 5 * 60 * 1000; // 5 minutes
+  private isCleaningUp = false;
   
   constructor() {
     super();
     
     // Register process cleanup handlers
-    process.once('exit', () => this.cleanupAll());
-    process.once('SIGINT', () => {
-      this.cleanupAll();
+    const cleanup = async () => {
+      if (!this.isCleaningUp) {
+        this.isCleaningUp = true;
+        await this.cleanupAll();
+      }
+    };
+    
+    process.once('exit', cleanup);
+    process.once('SIGINT', async () => {
+      await cleanup();
       process.exit(0);
     });
-    process.once('SIGTERM', () => {
-      this.cleanupAll();
+    process.once('SIGTERM', async () => {
+      await cleanup();
       process.exit(0);
     });
   }
@@ -194,10 +202,11 @@ export class OrthogonalDecomposer extends EventEmitter {
       }
       
       return orthogonalResults;
-    } finally {
-      // Always cleanup
-      await this.cleanupAll();
+    } catch (error: any) {
+      logDebug('DECOMPOSER', `Execution error: ${error.message}`);
+      throw error;
     }
+    // Don't cleanup here - let caller decide when to cleanup
   }
   
   private async executeParallel(tasks: OrthogonalTask[]): Promise<Map<string, TaskExecution>> {
@@ -252,6 +261,11 @@ export class OrthogonalDecomposer extends EventEmitter {
       }
     }, 10000); // Check every 10 seconds
     
+    // Register monitor for cleanup
+    const cleanup = this.cleanupTasks.get('monitor') || { workspace: '', intervals: [], timeouts: [] };
+    cleanup.intervals.push(monitor);
+    this.cleanupTasks.set('monitor', cleanup);
+    
     // Wait for all tasks
     await Promise.allSettled(promises);
     clearInterval(monitor);
@@ -263,25 +277,29 @@ export class OrthogonalDecomposer extends EventEmitter {
     const execution = this.executions.get(taskId);
     if (!execution) return;
     
-    try {
-      execution.status = 'running';
-      execution.startTime = Date.now();
-      
-      logDebug('DECOMPOSER', `Starting task ${taskId} in ${execution.workspace}`);
-      
-      // Copy base files to workspace
-      await this.setupWorkspace(execution.workspace);
-      
-      // Spawn Claude
-      const claude = pty.spawn('claude', [], {
-        name: 'xterm-color',
-        cols: 80,
-        rows: 30,
-        cwd: execution.workspace,
-        env: process.env as any
-      });
-      
-      execution.claude = claude;
+    let retries = 0;
+    const maxRetries = 2;
+    
+    while (retries <= maxRetries) {
+      try {
+        execution.status = 'running';
+        execution.startTime = Date.now();
+        
+        logDebug('DECOMPOSER', `Starting task ${taskId} in ${execution.workspace} (attempt ${retries + 1})`);
+        
+        // Copy base files to workspace
+        await this.setupWorkspace(execution.workspace);
+        
+        // Spawn Claude
+        const claude = pty.spawn('claude', [], {
+          name: 'xterm-color',
+          cols: 80,
+          rows: 30,
+          cwd: execution.workspace,
+          env: process.env as any
+        });
+        
+        execution.claude = claude;
       
       // Update cleanup
       const cleanup = this.cleanupTasks.get(taskId);
@@ -340,13 +358,27 @@ export class OrthogonalDecomposer extends EventEmitter {
         logDebug('DECOMPOSER', `Task ${taskId} failed - missing outputs`);
       }
       
-    } catch (error: any) {
-      execution.status = 'failed';
-      logDebug('DECOMPOSER', `Task ${taskId} error: ${error.message}`);
-    } finally {
-      // Cleanup task-specific resources
-      if (execution.claude && execution.status !== 'running') {
-        execution.claude.kill();
+        // If we got here, task completed - break out of retry loop
+        break;
+        
+      } catch (error: any) {
+        logDebug('DECOMPOSER', `Task ${taskId} error (attempt ${retries + 1}): ${error.message}`);
+        
+        // Cleanup before retry
+        if (execution.claude) {
+          execution.claude.kill();
+          execution.claude = undefined;
+        }
+        
+        retries++;
+        if (retries > maxRetries) {
+          execution.status = 'failed';
+          logDebug('DECOMPOSER', `Task ${taskId} failed after ${maxRetries + 1} attempts`);
+          break;
+        }
+        
+        // Wait before retry
+        await new Promise(r => setTimeout(r, 2000));
       }
     }
   }
@@ -600,6 +632,12 @@ export class OrthogonalDecomposer extends EventEmitter {
   }
   
   async cleanupAll(): Promise<void> {
+    if (this.isCleaningUp) {
+      logDebug('DECOMPOSER', 'Already cleaning up, skipping...');
+      return;
+    }
+    
+    this.isCleaningUp = true;
     logDebug('DECOMPOSER', 'Cleaning up all tasks...');
     
     const cleanupPromises: Promise<void>[] = [];
@@ -614,11 +652,20 @@ export class OrthogonalDecomposer extends EventEmitter {
     this.cleanupTasks.clear();
     
     logDebug('DECOMPOSER', 'Cleanup complete');
+    this.isCleaningUp = false;
   }
 }
 
 // Global instance
 let decomposer: OrthogonalDecomposer | null = null;
+
+// Public cleanup function
+export async function cleanupDecomposer() {
+  if (decomposer) {
+    await decomposer.cleanupAll();
+    decomposer = null;
+  }
+}
 
 export async function axiomOrthogonalDecompose(params: z.infer<typeof orthogonalDecomposerSchema>) {
   if (!decomposer) {

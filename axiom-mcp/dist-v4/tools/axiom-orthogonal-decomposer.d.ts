@@ -39,6 +39,7 @@ export declare class OrthogonalDecomposer extends EventEmitter {
     private cleanupTasks;
     private maxParallel;
     private taskTimeout;
+    private isCleaningUp;
     constructor();
     decompose(mainPrompt: string): Promise<OrthogonalTask[]>;
     private heuristicDecompose;
@@ -59,6 +60,7 @@ export declare class OrthogonalDecomposer extends EventEmitter {
     cleanup(taskId: string): Promise<void>;
     cleanupAll(): Promise<void>;
 }
+export declare function cleanupDecomposer(): Promise<void>;
 export declare function axiomOrthogonalDecompose(params: z.infer<typeof orthogonalDecomposerSchema>): Promise<string>;
 export {};
 //# sourceMappingURL=axiom-orthogonal-decomposer.d.ts.map

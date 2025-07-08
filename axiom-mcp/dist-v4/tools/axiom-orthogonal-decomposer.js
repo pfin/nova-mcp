@@ -23,16 +23,23 @@ export class OrthogonalDecomposer extends EventEmitter {
     cleanupTasks = new Map();
     maxParallel = 10;
     taskTimeout = 5 * 60 * 1000; // 5 minutes
+    isCleaningUp = false;
     constructor() {
         super();
         // Register process cleanup handlers
-        process.once('exit', () => this.cleanupAll());
-        process.once('SIGINT', () => {
-            this.cleanupAll();
+        const cleanup = async () => {
+            if (!this.isCleaningUp) {
+                this.isCleaningUp = true;
+                await this.cleanupAll();
+            }
+        };
+        process.once('exit', cleanup);
+        process.once('SIGINT', async () => {
+            await cleanup();
             process.exit(0);
         });
-        process.once('SIGTERM', () => {
-            this.cleanupAll();
+        process.once('SIGTERM', async () => {
+            await cleanup();
             process.exit(0);
         });
     }
@@ -140,10 +147,11 @@ export class OrthogonalDecomposer extends EventEmitter {
             }
             return orthogonalResults;
         }
-        finally {
-            // Always cleanup
-            await this.cleanupAll();
+        catch (error) {
+            logDebug('DECOMPOSER', `Execution error: ${error.message}`);
+            throw error;
         }
+        // Don't cleanup here - let caller decide when to cleanup
     }
     async executeParallel(tasks) {
         const results = new Map();
@@ -187,6 +195,10 @@ export class OrthogonalDecomposer extends EventEmitter {
                 }
             }
         }, 10000); // Check every 10 seconds
+        // Register monitor for cleanup
+        const cleanup = this.cleanupTasks.get('monitor') || { workspace: '', intervals: [], timeouts: [] };
+        cleanup.intervals.push(monitor);
+        this.cleanupTasks.set('monitor', cleanup);
         // Wait for all tasks
         await Promise.allSettled(promises);
         clearInterval(monitor);
@@ -196,79 +208,91 @@ export class OrthogonalDecomposer extends EventEmitter {
         const execution = this.executions.get(taskId);
         if (!execution)
             return;
-        try {
-            execution.status = 'running';
-            execution.startTime = Date.now();
-            logDebug('DECOMPOSER', `Starting task ${taskId} in ${execution.workspace}`);
-            // Copy base files to workspace
-            await this.setupWorkspace(execution.workspace);
-            // Spawn Claude
-            const claude = pty.spawn('claude', [], {
-                name: 'xterm-color',
-                cols: 80,
-                rows: 30,
-                cwd: execution.workspace,
-                env: process.env
-            });
-            execution.claude = claude;
-            // Update cleanup
-            const cleanup = this.cleanupTasks.get(taskId);
-            if (cleanup) {
-                cleanup.claude = claude;
-            }
-            // Monitor output
-            claude.onData((data) => {
-                execution.output.push(data);
-                // Detect completion patterns
-                if (data.includes('task complete') ||
-                    data.includes('finished') ||
-                    execution.output.join('').includes('```')) {
-                    // Give a bit more time for final output
-                    setTimeout(() => {
-                        if (execution.status === 'running') {
-                            execution.status = 'complete';
-                            claude.kill();
-                        }
-                    }, 5000);
-                }
-            });
-            // Wait for ready state
-            await this.waitForReady(claude, execution);
-            // Send task prompt
-            await this.sendPrompt(claude, execution.task.prompt);
-            // Wait for completion or timeout
-            await new Promise((resolve) => {
-                claude.onExit(() => {
-                    resolve();
+        let retries = 0;
+        const maxRetries = 2;
+        while (retries <= maxRetries) {
+            try {
+                execution.status = 'running';
+                execution.startTime = Date.now();
+                logDebug('DECOMPOSER', `Starting task ${taskId} in ${execution.workspace} (attempt ${retries + 1})`);
+                // Copy base files to workspace
+                await this.setupWorkspace(execution.workspace);
+                // Spawn Claude
+                const claude = pty.spawn('claude', [], {
+                    name: 'xterm-color',
+                    cols: 80,
+                    rows: 30,
+                    cwd: execution.workspace,
+                    env: process.env
                 });
-                // Also resolve on status change
-                const checkStatus = setInterval(() => {
-                    if (execution.status !== 'running') {
-                        clearInterval(checkStatus);
-                        resolve();
+                execution.claude = claude;
+                // Update cleanup
+                const cleanup = this.cleanupTasks.get(taskId);
+                if (cleanup) {
+                    cleanup.claude = claude;
+                }
+                // Monitor output
+                claude.onData((data) => {
+                    execution.output.push(data);
+                    // Detect completion patterns
+                    if (data.includes('task complete') ||
+                        data.includes('finished') ||
+                        execution.output.join('').includes('```')) {
+                        // Give a bit more time for final output
+                        setTimeout(() => {
+                            if (execution.status === 'running') {
+                                execution.status = 'complete';
+                                claude.kill();
+                            }
+                        }, 5000);
                     }
-                }, 1000);
-            });
-            // Collect created files
-            execution.files = await this.collectFiles(execution.workspace, execution.task.outputs);
-            // Verify success
-            if (execution.task.outputs.every(file => execution.files.has(file))) {
-                execution.status = 'complete';
-                logDebug('DECOMPOSER', `Task ${taskId} completed successfully`);
+                });
+                // Wait for ready state
+                await this.waitForReady(claude, execution);
+                // Send task prompt
+                await this.sendPrompt(claude, execution.task.prompt);
+                // Wait for completion or timeout
+                await new Promise((resolve) => {
+                    claude.onExit(() => {
+                        resolve();
+                    });
+                    // Also resolve on status change
+                    const checkStatus = setInterval(() => {
+                        if (execution.status !== 'running') {
+                            clearInterval(checkStatus);
+                            resolve();
+                        }
+                    }, 1000);
+                });
+                // Collect created files
+                execution.files = await this.collectFiles(execution.workspace, execution.task.outputs);
+                // Verify success
+                if (execution.task.outputs.every(file => execution.files.has(file))) {
+                    execution.status = 'complete';
+                    logDebug('DECOMPOSER', `Task ${taskId} completed successfully`);
+                }
+                else {
+                    execution.status = 'failed';
+                    logDebug('DECOMPOSER', `Task ${taskId} failed - missing outputs`);
+                }
+                // If we got here, task completed - break out of retry loop
+                break;
             }
-            else {
-                execution.status = 'failed';
-                logDebug('DECOMPOSER', `Task ${taskId} failed - missing outputs`);
-            }
-        }
-        catch (error) {
-            execution.status = 'failed';
-            logDebug('DECOMPOSER', `Task ${taskId} error: ${error.message}`);
-        }
-        finally {
-            // Cleanup task-specific resources
-            if (execution.claude && execution.status !== 'running') {
-                execution.claude.kill();
+            catch (error) {
+                logDebug('DECOMPOSER', `Task ${taskId} error (attempt ${retries + 1}): ${error.message}`);
+                // Cleanup before retry
+                if (execution.claude) {
+                    execution.claude.kill();
+                    execution.claude = undefined;
+                }
+                retries++;
+                if (retries > maxRetries) {
+                    execution.status = 'failed';
+                    logDebug('DECOMPOSER', `Task ${taskId} failed after ${maxRetries + 1} attempts`);
+                    break;
+                }
+                // Wait before retry
+                await new Promise(r => setTimeout(r, 2000));
             }
         }
     }
@@ -476,6 +500,11 @@ export class OrthogonalDecomposer extends EventEmitter {
         }
     }
     async cleanupAll() {
+        if (this.isCleaningUp) {
+            logDebug('DECOMPOSER', 'Already cleaning up, skipping...');
+            return;
+        }
+        this.isCleaningUp = true;
         logDebug('DECOMPOSER', 'Cleaning up all tasks...');
         const cleanupPromises = [];
         for (const [taskId, _] of this.cleanupTasks) {
@@ -485,10 +514,18 @@ export class OrthogonalDecomposer extends EventEmitter {
         this.executions.clear();
         this.cleanupTasks.clear();
         logDebug('DECOMPOSER', 'Cleanup complete');
+        this.isCleaningUp = false;
     }
 }
 // Global instance
 let decomposer = null;
+// Public cleanup function
+export async function cleanupDecomposer() {
+    if (decomposer) {
+        await decomposer.cleanupAll();
+        decomposer = null;
+    }
+}
 export async function axiomOrthogonalDecompose(params) {
     if (!decomposer) {
         decomposer = new OrthogonalDecomposer();
