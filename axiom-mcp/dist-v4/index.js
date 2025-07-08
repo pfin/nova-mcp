@@ -266,6 +266,36 @@ async function main() {
                             required: ['action', 'instanceId'],
                         },
                     },
+                    {
+                        name: 'axiom_orthogonal_decompose',
+                        description: 'Decompose complex tasks into 5-minute orthogonal chunks that can execute in parallel without conflicts. Actions: decompose (plan tasks), execute (run decomposition), status (check progress), merge (combine results).',
+                        inputSchema: {
+                            type: 'object',
+                            properties: {
+                                action: {
+                                    type: 'string',
+                                    enum: ['decompose', 'execute', 'status', 'merge'],
+                                    description: 'Action to perform',
+                                },
+                                prompt: {
+                                    type: 'string',
+                                    description: 'Task to decompose/execute (required for decompose/execute)',
+                                },
+                                taskIds: {
+                                    type: 'array',
+                                    items: { type: 'string' },
+                                    description: 'Specific task IDs (for status/merge)',
+                                },
+                                strategy: {
+                                    type: 'string',
+                                    enum: ['orthogonal', 'mcts', 'hybrid'],
+                                    description: 'Decomposition strategy (default: orthogonal)',
+                                    default: 'orthogonal',
+                                },
+                            },
+                            required: ['action'],
+                        },
+                    },
                 ],
             };
         });
@@ -572,6 +602,29 @@ async function main() {
                 }
                 catch (error) {
                     logDebug('MCP', 'axiom_claude_orchestrate_proper error:', error);
+                    return {
+                        content: [{
+                                type: 'text',
+                                text: `Error: ${error.message}`
+                            }],
+                        isError: true,
+                    };
+                }
+            }
+            if (request.params.name === 'axiom_orthogonal_decompose') {
+                try {
+                    const { axiomOrthogonalDecompose } = await import('./tools/axiom-orthogonal-decomposer.js');
+                    const result = await axiomOrthogonalDecompose(request.params.arguments);
+                    logDebug('MCP', 'axiom_orthogonal_decompose result:', result);
+                    return {
+                        content: [{
+                                type: 'text',
+                                text: typeof result === 'string' ? result : JSON.stringify(result, null, 2)
+                            }],
+                    };
+                }
+                catch (error) {
+                    logDebug('MCP', 'axiom_orthogonal_decompose error:', error);
                     return {
                         content: [{
                                 type: 'text',
