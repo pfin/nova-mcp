@@ -553,6 +553,12 @@ async function main() {
                         mimeType: 'text/markdown',
                     },
                     {
+                        uri: 'axiom://parallel-execution',
+                        name: 'Parallel Execution Guide',
+                        description: 'How to run multiple tasks simultaneously using git worktrees',
+                        mimeType: 'text/markdown',
+                    },
+                    {
                         uri: 'axiom://claude-control-guide',
                         name: 'Claude Control Guide',
                         description: 'Step-by-step guide for controlling Claude instances via axiom_spawn',
@@ -772,6 +778,30 @@ axiom_spawn({
                                     uri,
                                     mimeType: 'text/markdown',
                                     text: '# Quick Start\n\nError loading guide. Please check AXIOM_QUICK_START.md exists.',
+                                },
+                            ],
+                        };
+                    }
+                case 'axiom://parallel-execution':
+                    try {
+                        const parallelGuide = await fs.readFile(join(dirname(fileURLToPath(import.meta.url)), '..', 'LLM_PARALLEL_EXECUTION_GUIDE.md'), 'utf-8');
+                        return {
+                            contents: [
+                                {
+                                    uri,
+                                    mimeType: 'text/markdown',
+                                    text: parallelGuide,
+                                },
+                            ],
+                        };
+                    }
+                    catch (err) {
+                        return {
+                            contents: [
+                                {
+                                    uri,
+                                    mimeType: 'text/markdown',
+                                    text: '# Parallel Execution Guide\n\nError loading guide. Please check LLM_PARALLEL_EXECUTION_GUIDE.md exists.',
                                 },
                             ],
                         };
