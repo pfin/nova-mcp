@@ -36,8 +36,10 @@ interface TaskExecution {
 }
 export declare class OrthogonalDecomposer extends EventEmitter {
     private executions;
+    private cleanupTasks;
     private maxParallel;
     private taskTimeout;
+    constructor();
     decompose(mainPrompt: string): Promise<OrthogonalTask[]>;
     private heuristicDecompose;
     execute(tasks: OrthogonalTask[]): Promise<Map<string, TaskExecution>>;
@@ -50,6 +52,12 @@ export declare class OrthogonalDecomposer extends EventEmitter {
     private executeReserves;
     merge(executions: Map<string, TaskExecution>): Promise<Map<string, string>>;
     private scoreExecution;
+    getExecutions(): Map<string, TaskExecution>;
+    getExecution(taskId: string): TaskExecution | undefined;
+    mergeLatest(): Promise<Map<string, string>>;
+    private registerCleanup;
+    cleanup(taskId: string): Promise<void>;
+    cleanupAll(): Promise<void>;
 }
 export declare function axiomOrthogonalDecompose(params: z.infer<typeof orthogonalDecomposerSchema>): Promise<string>;
 export {};

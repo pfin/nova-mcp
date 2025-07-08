@@ -5,6 +5,12 @@ import * as fs from 'fs/promises';
 import * as pty from 'node-pty';
 import { EventEmitter } from 'events';
 import { logDebug } from '../core/simple-logger.js';
+// Working Claude control sequences from our tests
+const CLAUDE_CONTROLS = {
+    SUBMIT: '\x0d', // Ctrl+Enter (verified working)
+    INTERRUPT: '\x1b', // ESC
+    BACKSPACE: '\x7f'
+};
 // Schema for orthogonal task decomposition
 export const orthogonalDecomposerSchema = z.object({
     action: z.enum(['decompose', 'execute', 'status', 'merge']),
@@ -14,8 +20,22 @@ export const orthogonalDecomposerSchema = z.object({
 });
 export class OrthogonalDecomposer extends EventEmitter {
     executions = new Map();
+    cleanupTasks = new Map();
     maxParallel = 10;
     taskTimeout = 5 * 60 * 1000; // 5 minutes
+    constructor() {
+        super();
+        // Register process cleanup handlers
+        process.once('exit', () => this.cleanupAll());
+        process.once('SIGINT', () => {
+            this.cleanupAll();
+            process.exit(0);
+        });
+        process.once('SIGTERM', () => {
+            this.cleanupAll();
+            process.exit(0);
+        });
+    }
     async decompose(mainPrompt) {
         logDebug('DECOMPOSER', `Decomposing: ${mainPrompt.substring(0, 50)}...`);
         // For now, use a heuristic decomposition
@@ -100,24 +120,30 @@ export class OrthogonalDecomposer extends EventEmitter {
     }
     async execute(tasks) {
         logDebug('DECOMPOSER', `Executing ${tasks.length} tasks in parallel`);
-        // Separate orthogonal and reserve tasks
-        const orthogonal = tasks.filter(t => !t.dependencies);
-        const reserves = tasks.filter(t => t.dependencies);
-        // Execute orthogonal tasks in parallel
-        const orthogonalResults = await this.executeParallel(orthogonal);
-        // Check for failures and roadblocks
-        const failures = Array.from(orthogonalResults.values())
-            .filter(r => r.status === 'failed' || r.status === 'timeout');
-        if (failures.length > 0) {
-            logDebug('DECOMPOSER', `${failures.length} tasks failed, activating reserves`);
-            // Execute appropriate reserve tasks
-            const reserveResults = await this.executeReserves(reserves, failures);
-            // Merge results
-            for (const [id, result] of reserveResults) {
-                orthogonalResults.set(id, result);
+        try {
+            // Separate orthogonal and reserve tasks
+            const orthogonal = tasks.filter(t => !t.dependencies);
+            const reserves = tasks.filter(t => t.dependencies);
+            // Execute orthogonal tasks in parallel
+            const orthogonalResults = await this.executeParallel(orthogonal);
+            // Check for failures and roadblocks
+            const failures = Array.from(orthogonalResults.values())
+                .filter(r => r.status === 'failed' || r.status === 'timeout');
+            if (failures.length > 0) {
+                logDebug('DECOMPOSER', `${failures.length} tasks failed, activating reserves`);
+                // Execute appropriate reserve tasks
+                const reserveResults = await this.executeReserves(reserves, failures);
+                // Merge results
+                for (const [id, result] of reserveResults) {
+                    orthogonalResults.set(id, result);
+                }
             }
+            return orthogonalResults;
         }
-        return orthogonalResults;
+        finally {
+            // Always cleanup
+            await this.cleanupAll();
+        }
     }
     async executeParallel(tasks) {
         const results = new Map();
@@ -134,6 +160,8 @@ export class OrthogonalDecomposer extends EventEmitter {
             };
             this.executions.set(task.id, execution);
             results.set(task.id, execution);
+            // Register cleanup immediately
+            this.registerCleanup(task.id, { workspace, intervals: [], timeouts: [] });
         }
         // Start all tasks
         const promises = tasks.map(task => this.executeSingleTask(task.id));
@@ -145,8 +173,13 @@ export class OrthogonalDecomposer extends EventEmitter {
                     if (elapsed > this.taskTimeout) {
                         logDebug('DECOMPOSER', `Task ${id} timeout, interrupting`);
                         if (exec.claude) {
-                            exec.claude.write('\x1b'); // ESC to interrupt
-                            exec.claude.kill();
+                            exec.claude.write(CLAUDE_CONTROLS.INTERRUPT); // ESC to interrupt
+                            // Give it a moment to respond
+                            setTimeout(() => {
+                                if (exec.claude) {
+                                    exec.claude.kill();
+                                }
+                            }, 1000);
                         }
                         exec.status = 'timeout';
                         this.emit('timeout', id);
@@ -178,6 +211,11 @@ export class OrthogonalDecomposer extends EventEmitter {
                 env: process.env
             });
             execution.claude = claude;
+            // Update cleanup
+            const cleanup = this.cleanupTasks.get(taskId);
+            if (cleanup) {
+                cleanup.claude = claude;
+            }
             // Monitor output
             claude.onData((data) => {
                 execution.output.push(data);
@@ -227,6 +265,12 @@ export class OrthogonalDecomposer extends EventEmitter {
             execution.status = 'failed';
             logDebug('DECOMPOSER', `Task ${taskId} error: ${error.message}`);
         }
+        finally {
+            // Cleanup task-specific resources
+            if (execution.claude && execution.status !== 'running') {
+                execution.claude.kill();
+            }
+        }
     }
     async setupWorkspace(workspace) {
         // Create basic structure
@@ -242,27 +286,39 @@ export class OrthogonalDecomposer extends EventEmitter {
         }, null, 2));
     }
     async waitForReady(claude, execution) {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => {
+                reject(new Error('Claude ready timeout'));
+            }, 30000);
             const checkReady = () => {
                 const output = execution.output.join('');
-                if (output.includes('Type your prompt') || output.includes('>')) {
+                // Claude shows a '>' prompt when ready
+                if (output.endsWith('> ') || output.includes('> \n')) {
+                    clearTimeout(timeout);
+                    clearInterval(interval);
                     resolve();
                 }
-                else {
-                    setTimeout(checkReady, 500);
-                }
             };
-            checkReady();
+            // Check periodically
+            const interval = setInterval(checkReady, 100);
+            // Handle early exit
+            claude.onExit(() => {
+                clearInterval(interval);
+                clearTimeout(timeout);
+                reject(new Error('Claude exited before ready'));
+            });
         });
     }
     async sendPrompt(claude, prompt) {
-        // Type slowly to mimic human
+        // Human-like typing (50-150ms per char)
         for (const char of prompt) {
             claude.write(char);
-            await new Promise(r => setTimeout(r, 50));
+            await new Promise(r => setTimeout(r, 50 + Math.random() * 100));
         }
+        // Pause before submit
+        await new Promise(r => setTimeout(r, 300));
         // Submit with Ctrl+Enter
-        claude.write('\x0d');
+        claude.write(CLAUDE_CONTROLS.SUBMIT);
     }
     async collectFiles(workspace, expectedFiles) {
         const files = new Map();
@@ -298,14 +354,16 @@ export class OrthogonalDecomposer extends EventEmitter {
                     }
                 }
                 // Execute reserve
-                this.executions.set(reserve.id, {
+                const execution = {
                     task: reserve,
                     status: 'pending',
                     workspace,
                     startTime: 0,
                     output: [],
                     files: new Map()
-                });
+                };
+                this.executions.set(reserve.id, execution);
+                this.registerCleanup(reserve.id, { workspace, intervals: [], timeouts: [] });
                 await this.executeSingleTask(reserve.id);
                 const result = this.executions.get(reserve.id);
                 results.set(reserve.id, result);
@@ -373,6 +431,61 @@ export class OrthogonalDecomposer extends EventEmitter {
         }
         return Math.max(0, Math.min(1, score));
     }
+    // Public methods for proper access
+    getExecutions() {
+        return new Map(this.executions); // Return copy
+    }
+    getExecution(taskId) {
+        return this.executions.get(taskId);
+    }
+    async mergeLatest() {
+        return this.merge(this.executions);
+    }
+    // Cleanup methods
+    registerCleanup(taskId, cleanup) {
+        this.cleanupTasks.set(taskId, cleanup);
+    }
+    async cleanup(taskId) {
+        const cleanup = this.cleanupTasks.get(taskId);
+        if (!cleanup)
+            return;
+        try {
+            // Kill process
+            if (cleanup.claude) {
+                cleanup.claude.kill();
+            }
+            // Clear intervals
+            for (const interval of cleanup.intervals) {
+                clearInterval(interval);
+            }
+            // Clear timeouts
+            for (const timeout of cleanup.timeouts) {
+                clearTimeout(timeout);
+            }
+            // Remove temp directory
+            if (cleanup.workspace) {
+                await fs.rm(cleanup.workspace, { recursive: true, force: true })
+                    .catch(e => logDebug('CLEANUP', `Error removing ${cleanup.workspace}: ${e}`));
+            }
+            // Remove from maps
+            this.executions.delete(taskId);
+            this.cleanupTasks.delete(taskId);
+        }
+        catch (error) {
+            logDebug('CLEANUP', `Error cleaning up ${taskId}: ${error.message}`);
+        }
+    }
+    async cleanupAll() {
+        logDebug('DECOMPOSER', 'Cleaning up all tasks...');
+        const cleanupPromises = [];
+        for (const [taskId, _] of this.cleanupTasks) {
+            cleanupPromises.push(this.cleanup(taskId));
+        }
+        await Promise.allSettled(cleanupPromises);
+        this.executions.clear();
+        this.cleanupTasks.clear();
+        logDebug('DECOMPOSER', 'Cleanup complete');
+    }
 }
 // Global instance
 let decomposer = null;
@@ -407,15 +520,15 @@ export async function axiomOrthogonalDecompose(params) {
                 tasks: summary
             }, null, 2);
         case 'merge':
-            // Get latest executions and merge
-            const executions = decomposer['executions']; // Access private for now
-            const merged = await decomposer.merge(executions);
+            // Use public method
+            const merged = await decomposer.mergeLatest();
             return JSON.stringify({
                 mergedFiles: Array.from(merged.keys()),
                 totalSize: Array.from(merged.values()).reduce((sum, content) => sum + content.length, 0)
             }, null, 2);
         case 'status':
-            const status = Array.from(decomposer['executions'].entries()).map(([id, exec]) => ({
+            const executions = decomposer.getExecutions();
+            const status = Array.from(executions.entries()).map(([id, exec]) => ({
                 id,
                 status: exec.status,
                 duration: exec.startTime ? Date.now() - exec.startTime : 0,

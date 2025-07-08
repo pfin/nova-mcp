@@ -6,6 +6,13 @@ import * as pty from 'node-pty';
 import { EventEmitter } from 'events';
 import { logDebug } from '../core/simple-logger.js';
 
+// Working Claude control sequences from our tests
+const CLAUDE_CONTROLS = {
+  SUBMIT: '\x0d',      // Ctrl+Enter (verified working)
+  INTERRUPT: '\x1b',   // ESC
+  BACKSPACE: '\x7f'
+};
+
 // Schema for orthogonal task decomposition
 export const orthogonalDecomposerSchema = z.object({
   action: z.enum(['decompose', 'execute', 'status', 'merge']),
@@ -33,10 +40,33 @@ interface TaskExecution {
   files: Map<string, string>;
 }
 
+interface CleanupTask {
+  workspace: string;
+  claude?: pty.IPty;
+  intervals: NodeJS.Timeout[];
+  timeouts: NodeJS.Timeout[];
+}
+
 export class OrthogonalDecomposer extends EventEmitter {
   private executions: Map<string, TaskExecution> = new Map();
+  private cleanupTasks: Map<string, CleanupTask> = new Map();
   private maxParallel = 10;
   private taskTimeout = 5 * 60 * 1000; // 5 minutes
+  
+  constructor() {
+    super();
+    
+    // Register process cleanup handlers
+    process.once('exit', () => this.cleanupAll());
+    process.once('SIGINT', () => {
+      this.cleanupAll();
+      process.exit(0);
+    });
+    process.once('SIGTERM', () => {
+      this.cleanupAll();
+      process.exit(0);
+    });
+  }
   
   async decompose(mainPrompt: string): Promise<OrthogonalTask[]> {
     logDebug('DECOMPOSER', `Decomposing: ${mainPrompt.substring(0, 50)}...`);
@@ -139,30 +169,35 @@ export class OrthogonalDecomposer extends EventEmitter {
   async execute(tasks: OrthogonalTask[]): Promise<Map<string, TaskExecution>> {
     logDebug('DECOMPOSER', `Executing ${tasks.length} tasks in parallel`);
     
-    // Separate orthogonal and reserve tasks
-    const orthogonal = tasks.filter(t => !t.dependencies);
-    const reserves = tasks.filter(t => t.dependencies);
-    
-    // Execute orthogonal tasks in parallel
-    const orthogonalResults = await this.executeParallel(orthogonal);
-    
-    // Check for failures and roadblocks
-    const failures = Array.from(orthogonalResults.values())
-      .filter(r => r.status === 'failed' || r.status === 'timeout');
-    
-    if (failures.length > 0) {
-      logDebug('DECOMPOSER', `${failures.length} tasks failed, activating reserves`);
+    try {
+      // Separate orthogonal and reserve tasks
+      const orthogonal = tasks.filter(t => !t.dependencies);
+      const reserves = tasks.filter(t => t.dependencies);
       
-      // Execute appropriate reserve tasks
-      const reserveResults = await this.executeReserves(reserves, failures);
+      // Execute orthogonal tasks in parallel
+      const orthogonalResults = await this.executeParallel(orthogonal);
       
-      // Merge results
-      for (const [id, result] of reserveResults) {
-        orthogonalResults.set(id, result);
+      // Check for failures and roadblocks
+      const failures = Array.from(orthogonalResults.values())
+        .filter(r => r.status === 'failed' || r.status === 'timeout');
+      
+      if (failures.length > 0) {
+        logDebug('DECOMPOSER', `${failures.length} tasks failed, activating reserves`);
+        
+        // Execute appropriate reserve tasks
+        const reserveResults = await this.executeReserves(reserves, failures);
+        
+        // Merge results
+        for (const [id, result] of reserveResults) {
+          orthogonalResults.set(id, result);
+        }
       }
+      
+      return orthogonalResults;
+    } finally {
+      // Always cleanup
+      await this.cleanupAll();
     }
-    
-    return orthogonalResults;
   }
   
   private async executeParallel(tasks: OrthogonalTask[]): Promise<Map<string, TaskExecution>> {
@@ -183,6 +218,9 @@ export class OrthogonalDecomposer extends EventEmitter {
       
       this.executions.set(task.id, execution);
       results.set(task.id, execution);
+      
+      // Register cleanup immediately
+      this.registerCleanup(task.id, { workspace, intervals: [], timeouts: [] });
     }
     
     // Start all tasks
@@ -198,8 +236,13 @@ export class OrthogonalDecomposer extends EventEmitter {
             logDebug('DECOMPOSER', `Task ${id} timeout, interrupting`);
             
             if (exec.claude) {
-              exec.claude.write('\x1b'); // ESC to interrupt
-              exec.claude.kill();
+              exec.claude.write(CLAUDE_CONTROLS.INTERRUPT); // ESC to interrupt
+              // Give it a moment to respond
+              setTimeout(() => {
+                if (exec.claude) {
+                  exec.claude.kill();
+                }
+              }, 1000);
             }
             
             exec.status = 'timeout';
@@ -235,10 +278,16 @@ export class OrthogonalDecomposer extends EventEmitter {
         cols: 80,
         rows: 30,
         cwd: execution.workspace,
-        env: process.env
+        env: process.env as any
       });
       
       execution.claude = claude;
+      
+      // Update cleanup
+      const cleanup = this.cleanupTasks.get(taskId);
+      if (cleanup) {
+        cleanup.claude = claude;
+      }
       
       // Monitor output
       claude.onData((data: string) => {
@@ -294,6 +343,11 @@ export class OrthogonalDecomposer extends EventEmitter {
     } catch (error: any) {
       execution.status = 'failed';
       logDebug('DECOMPOSER', `Task ${taskId} error: ${error.message}`);
+    } finally {
+      // Cleanup task-specific resources
+      if (execution.claude && execution.status !== 'running') {
+        execution.claude.kill();
+      }
     }
   }
   
@@ -316,28 +370,45 @@ export class OrthogonalDecomposer extends EventEmitter {
   }
   
   private async waitForReady(claude: pty.IPty, execution: TaskExecution): Promise<void> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error('Claude ready timeout'));
+      }, 30000);
+      
       const checkReady = () => {
         const output = execution.output.join('');
-        if (output.includes('Type your prompt') || output.includes('>')) {
+        // Claude shows a '>' prompt when ready
+        if (output.endsWith('> ') || output.includes('> \n')) {
+          clearTimeout(timeout);
+          clearInterval(interval);
           resolve();
-        } else {
-          setTimeout(checkReady, 500);
         }
       };
-      checkReady();
+      
+      // Check periodically
+      const interval = setInterval(checkReady, 100);
+      
+      // Handle early exit
+      claude.onExit(() => {
+        clearInterval(interval);
+        clearTimeout(timeout);
+        reject(new Error('Claude exited before ready'));
+      });
     });
   }
   
   private async sendPrompt(claude: pty.IPty, prompt: string): Promise<void> {
-    // Type slowly to mimic human
+    // Human-like typing (50-150ms per char)
     for (const char of prompt) {
       claude.write(char);
-      await new Promise(r => setTimeout(r, 50));
+      await new Promise(r => setTimeout(r, 50 + Math.random() * 100));
     }
     
+    // Pause before submit
+    await new Promise(r => setTimeout(r, 300));
+    
     // Submit with Ctrl+Enter
-    claude.write('\x0d');
+    claude.write(CLAUDE_CONTROLS.SUBMIT);
   }
   
   private async collectFiles(workspace: string, expectedFiles: string[]): Promise<Map<string, string>> {
@@ -385,14 +456,17 @@ export class OrthogonalDecomposer extends EventEmitter {
         }
         
         // Execute reserve
-        this.executions.set(reserve.id, {
+        const execution: TaskExecution = {
           task: reserve,
           status: 'pending',
           workspace,
           startTime: 0,
           output: [],
           files: new Map()
-        });
+        };
+        
+        this.executions.set(reserve.id, execution);
+        this.registerCleanup(reserve.id, { workspace, intervals: [], timeouts: [] });
         
         await this.executeSingleTask(reserve.id);
         
@@ -471,6 +545,76 @@ export class OrthogonalDecomposer extends EventEmitter {
     
     return Math.max(0, Math.min(1, score));
   }
+  
+  // Public methods for proper access
+  getExecutions(): Map<string, TaskExecution> {
+    return new Map(this.executions); // Return copy
+  }
+  
+  getExecution(taskId: string): TaskExecution | undefined {
+    return this.executions.get(taskId);
+  }
+  
+  async mergeLatest(): Promise<Map<string, string>> {
+    return this.merge(this.executions);
+  }
+  
+  // Cleanup methods
+  private registerCleanup(taskId: string, cleanup: CleanupTask): void {
+    this.cleanupTasks.set(taskId, cleanup);
+  }
+  
+  async cleanup(taskId: string): Promise<void> {
+    const cleanup = this.cleanupTasks.get(taskId);
+    if (!cleanup) return;
+    
+    try {
+      // Kill process
+      if (cleanup.claude) {
+        cleanup.claude.kill();
+      }
+      
+      // Clear intervals
+      for (const interval of cleanup.intervals) {
+        clearInterval(interval);
+      }
+      
+      // Clear timeouts
+      for (const timeout of cleanup.timeouts) {
+        clearTimeout(timeout);
+      }
+      
+      // Remove temp directory
+      if (cleanup.workspace) {
+        await fs.rm(cleanup.workspace, { recursive: true, force: true })
+          .catch(e => logDebug('CLEANUP', `Error removing ${cleanup.workspace}: ${e}`));
+      }
+      
+      // Remove from maps
+      this.executions.delete(taskId);
+      this.cleanupTasks.delete(taskId);
+      
+    } catch (error: any) {
+      logDebug('CLEANUP', `Error cleaning up ${taskId}: ${error.message}`);
+    }
+  }
+  
+  async cleanupAll(): Promise<void> {
+    logDebug('DECOMPOSER', 'Cleaning up all tasks...');
+    
+    const cleanupPromises: Promise<void>[] = [];
+    
+    for (const [taskId, _] of this.cleanupTasks) {
+      cleanupPromises.push(this.cleanup(taskId));
+    }
+    
+    await Promise.allSettled(cleanupPromises);
+    
+    this.executions.clear();
+    this.cleanupTasks.clear();
+    
+    logDebug('DECOMPOSER', 'Cleanup complete');
+  }
 }
 
 // Global instance
@@ -512,9 +656,8 @@ export async function axiomOrthogonalDecompose(params: z.infer<typeof orthogonal
       }, null, 2);
       
     case 'merge':
-      // Get latest executions and merge
-      const executions = decomposer['executions']; // Access private for now
-      const merged = await decomposer.merge(executions);
+      // Use public method
+      const merged = await decomposer.mergeLatest();
       
       return JSON.stringify({
         mergedFiles: Array.from(merged.keys()),
@@ -522,7 +665,8 @@ export async function axiomOrthogonalDecompose(params: z.infer<typeof orthogonal
       }, null, 2);
       
     case 'status':
-      const status = Array.from(decomposer['executions'].entries()).map(([id, exec]) => ({
+      const executions = decomposer.getExecutions();
+      const status = Array.from(executions.entries()).map(([id, exec]) => ({
         id,
         status: exec.status,
         duration: exec.startTime ? Date.now() - exec.startTime : 0,
