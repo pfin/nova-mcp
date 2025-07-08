@@ -1,16 +1,57 @@
-# CLAUDE.md - Axiom MCP v3 Development Guide
+# CLAUDE.md - Axiom MCP v4 Development Guide
+
+## Critical Philosophy (2025-07-07)
+
+**LLMs always end with positive reinforcement, even when failing.** This toxic pattern must be interrupted. Axiom v4 solves this through:
+1. **5-10 minute task decomposition** - Too short for drift
+2. **Orthogonal parallelism** - Independent execution paths
+3. **Character-level interrupts** - Kill bad processes early
+4. **No false positives** - Only success reaches completion
+
+## CRITICAL LESSON (2025-07-07 18:42)
+**This is EXACTLY why Axiom exists** - to stop me from implementing the wrong thing!
+
+I just spent time implementing `claude --print` which CANNOT be course-corrected. Once it starts, you can only watch or kill it - you cannot redirect it. This completely breaks the Axiom vision of real-time intervention.
+
+**Verified**: `claude --print` ignores all input during execution. It will complete its original task no matter what you try to send it.
+
+This is a perfect example of why we need Axiom - to catch these architectural mistakes BEFORE wasting time on dead-end implementations.
+
+### Why PTY is Required (2025-07-07 18:24)
+After testing multiple approaches:
+1. **child_process.spawn() doesn't work** - Claude detects it's not in a terminal and hangs
+2. **DesktopCommander approach is wrong** - They handle simple commands, not interactive sessions
+3. **PTY (Pseudo-Terminal) is essential** - Claude requires terminal emulation to run interactively
+4. **Shell spawning is needed** - Spawn bash first, then run `claude` inside the shell
+
+Key insight: Interactive programs like Claude check if they're connected to a TTY and behave differently if not.
+
+### Game Bot Analogy Validated (2025-07-07 19:36)
+Gemini confirms: "The game bot analogy is not only useful, it's an exceptionally powerful framework. You're not prompting, you're *playing* the LLM."
+
+Key shift: From **prompt engineering** to **behavioral engineering**. We're building a bot that plays against Claude's training to force code output.
+
+**Critical Implementation Requirements**:
+1. **PTY is mandatory** - Claude detects if it's in a terminal, won't work without it
+2. **State machine for granular control** - Track Claude's "moves" like a fighting game
+3. **Pattern matching for "tells"** - Detect planning behavior early for intervention
+4. **Input buffering** - Queue interventions for frame-perfect timing
+5. **Tmux/expect patterns** - Use Linux automation tools designed for this
+
+See: [`docs/AXIOM_V4_GAME_BOT_ANALOGY.md`](docs/AXIOM_V4_GAME_BOT_ANALOGY.md) & [`docs/AXIOM_V4_GAME_BOT_RESEARCH.md`](docs/AXIOM_V4_GAME_BOT_RESEARCH.md)
 
 ## Critical Context
 
-This is the Axiom MCP v3 project - a parallel execution observatory that enforces real implementation through observation and intervention.
+This is the Axiom MCP v4 project - a hook-first parallel execution observatory that prevents LLM failure modes through decomposition and interruption.
 
 **Latest Status (July 7, 2025)**: 
 - ✅ Observability infrastructure complete (database, parser, verifier)
 - ✅ Universal principles system with temporal awareness
 - ✅ Real-time intervention CONNECTED! (as of July 6, 18:43)
 - ✅ SDK Streaming IMPLEMENTED! (as of July 6, 20:10)
-- 🚧 **CURRENT FOCUS**: Verbose Master Mode implementation (Days 1-5)
-- 📊 **System Completion**: 35% → Target 70% after Verbose Mode
+- ✅ **MCP TOOLS WORKING!** All 4 tools callable from Claude (as of July 7, 04:45)
+- 🚧 Verbose Master Mode started (schema ready, implementation next)
+- 📊 **System Completion**: 35% → 50% (MCP tools operational!)
 
 ### Intervention System (Working!)
 - **30-second planning timeout**: Forces implementation
@@ -85,9 +126,15 @@ Axiom MCP:
 - ❌ Claude CLI doesn't execute directly (bottleneck identified)
 - 🔧 Need alternative execution method
 
-## Critical Discovery (July 6, 2025)
+## Critical Fix (July 7, 2025)
 
-**The observer exists but doesn't intervene during execution!** 
+**MCP Tools are now working!** The issue was a configuration typo: `insex.js` → `index.js`
+
+All tools are now callable:
+- axiom_mcp_spawn({ parentPrompt, spawnPattern, spawnCount, verboseMasterMode })
+- axiom_test_v3({ prompt, useStreaming })
+- axiom_mcp_observe({ mode, conversationId, limit })
+- axiom_mcp_principles({ action, category, principleId }) 
 
 Current flow:
 1. PTY executor captures output
@@ -108,10 +155,11 @@ if (violations.length > 0) {
 
 ## Development Workflow
 
-1. **Always use temporal awareness**:
+1. **ALWAYS use temporal awareness - CRITICAL RULE**:
    ```bash
-   bash date  # Know when you are!
+   bash date  # ALWAYS run this first - NO EXCEPTIONS!
    ```
+   **This is mandatory before ANY action. Files show incorrect dates if you don't check the actual date first.**
 
 2. **Check observability status**:
    ```
@@ -134,6 +182,148 @@ if (violations.length > 0) {
 
 The entire point of Axiom MCP is to force real implementation. If it doesn't create files, it's not working. The observability system shows us exactly what's happening - use it!
 
+## Claude PTY Control - WORKING SOLUTION (January 8, 2025)
+
+We have successfully implemented Claude control via PTY! See [`test-mcp-claude-orchestrator.js`](test-mcp-claude-orchestrator.js) for the working implementation.
+
+### CRITICAL DISCOVERIES - What Actually Works:
+
+#### 1. **Exact Control Sequences That Work**
+```javascript
+const WORKING_CONTROLS = {
+  SUBMIT_PROMPT: '\x0d',        // Ctrl+Enter - ONLY way to submit
+  INTERRUPT: '\x1b',            // ESC - Stops Claude mid-stream
+  TAB: '\t',                    // Tab completion
+  BACKSPACE: '\x7f',            // Delete character
+  UP_ARROW: '\x1b[A',           // History up
+  DOWN_ARROW: '\x1b[B',         // History down
+  RIGHT_ARROW: '\x1b[C',        // Cursor right
+  LEFT_ARROW: '\x1b[D'          // Cursor left
+};
+```
+
+#### 2. **Human-Like Typing Pattern (MANDATORY)**
+```javascript
+// MUST type character by character with delays
+async function typeSlowly(pty, text) {
+  for (const char of text) {
+    pty.write(char);
+    await new Promise(r => setTimeout(r, 50 + Math.random() * 100));
+  }
+  // Add pause after typing before submit
+  await new Promise(r => setTimeout(r, 300));
+}
+```
+
+#### 3. **PTY Spawn Configuration**
+```javascript
+const claude = spawn('claude', [], {
+  name: 'xterm-color',    // MUST be xterm-color
+  cols: 80,               // Standard terminal width
+  rows: 30,               // Standard terminal height
+  cwd: process.cwd(),
+  env: process.env
+});
+```
+
+#### 4. **Exact Steering Sequence**
+```javascript
+// 1. Detect output pattern
+if (data.includes('Python')) {
+  // 2. Wait 1.5 seconds for Claude to be mid-stream
+  setTimeout(() => {
+    // 3. Send ESC to interrupt
+    claude.write('\x1b');
+    
+    // 4. Wait 1 second for interrupt to process
+    setTimeout(() => {
+      // 5. Type new instruction slowly
+      typeSlowly(claude, 'Actually, write it in Java instead');
+      
+      // 6. Wait 300ms then submit with Ctrl+Enter
+      setTimeout(() => {
+        claude.write('\x0d');
+      }, 300);
+    }, 1000);
+  }, 1500);
+}
+```
+
+#### 5. **Multiple Instance Management**
+- Each Claude instance needs its own PTY spawn
+- Track state separately: 'starting' → 'ready' → 'working' → 'complete'
+- Track buffers separately for each instance
+- No locking issues when managed properly
+
+#### 6. **What DOESN'T Work**
+- `claude --text "prompt"` - No such flag exists
+- `claude -p "prompt"` - Different behavior, not interactive
+- Pasting whole strings at once - Triggers bot detection
+- Typing too fast - Must be 50-150ms per character
+- Not waiting between actions - Timing is critical
+
+### MCP Tool Design:
+```typescript
+axiom_claude_orchestrate({
+  action: "spawn" | "prompt" | "steer" | "get_output" | "status",
+  instanceId: string,
+  prompt?: string,
+  lines?: number
+})
+```
+
+### Tested Working Files:
+- `test-mcp-claude-orchestrator.js` - MCP-style orchestration
+- `test-two-claude-steering-logs.js` - Parallel steering with logging
+- `test-python-to-java-steering.js` - Basic steering demo
+- `claude-tree-controller.js` - Full tree management system
+
+This enables parallel Claude execution with real-time steering and output monitoring.
+
+## Critical Update (July 7, 2025): Networking Solution Found
+
+### The Blocking Issue - Root Cause
+Axiom v4 tried to recursively call `claude --text "prompt"` but this command doesn't exist. The PTY executor hangs forever waiting for output from a non-existent subprocess.
+
+### The Solution: Hybrid Client-Server Architecture
+Instead of recursive Claude calls, we need:
+1. **WebSocket Server** in Axiom MCP (port 8080)
+2. **axiom-worker** executable that connects back via WebSocket
+3. **Message routing** between Claude and workers
+
+📚 **Essential Reading**: [`docs/AXIOM_V4_NETWORKING_KNOWLEDGE.md`](docs/AXIOM_V4_NETWORKING_KNOWLEDGE.md) - Complete technical deep-dive with implementation code
+
+## Critical Insight: The Claude Chat Model (January 7, 2025)
+
+### The Breakthrough
+Axiom should work exactly like the Claude chat interface:
+- **User types** → Claude streams response in real-time
+- **User sees output** character-by-character as it's generated
+- **User can interrupt** by sending a message while streaming
+- **Timer shows** work in progress
+- **User can read and react** before completion
+
+📚 **Essential Reading**: [`docs/AXIOM_V4_USER_EXPERIENCE_DESIGN.md`](docs/AXIOM_V4_USER_EXPERIENCE_DESIGN.md) - Complete UX vision
+
+### Why This Changes Everything
+1. **MCP already supports streaming** - We just need to use it properly
+2. **Claude CLI exists** - `claude "prompt"` works on command line
+3. **PTY provides real streams** - Character-by-character output
+4. **Interrupts are just new messages** - Not signals or special commands
+
+### Implementation Focus
+```typescript
+// What we have now (blocking):
+const result = await executor.execute(prompt);
+return result;  // User waits for everything
+
+// What we need (streaming):
+executor.execute(prompt);  // Start execution
+return { taskId, status: "streaming" };  // Return immediately
+// Output streams through MCP response streaming
+// User can send new messages to interrupt
+```
+
 ## Next Steps (Priority Order)
 
 ### 1. ✅ Connect Real-Time Intervention (COMPLETED July 6, 18:43)
@@ -143,13 +333,46 @@ The entire point of Axiom MCP is to force real implementation. If it doesn't cre
 - 10-second progress checks ✓
 - Interventions written via `executor.write()` ✓
 
-### 2. 🚧 ACTIVE: Verbose Master Mode Implementation
+### 2. ✅ COMPLETED: Verbose Master Mode Implementation
 
-**Status**: Day 1 of 5 (Monday, July 7, 2025)
+**Status**: COMPLETE! (July 7, 2025, 01:05 AM)
 
-## CRITICAL AUTO-EXECUTION PROTOCOL
+**What Was Achieved**:
+- ✅ Schema updated with `verboseMasterMode` flag
+- ✅ StreamAggregator class created and tested  
+- ✅ Integration with axiom-mcp-spawn complete
+- ✅ Non-blocking execution returns immediately
+- ✅ Progress bars track child execution
+- ✅ Real-time output with task prefixes
+- ✅ Intervention detection and highlighting
 
-For tomorrow's implementation, follow this EXACT sequence:
+**How to Use Verbose Mode**:
+```typescript
+axiom_mcp_spawn({
+  parentPrompt: "implement a REST API with authentication",
+  spawnPattern: "parallel",
+  spawnCount: 3,
+  verboseMasterMode: true  // ← Enable verbose streaming!
+})
+```
+
+**What You'll See**:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           VERBOSE MASTER MODE - PARALLEL EXECUTION          
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Parent Task: implement a REST API with authentication
+Pattern: parallel | Children: 3
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[abc12345] Creating express server...
+[def67890] Setting up authentication...
+[ghi23456] Building database models...
+[abc12345] [INTERVENTION] Stop planning! Create server.js now!
+[def67890] File created: auth.js
+```
+
+### 3. 🚧 NEXT PRIORITY: Test and Refine
 
 ### Pre-Step Protocol (ALWAYS):
 ```bash

@@ -1,0 +1,2 @@
+{"taskId":"system","workerId":"main","event":"task_start","payload":{"message":"Event bus initialized"},"timestamp":"2025-07-07T08:57:20.531Z"}
+{"taskId":"system","workerId":"main","event":"tool_call","payload":{"tool":"axiom_mcp_observe","args":{"mode":"recent","limit":5}},"timestamp":"2025-07-07T08:57:20.883Z"}

@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist-v4",
+    "rootDir": "./src-v4"
+  },
+  "include": [
+    "src-v4/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "dist-v3",
+    "dist-v4",
+    "src",
+    "src-v3"
+  ]
+}

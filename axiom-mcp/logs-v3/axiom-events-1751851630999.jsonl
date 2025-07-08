@@ -1,0 +1,2 @@
+{"taskId":"system","workerId":"main","event":"task_start","payload":{"message":"Event bus initialized"},"timestamp":"2025-07-07T01:27:10.999Z"}
+{"taskId":"system","workerId":"main","event":"tool_call","payload":{"tool":"axiom_mcp_spawn","args":{"parentPrompt":"test","spawnPattern":"decompose"}},"timestamp":"2025-07-07T01:27:11.003Z"}

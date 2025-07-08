@@ -11,9 +11,9 @@ import {
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
 import { EventBus, EventType } from './core/event-bus.js';
 import { ClaudeCodeSubprocessV3 } from './claude-subprocess-v3.js';
+import { createMcpCompliantSchema } from './utils/mcp-schema.js';
 
 // Initialize server
 const server = new Server({
@@ -42,7 +42,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
     tools: [{
       name: 'axiom_test_v3',
       description: 'Test Axiom v3 with PTY executor (no timeout!)',
-      inputSchema: zodToJsonSchema(testV3Schema),
+      inputSchema: createMcpCompliantSchema(testV3Schema, 'TestV3Input'),
     }],
   };
 });

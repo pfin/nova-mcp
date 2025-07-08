@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
 import { ConversationDB } from '../database/conversation-db.js';
 import { v4 as uuidv4 } from 'uuid';
+import { createMcpCompliantSchema } from '../utils/mcp-schema.js';
 
 export const axiomMcpObserveSchema = z.object({
   mode: z.enum(['all', 'tree', 'recent', 'live']).describe('Observation mode'),
@@ -19,7 +19,7 @@ export type AxiomMcpObserveInput = z.infer<typeof axiomMcpObserveSchema>;
 export const axiomMcpObserveTool = {
   name: 'axiom_mcp_observe',
   description: 'Observe active conversations and their progress across multiple execution branches',
-  inputSchema: zodToJsonSchema(axiomMcpObserveSchema),
+  inputSchema: createMcpCompliantSchema(axiomMcpObserveSchema, 'AxiomMcpObserveInput'),
 };
 
 export async function handleAxiomMcpObserve(
@@ -119,7 +119,7 @@ export async function handleAxiomMcpObserve(
       content: [{
         type: 'text',
         text: output,
-      }],
+      }]
     };
     
   } catch (error) {
@@ -128,7 +128,7 @@ export async function handleAxiomMcpObserve(
       content: [{
         type: 'text',
         text: `Error in axiom_mcp_observe: ${error instanceof Error ? error.message : String(error)}`,
-      }],
+      }]
     };
   }
 }

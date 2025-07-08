@@ -1,34 +1,21 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "ES2022",
-    "lib": ["ES2022"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "outDir": "./dist-v3",
-    "rootDir": "./",
+    "rootDir": "./src-v3",
     "strict": false,
-    "noImplicitAny": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true,
-    "moduleResolution": "node",
-    "types": ["node"],
-    "allowJs": true
+    "sourceMap": true
   },
   "include": [
-    "src-v3/**/*",
-    "src/base-system-prompt.ts",
-    "src/system-verification.ts",
-    "src/status-manager.ts",
-    "src/stream-manager.ts",
-    "src/mcts-engine.ts",
-    "src/context-manager.ts",
-    "src/implementation-monitor.ts",
-    "src/task-types.ts",
-    "src/tools/**/*"
+    "src-v3/**/*"
   ],
-  "exclude": ["node_modules", "dist-v3", "**/*.test.ts", "**/*.spec.ts"]
+  "exclude": ["node_modules", "dist-v3", "**/*.test.ts", "**/*.spec.ts", "src", "dist", "archive-v1"]
 }

@@ -1,0 +1,2 @@
+{"taskId":"system","workerId":"main","event":"task_start","payload":{"message":"Event bus initialized"},"timestamp":"2025-07-07T01:30:24.594Z"}
+{"taskId":"system","workerId":"main","event":"tool_call","payload":{"tool":"axiom_mcp_spawn","args":{"parentPrompt":"Create a simple hello world function in JavaScript","spawnPattern":"decompose","spawnCount":3}},"timestamp":"2025-07-07T01:30:24.598Z"}

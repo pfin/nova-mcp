@@ -278,6 +278,85 @@ export class ConversationDB {
     return await all('SELECT * FROM observation_views ORDER BY created_at DESC');
   }
   
+  // Get database statistics
+  async getStats(): Promise<{
+    totalConversations: number;
+    activeConversations: number;
+    completedConversations: number;
+    totalActions: number;
+    fileCreates: number;
+    toolCalls: number;
+    errors: number;
+    totalStreams: number;
+    totalStreamSize: number;
+    totalViolations: number;
+    violationsByType?: Record<string, number>;
+  }> {
+    const get = promisify(this.db.get.bind(this.db)) as GetFunction;
+    const all = promisify(this.db.all.bind(this.db)) as AllFunction;
+    
+    // Get conversation stats
+    const convStats = await get(`
+      SELECT 
+        COUNT(*) as total,
+        SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active,
+        SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed
+      FROM conversations
+    `);
+    
+    // Get action stats
+    const actionStats = await get(`
+      SELECT 
+        COUNT(*) as total,
+        SUM(CASE WHEN type = 'file_created' THEN 1 ELSE 0 END) as fileCreates,
+        SUM(CASE WHEN type = 'tool_call' THEN 1 ELSE 0 END) as toolCalls,
+        SUM(CASE WHEN type IN ('error', 'error_occurred') THEN 1 ELSE 0 END) as errors
+      FROM actions
+    `);
+    
+    // Get stream stats
+    const streamStats = await get(`
+      SELECT 
+        COUNT(*) as total,
+        SUM(LENGTH(chunk)) as totalSize
+      FROM streams
+    `);
+    
+    // Get violation stats
+    const violationStats = await all(`
+      SELECT 
+        parsed_data->>'$.violationType' as violationType,
+        COUNT(*) as count
+      FROM streams
+      WHERE parsed_data->>'$.hasViolation' = 'true'
+      GROUP BY violationType
+    `).catch(() => []); // Handle case where JSON queries aren't supported
+    
+    const violationsByType: Record<string, number> = {};
+    let totalViolations = 0;
+    
+    for (const row of violationStats) {
+      if (row.violationType) {
+        violationsByType[row.violationType] = row.count;
+        totalViolations += row.count;
+      }
+    }
+    
+    return {
+      totalConversations: convStats?.total || 0,
+      activeConversations: convStats?.active || 0,
+      completedConversations: convStats?.completed || 0,
+      totalActions: actionStats?.total || 0,
+      fileCreates: actionStats?.fileCreates || 0,
+      toolCalls: actionStats?.toolCalls || 0,
+      errors: actionStats?.errors || 0,
+      totalStreams: streamStats?.total || 0,
+      totalStreamSize: streamStats?.totalSize || 0,
+      totalViolations,
+      violationsByType: Object.keys(violationsByType).length > 0 ? violationsByType : undefined
+    };
+  }
+  
   // Close database
   async close(): Promise<void> {
     return new Promise((resolve, reject) => {

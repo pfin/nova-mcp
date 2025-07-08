@@ -1,46 +1,46 @@
 #!/usr/bin/env node
 
-import { PtyExecutor } from './dist-v3/src-v3/executors/pty-executor.js';
+import { PtyExecutor } from './dist-v4/executors/pty-executor.js';
 
-console.log('Testing PTY executor directly...');
-
+console.log('=== Direct PTY Test ===');
 const executor = new PtyExecutor({
-  cwd: process.cwd(),
-  heartbeatInterval: 5000
+  shell: 'bash',
+  cwd: process.cwd()
 });
 
-// Collect output
-let output = '';
-executor.on('data', (event) => {
-  output += event.payload;
-  console.log('[DATA]', event.payload);
-});
+console.log('Creating PTY executor...');
 
-executor.on('error', (event) => {
-  console.error('[ERROR]', event);
-});
+const taskId = 'test-' + Date.now();
+const prompt = 'Create a test file with echo';
 
-executor.on('exit', (event) => {
-  console.log('[EXIT]', event);
-  console.log('[FINAL OUTPUT]', output);
-  process.exit(0);
-});
+console.log('Executing command...');
+console.log('Prompt:', prompt);
 
-executor.on('heartbeat', () => {
-  console.log('[HEARTBEAT]');
-});
+// Set up stream handler
+const streamHandler = (data) => {
+  console.log('[STREAM]', data);
+};
 
-// Test with a simple command first
-console.log('Executing: echo "Hello from PTY"');
-executor.execute('echo', ['Hello from PTY'], 'test-123')
-  .then(() => console.log('Execution completed'))
+// Execute
+executor.execute(prompt, 'Test system prompt', taskId, streamHandler)
+  .then(output => {
+    console.log('\n=== Execution Complete ===');
+    console.log('Output length:', output.length);
+    console.log('Output:', output);
+  })
   .catch(err => {
-    console.error('Execution failed:', err);
-    process.exit(1);
+    console.error('\n=== Execution Failed ===');
+    console.error('Error:', err.message);
+    console.error('Stack:', err.stack);
+  })
+  .finally(() => {
+    console.log('\n=== Checking logs ===');
+    process.exit(0);
   });
 
-// Timeout after 10 seconds
+// Safety timeout
 setTimeout(() => {
-  console.error('Test timed out');
+  console.log('\n=== TIMEOUT after 10 seconds ===');
+  executor.kill();
   process.exit(1);
 }, 10000);

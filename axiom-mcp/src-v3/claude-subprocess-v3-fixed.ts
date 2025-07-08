@@ -3,8 +3,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { getCompleteSystemPrompt } from '../src/base-system-prompt.js';
-import { SystemVerification, VerificationProof } from '../src/system-verification.js';
+import { getCompleteSystemPrompt } from './base-system-prompt.js';
+import { SystemVerification, VerificationProof } from './system-verification.js';
 import { PtyExecutor } from './executors/pty-executor.js';
 import { EventBus, EventType } from './core/event-bus.js';
 import { execSync } from 'child_process';

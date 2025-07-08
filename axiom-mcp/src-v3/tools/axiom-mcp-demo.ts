@@ -1,9 +1,9 @@
 import { z } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
 import { ConversationDB } from '../database/conversation-db.js';
 import { GuidedExecutor } from '../executors/guided-executor.js';
 import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs/promises';
+import { createMcpCompliantSchema } from '../utils/mcp-schema.js';
 
 export const axiomMcpDemoSchema = z.object({
   scenario: z.enum(['violations', 'clean', 'intervention']).describe('Demo scenario to run'),
@@ -15,7 +15,7 @@ export type AxiomMcpDemoInput = z.infer<typeof axiomMcpDemoSchema>;
 export const axiomMcpDemoTool = {
   name: 'axiom_mcp_demo',
   description: 'Demonstrate observability and intervention system with simulated execution',
-  inputSchema: zodToJsonSchema(axiomMcpDemoSchema),
+  inputSchema: createMcpCompliantSchema(axiomMcpDemoSchema, 'AxiomMcpDemoInput'),
 };
 
 export async function handleAxiomMcpDemo(
