@@ -249,6 +249,48 @@ async function main() {
             required: ['action', 'instanceId'],
           },
         },
+        {
+          name: 'axiom_claude_orchestrate_proper',
+          description: 'Control Claude instances with PROPER git worktree handling - auto-commits and merges work. For orthogonal tasks that create different files.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              action: {
+                type: 'string',
+                enum: ['spawn', 'prompt', 'steer', 'get_output', 'status', 'cleanup', 'merge_all'],
+                description: 'Action to perform',
+              },
+              instanceId: {
+                type: 'string',
+                description: 'Claude instance identifier',
+              },
+              prompt: {
+                type: 'string',
+                description: 'Prompt text (for prompt/steer actions)',
+              },
+              lines: {
+                type: 'number',
+                description: 'Number of output lines to return (for get_output)',
+              },
+              useWorktree: {
+                type: 'boolean',
+                description: 'Use git worktree isolation (default: true)',
+                default: true,
+              },
+              baseBranch: {
+                type: 'string',
+                description: 'Base branch to create worktree from (default: main)',
+                default: 'main',
+              },
+              autoMerge: {
+                type: 'boolean',
+                description: 'Automatically merge completed work (default: true)',
+                default: true,
+              },
+            },
+            required: ['action', 'instanceId'],
+          },
+        },
       ],
     };
   });
@@ -551,6 +593,31 @@ async function main() {
         };
       } catch (error: any) {
         logDebug('MCP', 'axiom_claude_orchestrate error:', error);
+        return {
+          content: [{
+            type: 'text',
+            text: `Error: ${error.message}`
+          }],
+          isError: true,
+        };
+      }
+    }
+    
+    if (request.params.name === 'axiom_claude_orchestrate_proper') {
+      try {
+        const { axiomClaudeOrchestrateProper } = await import('./tools/axiom-claude-orchestrate-proper.js');
+        const result = await axiomClaudeOrchestrateProper(request.params.arguments as any);
+        
+        logDebug('MCP', 'axiom_claude_orchestrate_proper result:', result);
+        
+        return {
+          content: [{
+            type: 'text',
+            text: typeof result === 'string' ? result : JSON.stringify(result, null, 2)
+          }],
+        };
+      } catch (error: any) {
+        logDebug('MCP', 'axiom_claude_orchestrate_proper error:', error);
         return {
           content: [{
             type: 'text',
