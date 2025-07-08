@@ -182,6 +182,104 @@ if (violations.length > 0) {
 
 The entire point of Axiom MCP is to force real implementation. If it doesn't create files, it's not working. The observability system shows us exactly what's happening - use it!
 
+## Claude PTY Control - WORKING SOLUTION (January 8, 2025)
+
+We have successfully implemented Claude control via PTY! See [`test-mcp-claude-orchestrator.js`](test-mcp-claude-orchestrator.js) for the working implementation.
+
+### CRITICAL DISCOVERIES - What Actually Works:
+
+#### 1. **Exact Control Sequences That Work**
+```javascript
+const WORKING_CONTROLS = {
+  SUBMIT_PROMPT: '\x0d',        // Ctrl+Enter - ONLY way to submit
+  INTERRUPT: '\x1b',            // ESC - Stops Claude mid-stream
+  TAB: '\t',                    // Tab completion
+  BACKSPACE: '\x7f',            // Delete character
+  UP_ARROW: '\x1b[A',           // History up
+  DOWN_ARROW: '\x1b[B',         // History down
+  RIGHT_ARROW: '\x1b[C',        // Cursor right
+  LEFT_ARROW: '\x1b[D'          // Cursor left
+};
+```
+
+#### 2. **Human-Like Typing Pattern (MANDATORY)**
+```javascript
+// MUST type character by character with delays
+async function typeSlowly(pty, text) {
+  for (const char of text) {
+    pty.write(char);
+    await new Promise(r => setTimeout(r, 50 + Math.random() * 100));
+  }
+  // Add pause after typing before submit
+  await new Promise(r => setTimeout(r, 300));
+}
+```
+
+#### 3. **PTY Spawn Configuration**
+```javascript
+const claude = spawn('claude', [], {
+  name: 'xterm-color',    // MUST be xterm-color
+  cols: 80,               // Standard terminal width
+  rows: 30,               // Standard terminal height
+  cwd: process.cwd(),
+  env: process.env
+});
+```
+
+#### 4. **Exact Steering Sequence**
+```javascript
+// 1. Detect output pattern
+if (data.includes('Python')) {
+  // 2. Wait 1.5 seconds for Claude to be mid-stream
+  setTimeout(() => {
+    // 3. Send ESC to interrupt
+    claude.write('\x1b');
+    
+    // 4. Wait 1 second for interrupt to process
+    setTimeout(() => {
+      // 5. Type new instruction slowly
+      typeSlowly(claude, 'Actually, write it in Java instead');
+      
+      // 6. Wait 300ms then submit with Ctrl+Enter
+      setTimeout(() => {
+        claude.write('\x0d');
+      }, 300);
+    }, 1000);
+  }, 1500);
+}
+```
+
+#### 5. **Multiple Instance Management**
+- Each Claude instance needs its own PTY spawn
+- Track state separately: 'starting' → 'ready' → 'working' → 'complete'
+- Track buffers separately for each instance
+- No locking issues when managed properly
+
+#### 6. **What DOESN'T Work**
+- `claude --text "prompt"` - No such flag exists
+- `claude -p "prompt"` - Different behavior, not interactive
+- Pasting whole strings at once - Triggers bot detection
+- Typing too fast - Must be 50-150ms per character
+- Not waiting between actions - Timing is critical
+
+### MCP Tool Design:
+```typescript
+axiom_claude_orchestrate({
+  action: "spawn" | "prompt" | "steer" | "get_output" | "status",
+  instanceId: string,
+  prompt?: string,
+  lines?: number
+})
+```
+
+### Tested Working Files:
+- `test-mcp-claude-orchestrator.js` - MCP-style orchestration
+- `test-two-claude-steering-logs.js` - Parallel steering with logging
+- `test-python-to-java-steering.js` - Basic steering demo
+- `claude-tree-controller.js` - Full tree management system
+
+This enables parallel Claude execution with real-time steering and output monitoring.
+
 ## Critical Update (July 7, 2025): Networking Solution Found
 
 ### The Blocking Issue - Root Cause
