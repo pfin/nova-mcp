@@ -1,11 +1,15 @@
-# Pattern-Based Intervention System
+# Pattern-Based Intervention System for Axiom MCP v4
+
+## Overview
+
+The pattern-based intervention system is the heart of Axiom MCP v4's real-time intervention capabilities. It detects toxic LLM behaviors and intervenes automatically to force productive code generation.
 
 ## Architecture Overview
 
 ```
 ┌─────────────────┐     ┌──────────────────┐     ┌────────────────────┐
 │ Claude Instance │────▶│ Pattern Scanner  │────▶│ Intervention       │
-│   (Output)      │     │ (Regex Matching) │     │ Controller         │
+│   (PTY Output)  │     │ (Regex Matching) │     │ Controller         │
 └─────────────────┘     └──────────────────┘     └────────────────────┘
         │                        │                          │
         │                        ▼                          ▼
@@ -20,6 +24,23 @@
         │                                                    ▼
         └──────────────────────────────────────────▶ [ESC] + New Prompt
 ```
+
+## Core Components
+
+### 1. Pattern Scanner (`pattern-scanner.ts`)
+Real-time regex scanning engine that detects problematic patterns in LLM output.
+
+### 2. Intervention Controller (`intervention-controller.ts`)
+Orchestrates responses to detected patterns with cooldowns and priority handling.
+
+### 3. Task Decomposer (`task-decomposer.ts`)
+Breaks tasks into 5-10 minute orthogonal chunks following Axiom principles.
+
+### 4. Parallel Execution Observatory (`parallel-execution-observatory.ts`)
+Manages multiple Claude instances with real-time monitoring and kill decisions.
+
+### 5. Enhanced Claude Orchestrator (`claude-orchestrate-with-patterns.ts`)
+Integrates pattern detection with Claude instance management.
 
 ## Core Patterns and Actions
 
