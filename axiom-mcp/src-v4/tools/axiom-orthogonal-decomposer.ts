@@ -51,7 +51,7 @@ export class OrthogonalDecomposer extends EventEmitter {
   private executions: Map<string, TaskExecution> = new Map();
   private cleanupTasks: Map<string, CleanupTask> = new Map();
   private maxParallel = 10;
-  private taskTimeout = 5 * 60 * 1000; // 5 minutes
+  private taskTimeout = 10 * 60 * 1000; // 10 minutes (give Claude more time)
   private isCleaningUp = false;
   
   constructor() {
@@ -312,16 +312,30 @@ export class OrthogonalDecomposer extends EventEmitter {
         execution.output.push(data);
         
         // Detect completion patterns
-        if (data.includes('task complete') || 
-            data.includes('finished') ||
-            execution.output.join('').includes('```')) {
+        const fullOutput = execution.output.join('');
+        
+        // Look for file creation confirmations
+        const hasFileCreated = 
+          fullOutput.includes('File created:') ||
+          fullOutput.includes('Created file:') ||
+          fullOutput.includes('Successfully created') ||
+          fullOutput.includes('has been created') ||
+          fullOutput.includes('wrote to');
+          
+        // Look for next prompt appearing (task done)
+        const hasNextPrompt = 
+          data.includes('│ >') && 
+          fullOutput.split('│ >').length > 2; // More than one prompt box
+        
+        if (hasFileCreated || hasNextPrompt) {
           // Give a bit more time for final output
           setTimeout(() => {
             if (execution.status === 'running') {
               execution.status = 'complete';
+              logDebug('DECOMPOSER', `Task ${execution.task.id} completed - detected completion pattern`);
               claude.kill();
             }
-          }, 5000);
+          }, 3000);
         }
       });
       
@@ -407,13 +421,29 @@ export class OrthogonalDecomposer extends EventEmitter {
         reject(new Error('Claude ready timeout'));
       }, 30000);
       
+      let trustHandled = false;
+      
       const checkReady = () => {
         const output = execution.output.join('');
-        // Claude shows a '>' prompt when ready
-        if (output.endsWith('> ') || output.includes('> \n')) {
-          clearTimeout(timeout);
-          clearInterval(interval);
-          resolve();
+        
+        // First check for trust dialog
+        if (!trustHandled && output.includes('Do you trust the files in this folder?')) {
+          logDebug('DECOMPOSER', `Task ${execution.task.id} - Handling trust dialog`);
+          claude.write('1'); // Select "Yes, proceed"
+          claude.write('\n'); // Confirm
+          trustHandled = true;
+          return;
+        }
+        
+        // Then wait for Claude welcome and prompt box
+        if (trustHandled || !output.includes('Do you trust')) {
+          // Look for the prompt box pattern
+          if (output.includes('│ >') && output.includes('╭─') && output.includes('─╮')) {
+            clearTimeout(timeout);
+            clearInterval(interval);
+            logDebug('DECOMPOSER', `Task ${execution.task.id} - Claude ready`);
+            resolve();
+          }
         }
       };
       

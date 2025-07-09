@@ -1,52 +1,90 @@
-# Setting up Axiom MCP in Claude Code
+# Claude Code MCP Setup Guide for Axiom
 
-## Quick Setup
+Date: 2025-07-08
 
-Run this command in Claude Code to add Axiom MCP:
+## Problem
 
-```bash
-# Add with environment variable for database path
-claude mcp add stdio axiom-mcp-v4 node /home/peter/nova-mcp/axiom-mcp/dist-v4/index.js --env AXIOM_DB_PATH=/home/peter/nova-mcp/axiom-mcp/axiom-v4.db
-```
+Axiom MCP tools are not accessible from Claude Code even though the server is running.
 
-## Verify Installation
+## Solution
 
-After adding, check that the tools are available:
+1. **Add axiom-mcp to Claude Code's MCP configuration**
+   
+   Edit `~/.claude/settings.json` and add the axiom-mcp server:
 
-```bash
-# List configured MCP servers
-claude mcp list
+   ```json
+   {
+     "model": "opus",
+     "mcpServers": {
+       // ... existing servers ...
+       "axiom-mcp": {
+         "command": "node",
+         "args": ["/home/peter/nova-mcp/axiom-mcp/dist-v4/index.js"],
+         "env": {
+           "AXIOM_LOG_LEVEL": "INFO",
+           "AXIOM_DB_PATH": "/home/peter/nova-mcp/axiom-mcp/axiom-v4.db"
+         }
+       }
+     }
+   }
+   ```
 
-# The following tools should be available:
-# - axiom_spawn
-# - axiom_send  
-# - axiom_status
-# - axiom_output
-# - axiom_interrupt
-# - axiom_claude_orchestrate
-```
+2. **Restart Claude Code**
+   - MCP servers are loaded when Claude Code starts
+   - After editing settings.json, you MUST restart Claude Code
+   - Close all Claude Code windows/sessions and start fresh
 
-## Using Axiom MCP for QuantLib Task
+3. **Tool Naming Convention**
+   
+   Once properly configured, axiom tools will be available with this pattern:
+   - `mcp__axiom-mcp__axiom_spawn`
+   - `mcp__axiom-mcp__axiom_send`
+   - `mcp__axiom-mcp__axiom_status`
+   - `mcp__axiom-mcp__axiom_output`
+   - `mcp__axiom-mcp__axiom_interrupt`
+   - `mcp__axiom-mcp__axiom_claude_orchestrate`
+   - `mcp__axiom-mcp__axiom_claude_orchestrate_proper`
+   - `mcp__axiom-mcp__axiom_orthogonal_decompose`
 
-Once configured, you can use the tools directly:
+## Configuration Files
 
-```typescript
-axiom_spawn({
-  "prompt": "Create USD SABR volatility grid implementation with these files: 1) usd_sabr_model.py with SABR model for USD swaptions, 2) market_data.py with Bloomberg vol quotes, 3) calibration.py with QuantLib optimization, 4) surface_builder.py with interpolation, 5) visualization.py with matplotlib plots",
-  "verboseMasterMode": true
-})
+- **Claude Code MCP Config**: `~/.claude/settings.json`
+- **Claude Code Permissions**: `~/.claude/settings.local.json`
+- **Cline MCP Config** (VSCode): `~/.vscode-server/data/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json`
+
+## Verification
+
+After restart, test with:
+```python
+# In Claude Code
+mcp__axiom-mcp__axiom_spawn(prompt="echo 'Axiom MCP is working!'")
 ```
 
 ## Troubleshooting
 
-If tools aren't available:
-1. Check server is running: `claude mcp list`
-2. Remove and re-add: `claude mcp remove axiom-mcp-v4`
-3. Check logs: Look in logs-v4 directory
+1. **Check if server is in config**:
+   ```bash
+   cat ~/.claude/settings.json | jq '.mcpServers."axiom-mcp"'
+   ```
 
-## Direct Testing (Without MCP)
+2. **Verify server is executable**:
+   ```bash
+   node /home/peter/nova-mcp/axiom-mcp/dist-v4/index.js
+   # Should see: "Axiom MCP Server v4 running on stdio"
+   ```
 
-```bash
-cd /home/peter/nova-mcp/axiom-mcp
-npx @modelcontextprotocol/inspector ./dist-v4/index.js
-```
+3. **Check permissions**:
+   ```bash
+   grep "mcp__axiom-mcp" ~/.claude/settings.local.json
+   ```
+
+4. **Server not loading?**
+   - Ensure path is absolute, not relative
+   - Check file exists and is executable
+   - Look for errors in Claude Code logs
+
+## Notes
+
+- The server name in settings.json ("axiom-mcp") becomes part of the tool prefix
+- Different from the server's internal name ("axiom-mcp-v4")
+- Permissions are auto-added to settings.local.json when tools are first used

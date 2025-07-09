@@ -275,7 +275,15 @@ export class PtyExecutor extends EventEmitter {
   
   write(data: string): void {
     if (this.pty && !this.isComplete) {
-      this.pty.write(data);
+      // Process escape sequences
+      const processedData = data
+        .replace(/\\r/g, '\r')      // Carriage return (Ctrl+Enter for Claude)
+        .replace(/\\n/g, '\n')      // Newline
+        .replace(/\\t/g, '\t')      // Tab
+        .replace(/\\x1b/g, '\x1b')  // ESC
+        .replace(/\\x03/g, '\x03'); // Ctrl+C
+      
+      this.pty.write(processedData);
     }
   }
   

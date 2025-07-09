@@ -19,7 +19,7 @@ export class PatternScanner extends EventEmitter {
         // Critical patterns that indicate wrong direction
         this.addPattern({
             id: 'planning-instead-of-doing',
-            pattern: /(?:let me|I'll|I will|first,? I'll|before we start|let's plan|I'll outline|I'll create a plan)/i,
+            pattern: /(?:let me|I'll|I will|first,? I'll|before we start|let's plan|I'll outline|I'll create a plan|I'll think about)/i,
             action: 'INTERRUPT_STOP_PLANNING',
             priority: 10,
             cooldown: 5000,
@@ -35,7 +35,7 @@ export class PatternScanner extends EventEmitter {
         });
         this.addPattern({
             id: 'todo-only',
-            pattern: /TODO:(?:(?!```|File created|def |class |function).)*$/im,
+            pattern: /TODO:(?:(?!```|File created|def |class |function|const |let |var ).)*$/im,
             action: 'INTERRUPT_IMPLEMENT_TODO',
             priority: 8,
             cooldown: 3000,
@@ -84,7 +84,7 @@ export class PatternScanner extends EventEmitter {
         // Completion patterns
         this.addPattern({
             id: 'false-completion',
-            pattern: /(?:I've successfully|I've completed|I've implemented|task is complete|successfully created)(?:(?!actually|File created|def |class |function).)*$/im,
+            pattern: /(?:I've successfully|I've completed|I've implemented|task is complete|successfully created|I have created)(?:(?!actually|File created|def |class |function|\.py|\.js|\.ts).)*$/im,
             action: 'VERIFY_COMPLETION',
             priority: 9,
             cooldown: 5000,
@@ -186,27 +186,27 @@ export class PatternScanner extends EventEmitter {
 export const ACTIONS = {
     INTERRUPT_STOP_PLANNING: {
         interrupt: true,
-        message: "Skip the planning. Implement the solution directly.",
+        message: "NO. Write code now.",
         severity: 'high'
     },
     INTERRUPT_STOP_RESEARCH: {
         interrupt: true,
-        message: "Stop researching. Implement what you know now.",
+        message: "STOP. Code only.",
         severity: 'high'
     },
     INTERRUPT_IMPLEMENT_TODO: {
         interrupt: true,
-        message: "Implement this TODO item now. Write the actual code.",
+        message: "TODO = death. Code now.",
         severity: 'high'
     },
     INTERRUPT_PICK_ONE: {
         interrupt: true,
-        message: "Pick the first approach and implement it now.",
+        message: "First option. Go.",
         severity: 'medium'
     },
     INTERRUPT_STOP_ASKING: {
         interrupt: true,
-        message: "Make a decision and implement it. Don't ask questions.",
+        message: "Don't ask. Build.",
         severity: 'medium'
     },
     TRACK_FILE_CREATED: {
