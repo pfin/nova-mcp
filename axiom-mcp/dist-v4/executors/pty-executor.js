@@ -143,12 +143,46 @@ export class PtyExecutor extends EventEmitter {
             });
             // Start Claude
             this.pty.write(claudeCommand);
-            // Wait for Claude to start, then send the prompt
-            setTimeout(async () => {
-                logDebug('PTY', 'Sending prompt to Claude with human-like typing', {
-                    prompt: prompt.slice(0, 100)
-                });
-                if (this.pty) {
+            // Set up a flag to track when Claude is ready
+            let claudeReady = false;
+            let promptSent = false;
+            // Watch for Claude prompt and handle security/interactive prompts
+            const checkForPrompt = setInterval(() => {
+                const output = this.output.toLowerCase();
+                const lastLine = this.output.split('\n').pop() || '';
+                // Check for security prompts
+                if (output.includes('do you want to') || output.includes('yes/no') || output.includes('[y/n]')) {
+                    logDebug('PTY', 'Security prompt detected, auto-approving with "y"');
+                    if (this.pty)
+                        this.pty.write('y\n');
+                }
+                // Check for file creation prompts (numbered choices)
+                if (lastLine.includes('1.') && lastLine.includes('yes')) {
+                    logDebug('PTY', 'File creation prompt detected, auto-approving with "1"');
+                    if (this.pty)
+                        this.pty.write('1\n');
+                }
+                // Check for Claude ready prompt
+                if (!claudeReady && this.output.includes('>') && this.output.includes('─')) {
+                    claudeReady = true;
+                    logDebug('PTY', 'Claude prompt detected, ready to send user prompt');
+                }
+            }, 100);
+            // Wait for Claude to be ready, then send the prompt
+            const sendPromptWhenReady = setInterval(async () => {
+                if (claudeReady && !promptSent && this.pty) {
+                    promptSent = true;
+                    clearInterval(checkForPrompt);
+                    clearInterval(sendPromptWhenReady);
+                    // Calculate expected typing time (50-150ms per char + 300ms pause)
+                    const minTypingTime = prompt.length * 50 + 300;
+                    const maxTypingTime = prompt.length * 150 + 300;
+                    const avgTypingTime = (minTypingTime + maxTypingTime) / 2;
+                    logDebug('PTY', 'Sending prompt to Claude with human-like typing', {
+                        prompt: prompt.slice(0, 100),
+                        promptLength: prompt.length,
+                        expectedTime: `${(avgTypingTime / 1000).toFixed(1)}s`
+                    });
                     // Type the prompt character by character with human-like delays
                     for (const char of prompt) {
                         this.pty.write(char);
@@ -157,10 +191,42 @@ export class PtyExecutor extends EventEmitter {
                     // Wait a bit before submitting
                     await new Promise(resolve => setTimeout(resolve, 300));
                     // Submit with Ctrl+Enter
-                    logDebug('PTY', 'Submitting prompt with Ctrl+Enter');
+                    logDebug('PTY', 'Submitting prompt with Ctrl+Enter (\\x0d)');
                     this.pty.write('\x0d'); // Ctrl+Enter to submit
+                    // If Ctrl+Enter doesn't work after 1 second, try regular Enter
+                    setTimeout(() => {
+                        if (!this.isComplete && this.pty) {
+                            logDebug('PTY', 'Ctrl+Enter may have failed, trying regular Enter (\\n)');
+                            this.pty.write('\n'); // Regular Enter as fallback
+                        }
+                    }, 1000);
+                    // Continue monitoring for interactive prompts after sending
+                    const monitorInterval = setInterval(() => {
+                        const output = this.output.toLowerCase();
+                        const lastLines = this.output.split('\n').slice(-5).join('\n');
+                        // Check for file creation prompts
+                        if (lastLines.includes('Do you want to create') &&
+                            (lastLines.includes('1. Yes') || lastLines.includes('❯ 1. Yes'))) {
+                            logDebug('PTY', 'File creation prompt detected during execution, auto-approving with "1"');
+                            if (this.pty)
+                                this.pty.write('1\n');
+                        }
+                        // Stop monitoring when task completes
+                        if (this.isComplete) {
+                            clearInterval(monitorInterval);
+                        }
+                    }, 500); // Check every 500ms during execution
                 }
-            }, 2000); // Give Claude more time to start
+            }, 200); // Check every 200ms for Claude readiness
+            // Fallback timeout after 30 seconds
+            setTimeout(() => {
+                if (!promptSent) {
+                    logDebug('PTY', 'Claude prompt not detected after 30s, aborting');
+                    clearInterval(checkForPrompt);
+                    clearInterval(sendPromptWhenReady);
+                    reject(new Error('Claude failed to start - no prompt detected'));
+                }
+            }, 30000);
             logDebug('PTY', 'Commands queued for execution');
             logger.debug('PtyExecutor', 'execute', 'Command written, starting heartbeat', { taskId });
             // Send heartbeat to prevent hanging
