@@ -25,9 +25,12 @@ axiom_send({ "taskId": "task-123", "message": "Create factorial.py" })
 // 5. Submit (Ctrl+Enter)
 axiom_send({ "taskId": "task-123", "message": "\r" })
 
-// 6. Monitor
-axiom_status({ "taskId": "task-123" })  // Check runtime
-axiom_output({ "taskId": "task-123", "tail": 50 })  // See output
+// 6. Monitor for file approval prompts
+axiom_output({ "taskId": "task-123", "tail": 50 })
+// If you see "Do you want to create file.py?" send "1" (NOT "y"!)
+axiom_send({ "taskId": "task-123", "message": "1" })  // Approve
+// or
+axiom_send({ "taskId": "task-123", "message": "2" })  // Auto-approve all
 ```
 
 ## Key Points
@@ -36,6 +39,9 @@ axiom_output({ "taskId": "task-123", "tail": 50 })  // See output
 - **Use "\r" to submit prompts**
 - **Use "quit" not "exit" to stop**
 - **axiom_spawn prompt is for validation only**
+- **CRITICAL: Send "1" or "2" for approvals, NOT "y"!**
+- **File approval prompts block execution**
+- **Auto-updates can interrupt tasks (wait 30s)**
 
 ## Quick Commands
 ```javascript
@@ -47,6 +53,51 @@ axiom_interrupt({ "taskId": "task-123", "followUp": "[INTERRUPT: CHANGE TO PYTHO
 
 // Force action
 axiom_send({ "taskId": "task-123", "message": "[INTERRUPT: STOP PLANNING. CREATE FILE NOW.]" })
+```
+
+## Common Issues & Solutions
+
+### Task Stuck on "Do you want to create...?"
+```javascript
+// WRONG - This won't work!
+axiom_send({ "taskId": "task-123", "message": "y" })
+axiom_send({ "taskId": "task-123", "message": "yes" })
+
+// CORRECT - Send the menu number
+axiom_send({ "taskId": "task-123", "message": "1" })  // Yes
+axiom_send({ "taskId": "task-123", "message": "2" })  // Yes, auto-approve all
+```
+
+### Task Stuck on Research/Web Searches
+```javascript
+axiom_send({ 
+  "taskId": "task-123", 
+  "message": "Stop researching. Create files now with Write tool." 
+})
+```
+
+### Claude Auto-Updating
+- Wait 30+ seconds for update to complete
+- May need to restart task after update
+- Increase PTY startup delay to 5+ seconds
+
+## 3x3x3 Pattern Quick Reference
+```javascript
+// Level 1: Decompose
+axiom_spawn({
+  "prompt": "Break into 3 orthogonal tasks...",
+  "spawnPattern": "decompose",
+  "spawnCount": 3,
+  "verboseMasterMode": true
+})
+
+// Level 2: Verify (per task)
+axiom_spawn({
+  "prompt": "Verify sources with Puppeteer...",
+  "spawnPattern": "parallel",
+  "spawnCount": 3,
+  "verboseMasterMode": true
+})
 ```
 
 ## Read Full Guides!

@@ -87,6 +87,31 @@ await axiom_output({ "taskId": taskId, "tail": 50 });
 - **Use "\r" (Ctrl+Enter)** to submit prompts to Claude
 - **Monitor with axiom_output** to know when each step completes
 
+### CRITICAL: File Approval Dialogs
+
+When Claude creates files, it shows approval prompts:
+
+```
+Do you want to create hooks_research_2025.md?
+❯ 1. Yes
+  2. Yes, and don't ask again this session (shift+tab)
+  3. No, and tell Claude what to do differently (esc)
+```
+
+**IMPORTANT: Send the NUMBER, not 'y' or 'yes'!**
+
+```javascript
+// WRONG - These won't work!
+axiom_send({ "taskId": "task-xxx", "message": "y" })
+axiom_send({ "taskId": "task-xxx", "message": "yes" })
+
+// CORRECT - Send the menu option number
+axiom_send({ "taskId": "task-xxx", "message": "1" })  // Approve once
+axiom_send({ "taskId": "task-xxx", "message": "2" })  // Auto-approve all
+```
+
+This is the #1 cause of stuck tasks! Always monitor output for these prompts.
+
 ### Changing Language Mid-Execution
 
 Once Claude is executing:
