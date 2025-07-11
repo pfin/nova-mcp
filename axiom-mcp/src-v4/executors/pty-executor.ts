@@ -1,6 +1,8 @@
 import { spawn, IPty } from 'node-pty';
 import { EventEmitter } from 'events';
 import * as os from 'os';
+import * as fs from 'fs';
+import * as path from 'path';
 import { HookOrchestrator, HookEvent } from '../core/hook-orchestrator.js';
 import { Logger } from '../core/logger.js';
 import { logDebug } from '../core/simple-logger.js';
@@ -207,6 +209,19 @@ export class PtyExecutor extends EventEmitter {
         if (!claudeReady && this.output.includes('>') && this.output.includes('─')) {
           claudeReady = true;
           logDebug('PTY', 'Claude prompt detected, ready to send user prompt');
+        }
+        
+        // Also check for Claude Code hook marker
+        try {
+          const markerPath = path.join(process.env.HOME || '', 'nova-mcp', '.claude', 'ready-for-input');
+          if (!claudeReady && fs.existsSync(markerPath)) {
+            claudeReady = true;
+            logDebug('PTY', 'Claude ready marker detected from hook');
+            // Remove marker
+            fs.unlinkSync(markerPath);
+          }
+        } catch (e) {
+          // Ignore errors checking marker
         }
       }, 100);
       
