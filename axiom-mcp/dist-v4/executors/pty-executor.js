@@ -144,13 +144,23 @@ export class PtyExecutor extends EventEmitter {
             // Start Claude
             this.pty.write(claudeCommand);
             // Wait for Claude to start, then send the prompt
-            setTimeout(() => {
-                logDebug('PTY', 'Sending prompt to Claude', {
+            setTimeout(async () => {
+                logDebug('PTY', 'Sending prompt to Claude with human-like typing', {
                     prompt: prompt.slice(0, 100)
                 });
-                if (this.pty)
-                    this.pty.write(prompt + '\n');
-            }, 1000);
+                if (this.pty) {
+                    // Type the prompt character by character with human-like delays
+                    for (const char of prompt) {
+                        this.pty.write(char);
+                        await new Promise(resolve => setTimeout(resolve, 50 + Math.random() * 50));
+                    }
+                    // Wait a bit before submitting
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    // Submit with Ctrl+Enter
+                    logDebug('PTY', 'Submitting prompt with Ctrl+Enter');
+                    this.pty.write('\x0d'); // Ctrl+Enter to submit
+                }
+            }, 2000); // Give Claude more time to start
             logDebug('PTY', 'Commands queued for execution');
             logger.debug('PtyExecutor', 'execute', 'Command written, starting heartbeat', { taskId });
             // Send heartbeat to prevent hanging

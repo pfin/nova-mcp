@@ -31,6 +31,9 @@ import interruptHandlerHook from './hooks/interrupt-handler-hook.js';
 import monitoringDashboardHook from './hooks/monitoring-dashboard-hook.js';
 import taskDecompositionHook from './hooks/task-decomposition-hook.js';
 import databaseTrackingHook from './hooks/database-tracking-hook.js';
+import taskMonitorHook from './hooks/task-monitor-hook.js';
+import metaAxiomHook from './hooks/meta-axiom-hook.js';
+import researchAxiomHook from './hooks/research-axiom-hook.js';
 async function main() {
     logDebug('MAIN', 'Starting Axiom v4 MCP server');
     try {
@@ -58,6 +61,9 @@ async function main() {
         // Register enhanced hooks for maximum visibility
         orchestrator.registerHook(databaseTrackingHook); // CRITICAL - populate database!
         orchestrator.registerHook(taskDecompositionHook); // Run early to decompose
+        orchestrator.registerHook(taskMonitorHook); // Monitor tasks every 15 seconds
+        orchestrator.registerHook(metaAxiomHook); // Pattern learning and self-improvement
+        orchestrator.registerHook(researchAxiomHook); // Time-boxed research with forced implementation
         orchestrator.registerHook(enhancedVerboseHook);
         orchestrator.registerHook(interruptHandlerHook);
         orchestrator.registerHook(monitoringDashboardHook);
@@ -711,7 +717,7 @@ async function main() {
                                     version: '4.0.0',
                                     status: 'operational',
                                     hooks: {
-                                        count: 11,
+                                        count: 13,
                                         names: [
                                             validationHook.name,
                                             verboseMonitorHook.name,
@@ -721,6 +727,9 @@ async function main() {
                                             universalPrinciplesHook.name,
                                             databaseTrackingHook.name,
                                             taskDecompositionHook.name,
+                                            taskMonitorHook.name,
+                                            metaAxiomHook.name,
+                                            researchAxiomHook.name,
                                             enhancedVerboseHook.name,
                                             interruptHandlerHook.name,
                                             monitoringDashboardHook.name,
@@ -944,7 +953,11 @@ axiom_spawn({
                 parallelExecutionHook.name,
                 websocketMonitorHook.name,
                 universalPrinciplesHook.name,
+                databaseTrackingHook.name,
                 taskDecompositionHook.name,
+                taskMonitorHook.name,
+                metaAxiomHook.name,
+                researchAxiomHook.name,
                 enhancedVerboseHook.name,
                 interruptHandlerHook.name,
                 monitoringDashboardHook.name

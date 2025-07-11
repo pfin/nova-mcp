@@ -1,11 +1,39 @@
 #!/usr/bin/env python3
 """
-Fibonacci sequence calculator
+Fibonacci sequence calculator with memoization
 """
+from functools import lru_cache
 
+def fibonacci_memoized(n, memo=None):
+    """
+    Calculate the nth Fibonacci number using memoization.
+    
+    Args:
+        n: The position in the Fibonacci sequence (0-indexed)
+        memo: Dictionary to store computed values (default: None)
+        
+    Returns:
+        The nth Fibonacci number
+    """
+    if memo is None:
+        memo = {}
+    
+    if n in memo:
+        return memo[n]
+    
+    if n < 0:
+        raise ValueError("Position must be non-negative")
+    elif n <= 1:
+        return n
+    
+    memo[n] = fibonacci_memoized(n - 1, memo) + fibonacci_memoized(n - 2, memo)
+    return memo[n]
+
+
+@lru_cache(maxsize=None)
 def fibonacci(n):
     """
-    Calculate the nth Fibonacci number.
+    Calculate the nth Fibonacci number using built-in LRU cache.
     
     Args:
         n: The position in the Fibonacci sequence (0-indexed)
@@ -15,16 +43,10 @@ def fibonacci(n):
     """
     if n < 0:
         raise ValueError("Position must be non-negative")
-    elif n == 0:
-        return 0
-    elif n == 1:
-        return 1
+    elif n <= 1:
+        return n
     else:
-        # Iterative approach for efficiency
-        a, b = 0, 1
-        for _ in range(2, n + 1):
-            a, b = b, a + b
-        return b
+        return fibonacci(n - 1) + fibonacci(n - 2)
 
 
 def fibonacci_sequence(count):

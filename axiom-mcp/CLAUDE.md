@@ -188,6 +188,46 @@ if (violations.length > 0) {
    - But must lead to file creation
    - Observer intervenes if no progress
 
+## Hook Integration Plan (January 2025)
+
+### Critical Issue: Task Execution
+**Problem**: Tasks get stuck at Claude prompt without executing
+**Root Cause**: PTY executor not properly sending prompts to Claude
+**Solution**: Implement proper control sequences from `test-mcp-claude-orchestrator.js`
+
+### Implementation Phases
+
+#### Phase 1: Fix Task Execution (Immediate)
+```typescript
+// Correct prompt submission pattern
+async function submitPrompt(pty, prompt) {
+  // Type character by character with delays
+  for (const char of prompt) {
+    pty.write(char);
+    await sleep(50 + Math.random() * 50);
+  }
+  await sleep(300);
+  pty.write('\x0d'); // Ctrl+Enter to submit
+}
+```
+
+#### Phase 2: META-AXIOM Pattern Learning
+- External hooks track success/failure patterns
+- Internal hooks learn and adapt
+- Shared pattern database for bidirectional communication
+
+#### Phase 3: RESEARCH-AXIOM Time-Boxing
+- Allow research with 2-minute limit
+- Force implementation after timeout
+- Extract insights for future use
+
+#### Phase 4: Enhanced Monitoring
+- 15-second task health checks
+- Automatic intervention for stuck tasks
+- Dashboard for real-time visibility
+
+See: `memory://projects/axiom-mcp/axiom-mcp-hook-integration-plan-january-2025`
+
 ## Claude Code Hook Integration
 
 ### Setting Up External Hooks
