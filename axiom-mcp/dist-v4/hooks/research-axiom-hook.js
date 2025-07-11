@@ -7,8 +7,7 @@ import { logDebug } from '../core/simple-logger.js';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 const activeResearch = new Map();
-const RESEARCH_TIME_LIMIT = 120000; // 2 minutes
-const RESEARCH_WARNING_TIME = 90000; // 1.5 minutes
+const DEFAULT_RESEARCH_TIME_LIMIT = 300000; // 5 minutes default
 const RESEARCH_INSIGHTS_PATH = path.join(process.cwd(), 'logs', 'research-insights.json');
 let researchCache = null;
 async function loadResearchDatabase() {
@@ -82,14 +81,17 @@ function convertInsightsToTasks(insights) {
 export const researchAxiomHook = {
     name: 'research-axiom-hook',
     events: [HookEvent.REQUEST_RECEIVED, HookEvent.EXECUTION_STREAM, HookEvent.EXECUTION_COMPLETED],
-    priority: 95, // Higher than validation to intercept research
+    priority: 105, // Higher than validation (100) to intercept research before blocking
     handler: async (context) => {
         const { event, request, execution, stream } = context;
         if (event === HookEvent.REQUEST_RECEIVED && request?.tool === 'axiom_spawn') {
             const prompt = request.args.prompt || '';
+            const researchTimeLimit = request.args.researchTimeLimit || DEFAULT_RESEARCH_TIME_LIMIT;
+            const researchWarningTime = researchTimeLimit * 0.75; // Warning at 75% of time
             // Check if this is a research prompt
             if (/\b(research|analyze|explore|investigate|study|examine)\b/i.test(prompt)) {
                 logDebug('RESEARCH-AXIOM', `Research prompt detected: ${prompt.slice(0, 50)}...`);
+                logDebug('RESEARCH-AXIOM', `Time limit: ${researchTimeLimit}ms (${researchTimeLimit / 60000} minutes)`);
                 // Allow but mark for monitoring
                 return {
                     action: 'continue',
@@ -97,7 +99,8 @@ export const researchAxiomHook = {
                         ...request.args,
                         __research_mode: true,
                         __research_start: Date.now(),
-                        __research_limit: RESEARCH_TIME_LIMIT,
+                        __research_limit: researchTimeLimit,
+                        __research_warning: researchWarningTime,
                         __research_original_prompt: prompt
                     }
                 };
@@ -123,19 +126,25 @@ export const researchAxiomHook = {
                 // Extract insights from output
                 const newInsights = extractInsights(stream.data);
                 session.insights.push(...newInsights);
-                // Warning at 1.5 minutes
-                if (elapsed > RESEARCH_WARNING_TIME && elapsed < RESEARCH_WARNING_TIME + 1000) {
-                    logDebug('RESEARCH-AXIOM', `Research time warning for ${taskId}`);
+                // Get configured times from the request args
+                const researchLimit = (context.request?.args).__research_limit || DEFAULT_RESEARCH_TIME_LIMIT;
+                const warningTime = (context.request?.args).__research_warning || (researchLimit * 0.75);
+                const remainingTime = researchLimit - elapsed;
+                // Warning when 75% of time is used
+                if (elapsed > warningTime && elapsed < warningTime + 1000) {
+                    const minutesRemaining = Math.round(remainingTime / 60000);
+                    logDebug('RESEARCH-AXIOM', `Research time warning for ${taskId} - ${minutesRemaining} minutes remaining`);
                     return {
                         action: 'modify',
                         modifications: {
-                            command: '\n[WARNING] Research time limit approaching! 30 seconds remaining.\n' +
-                                'Start documenting key findings now...\n'
+                            command: `\n[WARNING] Research time limit approaching! ${minutesRemaining} minutes remaining.\n` +
+                                'Start documenting key findings now...\n' +
+                                'You can spawn sub-tasks with axiom_spawn for implementation while continuing research.\n'
                         }
                     };
                 }
-                // Force implementation at 2 minutes
-                if (elapsed > RESEARCH_TIME_LIMIT && !session.converted) {
+                // Force implementation at time limit
+                if (elapsed > researchLimit && !session.converted) {
                     logDebug('RESEARCH-AXIOM', `Research time limit reached for ${taskId}`);
                     session.converted = true;
                     // Convert insights to tasks
@@ -210,7 +219,8 @@ export const researchAxiomHook = {
 setInterval(() => {
     const now = Date.now();
     for (const [taskId, session] of activeResearch) {
-        if (now - session.startTime > RESEARCH_TIME_LIMIT * 2) {
+        // Clean up sessions that are 2x their limit old
+        if (now - session.startTime > DEFAULT_RESEARCH_TIME_LIMIT * 2) {
             logDebug('RESEARCH-AXIOM', `Cleaning up stale research session ${taskId}`);
             activeResearch.delete(taskId);
         }
