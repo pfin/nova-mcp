@@ -1,67 +1,68 @@
+#\!/usr/bin/env node
+
 import { spawn } from 'node-pty';
-import { setTimeout } from 'timers/promises';
 
-console.log('=== Testing Claude Direct Control ===\n');
+console.log('Testing Claude CLI directly...\n');
 
-async function testClaudeControl() {
-  // Test 1: Try to use Claude in a more direct way
-  console.log('Test: Attempting to send commands to Claude\n');
+const claude = spawn('claude', [], {
+  name: 'xterm-color',
+  cols: 80,
+  rows: 30,
+  cwd: process.cwd(),
+  env: process.env
+});
+
+let output = '';
+let promptReady = false;
+
+claude.onData((data) => {
+  output += data;
+  process.stdout.write(data);
   
-  const claude = spawn('claude', [], {
-    name: 'xterm-color',
-    cols: 80,
-    rows: 30,
-    cwd: process.cwd(),
-    env: process.env
-  });
-  
-  let output = '';
-  let lastOutputTime = Date.now();
-  
-  claude.onData((data) => {
-    output += data;
-    lastOutputTime = Date.now();
-    process.stdout.write(data);
-  });
-  
-  // Wait for Claude to initialize
-  await setTimeout(2000);
-  
-  console.log('\n[TEST] Sending initial prompt...');
-  claude.write('print("Hello World")\n');
-  
-  await setTimeout(2000);
-  
-  console.log('\n[TEST] Trying Enter key...');
-  claude.write('\r');
-  
-  await setTimeout(2000);
-  
-  console.log('\n[TEST] Trying Ctrl+Enter...');
-  claude.write('\x0d');
-  
-  await setTimeout(2000);
-  
-  console.log('\n[TEST] Trying to exit...');
-  claude.write('/exit\n');
-  
-  await setTimeout(1000);
-  
-  console.log('\n[TEST] Force killing...');
-  claude.kill();
-  
-  // Analysis
-  console.log('\n=== Analysis ===');
-  console.log('Total output length:', output.length);
-  console.log('Output contains prompt:', output.includes('print("Hello World")'));
-  console.log('Output contains welcome:', output.includes('Welcome to Claude'));
-  console.log('Output contains any code:', output.includes('```'));
-  
-  // Check if Claude is actually interactive
-  if (output.includes('shortcuts') && !output.includes('```')) {
-    console.log('\nCONCLUSION: Claude is stuck in interactive UI, not processing commands');
-    console.log('We cannot steer Claude Code in its current form.');
+  // Check if prompt is ready
+  if (\!promptReady && output.includes('>') && output.includes('─')) {
+    promptReady = true;
+    console.log('\n\n[TEST] Claude prompt detected\! Sending test prompt...\n');
+    
+    // Type a simple prompt
+    const prompt = 'Say hello';
+    setTimeout(async () => {
+      for (const char of prompt) {
+        claude.write(char);
+        await new Promise(r => setTimeout(r, 100));
+      }
+      
+      console.log('\n[TEST] Prompt typed. Trying different submission methods...\n');
+      
+      // Try different ways to submit
+      setTimeout(() => {
+        console.log('[TEST] Trying Ctrl+Enter...');
+        claude.write('\x0d');
+      }, 500);
+      
+      setTimeout(() => {
+        console.log('[TEST] Trying Enter...');
+        claude.write('\n');
+      }, 2000);
+      
+      setTimeout(() => {
+        console.log('[TEST] Trying Return...');
+        claude.write('\r');
+      }, 4000);
+      
+    }, 1000);
   }
-}
+});
 
-testClaudeControl().catch(console.error);
+claude.onExit(() => {
+  console.log('\n[TEST] Claude exited');
+  process.exit(0);
+});
+
+// Exit after 15 seconds
+setTimeout(() => {
+  console.log('\n[TEST] Timeout - checking final output length:', output.length);
+  claude.kill();
+  process.exit(1);
+}, 15000);
+EOF < /dev/null

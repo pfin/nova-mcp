@@ -2,13 +2,18 @@
   "hooks": {
     "Notification": [
       {
-        "type": "command",
-        "command": "python3 /home/peter/nova-mcp/.claude/hooks/notification_hook.py"
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 /home/peter/nova-mcp/.claude/hooks/notification_hook.py"
+          }
+        ]
       }
     ],
     "PreToolUse": [
       {
-        "matcher": "axiom_spawn",
+        "matcher": "mcp__axiom-mcp__axiom_spawn",
         "hooks": [
           {
             "type": "command", 
@@ -19,11 +24,22 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "axiom_spawn",
+        "matcher": "mcp__axiom-mcp__axiom_spawn",
         "hooks": [
           {
             "type": "command",
             "command": "python3 /home/peter/nova-mcp/.claude/hooks/post_tool_use.py"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 /home/peter/nova-mcp/.claude/hooks/test_hook.py"
           }
         ]
       }
