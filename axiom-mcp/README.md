@@ -489,14 +489,21 @@ User Request
    - `intervention-hook`: Pattern-based interruption
    - `task-decomposition-hook`: Breaks complex tasks
    - `database-tracking-hook`: Persistent task history
-   - And 6 more specialized hooks
+   - `research-axiom-hook`: Time-boxed research (2 min limit) **NEW**
+   - `meta-axiom-hook`: Self-monitoring and improvement **NEW**
+   - And 5 more specialized hooks
 
-3. **Executors** (`executors/`)
+3. **Claude Code Integration** (`.claude/`)
+   - External hooks that control Claude's behavior
+   - Pattern tracking and learning system
+   - Bidirectional communication with Axiom
+
+4. **Executors** (`executors/`)
    - `pty-executor`: Primary executor using pseudo-terminals
    - `claude-session-manager`: Manages Claude instances
    - Others for specific use cases
 
-4. **Database** (`database/conversation-db.ts`)
+5. **Database** (`database/conversation-db.ts`)
    - SQLite-based task tracking
    - Conversation history
    - Pattern learning
@@ -737,8 +744,10 @@ Read axiom://tools-guide
 ### Documentation
 
 - `/docs` - Architecture and design documents
+  - [`HOOKS_RESEARCH_FINDINGS.md`](docs/HOOKS_RESEARCH_FINDINGS.md) - Complete hook integration research **NEW**
+  - [`HOOKS_ARCHITECTURE.md`](HOOKS_ARCHITECTURE.md) - Internal hook architecture
 - `/examples` - Code examples and patterns
-- `CLAUDE.md` - Critical implementation notes
+- `CLAUDE.md` - Critical implementation notes with hook setup
 - Issues: https://github.com/pfin/nova-mcp/issues/1
 
 ## Contributing

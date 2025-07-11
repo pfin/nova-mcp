@@ -126,15 +126,25 @@ Axiom MCP:
 - ❌ Claude CLI doesn't execute directly (bottleneck identified)
 - 🔧 Need alternative execution method
 
-## Critical Fix (July 7, 2025)
+## Critical Updates (January 2025)
 
+### MCP Tools Working
 **MCP Tools are now working!** The issue was a configuration typo: `insex.js` → `index.js`
 
 All tools are now callable:
 - axiom_mcp_spawn({ parentPrompt, spawnPattern, spawnCount, verboseMasterMode })
 - axiom_test_v3({ prompt, useStreaming })
 - axiom_mcp_observe({ mode, conversationId, limit })
-- axiom_mcp_principles({ action, category, principleId }) 
+- axiom_mcp_principles({ action, category, principleId })
+
+### Hook Integration Research Complete
+**New Capabilities**: META-AXIOM and RESEARCH-AXIOM hooks enable:
+- **Pattern Learning**: Claude Code hooks track success/failure patterns
+- **Time-Boxed Research**: 2-minute research windows before forced implementation
+- **Bidirectional Communication**: External Claude hooks talk to internal Axiom hooks
+- **Self-Improvement**: Meta-learning from execution patterns
+
+See: [HOOKS_RESEARCH_FINDINGS.md](docs/HOOKS_RESEARCH_FINDINGS.md) for complete details 
 
 Current flow:
 1. PTY executor captures output
@@ -177,6 +187,45 @@ if (violations.length > 0) {
    - Planning is allowed
    - But must lead to file creation
    - Observer intervenes if no progress
+
+## Claude Code Hook Integration
+
+### Setting Up External Hooks
+To enable pattern learning and meta-capabilities:
+
+1. **Create `.claude/settings.json`**:
+```json
+{
+  "hooks": {
+    "PreToolUse": [{
+      "matcher": "axiom_spawn",
+      "hooks": [{
+        "type": "command",
+        "command": "uv run .claude/hooks/pre_tool_use.py"
+      }]
+    }],
+    "PostToolUse": [{
+      "matcher": "axiom_spawn",
+      "hooks": [{
+        "type": "command",
+        "command": "uv run .claude/hooks/post_tool_use.py"
+      }]
+    }]
+  }
+}
+```
+
+2. **Hook Scripts**: See `.claude/hooks/` for Python implementations
+3. **Pattern Database**: Check `logs/axiom-patterns.json` for learned patterns
+4. **Research Insights**: View `logs/research-insights.json` for extracted knowledge
+
+### Key Hook Files
+- **External** (Claude Code):
+  - `.claude/hooks/pre_tool_use.py` - Pattern tracking
+  - `.claude/hooks/post_tool_use.py` - Result analysis
+- **Internal** (Axiom MCP):
+  - `src-v4/hooks/meta-axiom-hook.ts` - Self-improvement
+  - `src-v4/hooks/research-axiom-hook.ts` - Time-boxed research
 
 ## Remember
 
