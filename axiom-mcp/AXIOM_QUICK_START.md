@@ -68,6 +68,9 @@ axiom_send({ "taskId": "task-123", "message": "1" })  // Yes
 axiom_send({ "taskId": "task-123", "message": "2" })  // Yes, auto-approve all
 ```
 
+**UPDATE (v4.1.0)**: The approval-monitor-hook now handles these automatically!
+No manual intervention needed unless you disable auto-approval.
+
 ### Task Stuck on Research/Web Searches
 ```javascript
 axiom_send({ 

@@ -1,0 +1,22 @@
+// Add this to the onData handler in pty-executor.ts after line ~135
+// This provides immediate approval handling without waiting for hook cycles
+
+// Quick approval detection and response
+const recentOutput = this.output.slice(-1000);
+if (recentOutput.includes('Do you want to create') && recentOutput.includes('1. Yes')) {
+  // File creation prompt detected
+  if (!this.approvalsSent?.has('file-creation')) {
+    logDebug('PTY', 'File creation prompt detected - auto-approving');
+    this.pty.write('1'); // Or '2' for auto-approve all
+    this.approvalsSent = this.approvalsSent || new Set();
+    this.approvalsSent.add('file-creation');
+  }
+} else if (recentOutput.includes('Do you trust the files') && recentOutput.includes('1. Yes')) {
+  // Trust prompt detected
+  if (!this.approvalsSent?.has('trust')) {
+    logDebug('PTY', 'Trust prompt detected - auto-approving');
+    this.pty.write('1');
+    this.approvalsSent = this.approvalsSent || new Set();
+    this.approvalsSent.add('trust');
+  }
+}
