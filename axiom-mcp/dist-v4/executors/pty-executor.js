@@ -160,14 +160,28 @@ export class PtyExecutor extends EventEmitter {
                     logDebug('PTY', 'Submitting prompt with Ctrl+Enter');
                     this.pty.write('\x0d'); // Ctrl+Enter to submit
                     // Monitor for file creation prompts during execution
+                    let lastApprovalSent = 0;
                     const monitorInterval = setInterval(() => {
-                        const lastLines = this.output.split('\n').slice(-5).join('\n');
-                        // Check for file creation prompts
-                        if (lastLines.includes('Do you want to create') &&
-                            (lastLines.includes('1. Yes') || lastLines.includes('❯ 1. Yes'))) {
-                            logDebug('PTY', 'File creation prompt detected, auto-approving with "1"');
-                            if (this.pty)
-                                this.pty.write('1\n');
+                        const recentOutput = this.output.slice(-2000); // Look at more output
+                        // Check for file creation prompts - handle various formats
+                        if ((recentOutput.includes('Do you want to create') ||
+                            recentOutput.includes('Do you trust the files')) &&
+                            (recentOutput.includes('1. Yes') ||
+                                recentOutput.includes('❯ 1. Yes') ||
+                                recentOutput.includes('> 1. Yes'))) {
+                            // Avoid sending duplicate approvals
+                            const now = Date.now();
+                            if (now - lastApprovalSent > 2000) { // Wait 2s between approvals
+                                logDebug('PTY', 'Approval prompt detected, auto-approving with "1"');
+                                if (this.pty) {
+                                    this.pty.write('1'); // Send just "1" without newline first
+                                    setTimeout(() => {
+                                        if (this.pty)
+                                            this.pty.write('\n'); // Then send newline
+                                    }, 100);
+                                }
+                                lastApprovalSent = now;
+                            }
                         }
                         // Stop monitoring when task completes
                         if (this.isComplete) {

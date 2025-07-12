@@ -1,1 +1,1 @@
-{"version":3,"file":"approval-monitor-hook.d.ts","sourceRoot":"","sources":["../../src-v4/hooks/approval-monitor-hook.ts"],"names":[],"mappings":"AAAA;;;GAGG;AAEH,OAAO,EAAE,IAAI,EAAsC,MAAM,8BAA8B,CAAC;AA6CxF,eAAO,MAAM,mBAAmB,EAAE,IA0IjC,CAAC;AASF,eAAe,mBAAmB,CAAC"}
+{"version":3,"file":"approval-monitor-hook.d.ts","sourceRoot":"","sources":["../../src-v4/hooks/approval-monitor-hook.ts"],"names":[],"mappings":"AAAA;;;GAGG;AAEH,OAAO,EAAE,IAAI,EAAsC,MAAM,8BAA8B,CAAC;AAmDxF,QAAA,MAAM,mBAAmB,EAAE,IAoE1B,CAAC;AAEF,eAAe,mBAAmB,CAAC"}
