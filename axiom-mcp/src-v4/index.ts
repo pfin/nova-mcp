@@ -44,6 +44,7 @@ import databaseTrackingHook from './hooks/database-tracking-hook.js';
 import taskMonitorHook from './hooks/task-monitor-hook.js';
 import metaAxiomHook from './hooks/meta-axiom-hook.js';
 import researchAxiomHook from './hooks/research-axiom-hook.js';
+import approvalMonitorHook from './hooks/approval-monitor-hook.js';
 
 async function main() {
   logDebug('MAIN', 'Starting Axiom v4 MCP server');
@@ -77,6 +78,7 @@ async function main() {
   orchestrator.registerHook(universalPrinciplesHook);
   
   // Register enhanced hooks for maximum visibility
+  orchestrator.registerHook(approvalMonitorHook);    // CRITICAL - handle approval prompts!
   orchestrator.registerHook(databaseTrackingHook);   // CRITICAL - populate database!
   orchestrator.registerHook(taskDecompositionHook);  // Run early to decompose
   orchestrator.registerHook(taskMonitorHook);        // Monitor tasks every 15 seconds
