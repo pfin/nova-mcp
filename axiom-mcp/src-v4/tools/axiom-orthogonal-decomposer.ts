@@ -5,6 +5,7 @@ import * as fs from 'fs/promises';
 import * as pty from 'node-pty';
 import { EventEmitter } from 'events';
 import { logDebug } from '../core/simple-logger.js';
+import { contextBuilder } from '../core/context-builder.js';
 
 // Working Claude control sequences from our tests
 const CLAUDE_CONTROLS = {
@@ -18,7 +19,9 @@ export const orthogonalDecomposerSchema = z.object({
   action: z.enum(['decompose', 'execute', 'status', 'merge']),
   prompt: z.string().optional(),
   taskIds: z.array(z.string()).optional(),
-  strategy: z.enum(['orthogonal', 'mcts', 'hybrid']).default('orthogonal')
+  strategy: z.enum(['orthogonal', 'mcts', 'hybrid']).default('orthogonal'),
+  projectPath: z.string().optional(), // For context generation
+  includeContext: z.boolean().default(false) // Whether to prepare context
 });
 
 interface OrthogonalTask {
@@ -50,6 +53,7 @@ interface CleanupTask {
 export class OrthogonalDecomposer extends EventEmitter {
   private executions: Map<string, TaskExecution> = new Map();
   private cleanupTasks: Map<string, CleanupTask> = new Map();
+  private taskContexts: Map<string, string> = new Map(); // Task ID -> Context
   private maxParallel = 10;
   private taskTimeout = 10 * 60 * 1000; // 10 minutes (give Claude more time)
   private isCleaningUp = false;
@@ -174,10 +178,15 @@ export class OrthogonalDecomposer extends EventEmitter {
     return tasks;
   }
   
-  async execute(tasks: OrthogonalTask[]): Promise<Map<string, TaskExecution>> {
+  async execute(tasks: OrthogonalTask[], projectPath?: string): Promise<Map<string, TaskExecution>> {
     logDebug('DECOMPOSER', `Executing ${tasks.length} tasks in parallel`);
     
     try {
+      // Prepare contexts if project path provided
+      if (projectPath) {
+        await this.prepareTaskContexts(tasks, projectPath);
+      }
+      
       // Separate orthogonal and reserve tasks
       const orthogonal = tasks.filter(t => !t.dependencies);
       const reserves = tasks.filter(t => t.dependencies);
@@ -207,6 +216,32 @@ export class OrthogonalDecomposer extends EventEmitter {
       throw error;
     }
     // Don't cleanup here - let caller decide when to cleanup
+  }
+  
+  /**
+   * Prepare contexts for all tasks
+   */
+  private async prepareTaskContexts(tasks: OrthogonalTask[], projectPath: string): Promise<void> {
+    logDebug('DECOMPOSER', `Preparing contexts for ${tasks.length} tasks from ${projectPath}`);
+    
+    try {
+      // Create orthogonal contexts
+      const taskInputs = tasks.map(t => ({ id: t.id, prompt: t.prompt }));
+      const contexts = await contextBuilder.createOrthogonalContexts(taskInputs, projectPath);
+      
+      // Store contexts for each task
+      for (const [taskId, context] of contexts) {
+        // For Claude, we'll send the first chunk as context
+        // Additional chunks can be sent as follow-ups if needed
+        const contextPrompt = `${context.chunks[0]}\n\nBased on this context, ${context.prompt}`;
+        this.taskContexts.set(taskId, contextPrompt);
+        
+        logDebug('DECOMPOSER', `Context prepared for ${taskId}: ${context.files.size} files, ${context.tokenCount} tokens`);
+      }
+    } catch (error: any) {
+      logDebug('DECOMPOSER', `Context preparation failed: ${error.message}`);
+      // Continue without context rather than failing
+    }
   }
   
   private async executeParallel(tasks: OrthogonalTask[]): Promise<Map<string, TaskExecution>> {
@@ -342,8 +377,9 @@ export class OrthogonalDecomposer extends EventEmitter {
       // Wait for ready state
       await this.waitForReady(claude, execution);
       
-      // Send task prompt
-      await this.sendPrompt(claude, execution.task.prompt);
+      // Send task prompt (with context if available)
+      const prompt = this.taskContexts.get(taskId) || execution.task.prompt;
+      await this.sendPrompt(claude, prompt);
       
       // Wait for completion or timeout
       await new Promise<void>((resolve) => {
@@ -702,7 +738,7 @@ export async function axiomOrthogonalDecompose(params: z.infer<typeof orthogonal
     decomposer = new OrthogonalDecomposer();
   }
   
-  const { action, prompt, taskIds, strategy } = params;
+  const { action, prompt, taskIds, strategy, projectPath, includeContext } = params;
   
   switch (action) {
     case 'decompose':
@@ -715,7 +751,10 @@ export async function axiomOrthogonalDecompose(params: z.infer<typeof orthogonal
       
       // Decompose and execute
       const decomposed = await decomposer.decompose(prompt);
-      const results = await decomposer.execute(decomposed);
+      
+      // Execute with optional context
+      const executePath = includeContext ? (projectPath || process.cwd()) : undefined;
+      const results = await decomposer.execute(decomposed, executePath);
       
       // Convert to serializable format
       const summary = Array.from(results.entries()).map(([id, exec]) => ({
@@ -729,7 +768,8 @@ export async function axiomOrthogonalDecompose(params: z.infer<typeof orthogonal
         totalTasks: decomposed.length,
         completed: summary.filter(s => s.status === 'complete').length,
         failed: summary.filter(s => s.status === 'failed').length,
-        tasks: summary
+        tasks: summary,
+        contextIncluded: includeContext
       }, null, 2);
       
     case 'merge':

@@ -267,6 +267,15 @@ To enable pattern learning and meta-capabilities:
   - `src-v4/hooks/meta-axiom-hook.ts` - Self-improvement
   - `src-v4/hooks/research-axiom-hook.ts` - Time-boxed research
 
+## Axiom V5: Thought-Observable Architecture
+
+**NEW**: V5 introduces thought-level observation and pre-emptive intervention:
+- 📚 **[V5 Thought-Observable Prompt](docs/AXIOM_V5_THOUGHT_OBSERVABLE_PROMPT.md)** - Revolutionary architecture
+- **Key Innovation**: Observe Claude's internal reasoning, not just output
+- **Pre-emptive Intervention**: Stop problems before they manifest
+- **Three-Tier Architecture**: Implementation agents, Thought observers, Meta observer
+- **Orthogonal Components**: Logging, observability, interrupts, and messaging are separate modules
+
 ## Remember
 
 The entire point of Axiom MCP is to force real implementation. If it doesn't create files, it's not working. The observability system shows us exactly what's happening - use it!

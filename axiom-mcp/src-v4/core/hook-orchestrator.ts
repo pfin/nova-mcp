@@ -120,6 +120,29 @@ export class HookOrchestrator extends EventEmitter {
     logDebug('ORCHESTRATOR', `handleRequest START - tool: ${tool}, taskId: ${taskId}`);
     logDebug('ORCHESTRATOR', 'args:', args);
     
+    // Add timeout to prevent infinite hangs
+    const timeoutMs = 30000; // 30 second timeout
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => {
+        logDebug('ORCHESTRATOR', `handleRequest TIMEOUT after ${timeoutMs}ms for taskId: ${taskId}`);
+        reject(new Error(`Request timeout after ${timeoutMs}ms`));
+      }, timeoutMs);
+    });
+    
+    try {
+      return await Promise.race([
+        this._handleRequestInternal(tool, args, taskId),
+        timeoutPromise
+      ]);
+    } catch (error) {
+      logDebug('ORCHESTRATOR', `handleRequest ERROR for taskId: ${taskId}`, error);
+      throw error;
+    }
+  }
+  
+  private async _handleRequestInternal(tool: string, args: any, taskId: string): Promise<any> {
+    logDebug('ORCHESTRATOR', `_handleRequestInternal START - taskId: ${taskId}`);
+    
     this.logger.info('HookOrchestrator', 'handleRequest', 'Request received', { tool, taskId, args });
     
     const context: HookContext = {
@@ -132,7 +155,7 @@ export class HookOrchestrator extends EventEmitter {
     // Phase 1: Request validation hooks
     logDebug('ORCHESTRATOR', 'Phase 1: Triggering validation hooks');
     const validationResult = await this.triggerHooks(HookEvent.REQUEST_RECEIVED, context);
-    logDebug('ORCHESTRATOR', 'Validation result:', validationResult);
+    logDebug('ORCHESTRATOR', 'Phase 1 COMPLETE - Validation result:', validationResult);
     
     if (validationResult.action === 'block') {
       await this.triggerHooks(HookEvent.REQUEST_BLOCKED, {
@@ -144,6 +167,7 @@ export class HookOrchestrator extends EventEmitter {
     
     if (validationResult.action === 'redirect') {
       // Redirect to different tool
+      logDebug('ORCHESTRATOR', `Phase 1: REDIRECT to ${validationResult.redirect!.tool}`);
       return this.handleRequest(
         validationResult.redirect!.tool,
         validationResult.redirect!.args
@@ -161,12 +185,13 @@ export class HookOrchestrator extends EventEmitter {
     
     logDebug('ORCHESTRATOR', 'Phase 2: Starting execution');
     await this.triggerHooks(HookEvent.EXECUTION_STARTED, context);
+    logDebug('ORCHESTRATOR', 'Phase 2: EXECUTION_STARTED hooks completed');
     
     try {
       // Get executor through hooks (allows dynamic executor selection)
       logDebug('ORCHESTRATOR', `Selecting executor for tool: ${tool}`);
       const executor = await this.selectExecutor(tool, args);
-      logDebug('ORCHESTRATOR', `Executor selected: ${executor.constructor.name}`);
+      logDebug('ORCHESTRATOR', `Executor selected: ${executor?.constructor?.name || 'null'}`);
       
       // Set up stream monitoring
       const streamHandler = async (data: string) => {
@@ -337,16 +362,20 @@ export class HookOrchestrator extends EventEmitter {
         logDebug('ORCHESTRATOR', 'BLOCKING MODE - Awaiting execution completion');
         let result;
         if (executor.execute.length === 4) {
-          logDebug('ORCHESTRATOR', 'Calling executor.execute with 4 params');
+          logDebug('ORCHESTRATOR', 'Calling executor.execute with 4 params (PTY style)');
+          logDebug('ORCHESTRATOR', 'About to call executor.execute - THIS IS WHERE IT MIGHT HANG');
           result = await executor.execute(
             args.prompt || args.parentPrompt || '',
             args.systemPrompt || '',
             taskId,
             streamHandler
           );
+          logDebug('ORCHESTRATOR', 'PTY executor.execute COMPLETED');
         } else {
-          logDebug('ORCHESTRATOR', 'Calling executor.execute with args');
+          logDebug('ORCHESTRATOR', 'Calling executor.execute with args (non-PTY style)');
+          logDebug('ORCHESTRATOR', 'About to call executor.execute - THIS IS WHERE IT MIGHT HANG');
           result = await executor.execute(args, streamHandler);
+          logDebug('ORCHESTRATOR', 'Non-PTY executor.execute COMPLETED');
         }
         logDebug('ORCHESTRATOR', 'Execution completed, result type:', typeof result);
         

@@ -1,0 +1,25 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist-v5",
+    "rootDir": ".",
+    "baseUrl": ".",
+    "paths": {
+      "@v4/*": ["./src-v4/*"],
+      "@v5/*": ["./src-v5/*"]
+    }
+  },
+  "include": [
+    "src-v5/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "dist-v3",
+    "dist-v4",
+    "dist-v5",
+    "src",
+    "src-v3",
+    "src-v4"
+  ]
+}

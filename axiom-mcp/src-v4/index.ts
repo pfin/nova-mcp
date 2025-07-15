@@ -78,12 +78,12 @@ async function main() {
   orchestrator.registerHook(universalPrinciplesHook);
   
   // Register enhanced hooks for maximum visibility
-  orchestrator.registerHook(approvalMonitorHook);    // CRITICAL - handle approval prompts!
+  // TEMPORARILY DISABLED for debugging: orchestrator.registerHook(approvalMonitorHook);    // CRITICAL - handle approval prompts!
   orchestrator.registerHook(databaseTrackingHook);   // CRITICAL - populate database!
-  orchestrator.registerHook(taskDecompositionHook);  // Run early to decompose
-  orchestrator.registerHook(taskMonitorHook);        // Monitor tasks every 15 seconds
-  orchestrator.registerHook(metaAxiomHook);          // Pattern learning and self-improvement
-  orchestrator.registerHook(researchAxiomHook);      // Time-boxed research with forced implementation
+  // TEMPORARILY DISABLED for debugging: orchestrator.registerHook(taskDecompositionHook);  // Run early to decompose
+  // TEMPORARILY DISABLED for debugging: orchestrator.registerHook(taskMonitorHook);        // Monitor tasks every 15 seconds
+  // TEMPORARILY DISABLED for debugging: orchestrator.registerHook(metaAxiomHook);          // Pattern learning and self-improvement
+  // TEMPORARILY DISABLED for debugging: orchestrator.registerHook(researchAxiomHook);      // Time-boxed research with forced implementation
   orchestrator.registerHook(enhancedVerboseHook);
   orchestrator.registerHook(interruptHandlerHook);
   orchestrator.registerHook(monitoringDashboardHook);
@@ -300,6 +300,56 @@ async function main() {
           },
         },
         {
+          name: 'axiom_context_builder',
+          description: 'Prepare and optimize context for LLM tasks using repomix. Actions: generate (create repomix output), prepare (create task contexts), optimize (fit to token limits), analyze (project structure).',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              action: {
+                type: 'string',
+                enum: ['generate', 'prepare', 'optimize', 'analyze'],
+                description: 'Action to perform',
+              },
+              projectPath: {
+                type: 'string',
+                description: 'Path to project directory',
+              },
+              tasks: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string' },
+                    prompt: { type: 'string' }
+                  },
+                  required: ['id', 'prompt']
+                },
+                description: 'Tasks to prepare context for',
+              },
+              taskId: {
+                type: 'string',
+                description: 'Task ID for optimization',
+              },
+              llm: {
+                type: 'string',
+                enum: ['gpt-4', 'gpt-3.5', 'claude'],
+                description: 'Target LLM for optimization',
+              },
+              config: {
+                type: 'object',
+                properties: {
+                  maxTokens: { type: 'number' },
+                  format: { type: 'string', enum: ['minimal', 'detailed', 'compressed'] },
+                  includeTests: { type: 'boolean' },
+                  includeDocs: { type: 'boolean' }
+                },
+                description: 'Context builder configuration',
+              }
+            },
+            required: ['action'],
+          },
+        },
+        {
           name: 'axiom_orthogonal_decompose',
           description: 'Decompose complex tasks into 5-minute orthogonal chunks that can execute in parallel without conflicts. Actions: decompose (plan tasks), execute (run decomposition), status (check progress), merge (combine results).',
           inputSchema: {
@@ -324,6 +374,15 @@ async function main() {
                 enum: ['orthogonal', 'mcts', 'hybrid'],
                 description: 'Decomposition strategy (default: orthogonal)',
                 default: 'orthogonal',
+              },
+              projectPath: {
+                type: 'string',
+                description: 'Project path for context generation (optional)',
+              },
+              includeContext: {
+                type: 'boolean',
+                description: 'Whether to prepare context for tasks (default: false)',
+                default: false,
               },
             },
             required: ['action'],
@@ -672,6 +731,26 @@ async function main() {
         const result = await axiomOrthogonalDecompose(request.params.arguments as any);
         
         logDebug('MCP', 'axiom_orthogonal_decompose result:', result);
+        
+        return {
+          content: [{ type: 'text', text: result }],
+          isError: false,
+        };
+      } catch (error: any) {
+        logDebug('ERROR', 'axiom_orthogonal_decompose error:', error);
+        return {
+          content: [{ type: 'text', text: `Error: ${error.message}` }],
+          isError: true,
+        };
+      }
+    }
+    
+    if (request.params.name === 'axiom_context_builder') {
+      try {
+        const { axiomContextBuilder } = await import('./tools/axiom-context-builder.js');
+        const result = await axiomContextBuilder(request.params.arguments as any);
+        
+        logDebug('MCP', 'axiom_context_builder result:', result);
         
         return {
           content: [{
