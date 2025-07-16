@@ -20,6 +20,24 @@
 - [Advanced Usage](#advanced-usage)
 - [Contributing](#contributing)
 
+## 📚 New Documentation Resources
+
+### Quick Start Guides
+- **[5-Minute Quick Start](README-QUICK-START.md)** - Get running in minutes
+- **[Examples Directory](examples/)** - Working code examples
+- **[Troubleshooting Guide](docs/AXIOM_TROUBLESHOOTING_GUIDE.md)** - Fix common issues
+
+### Visual & Conceptual
+- **[Visual Flow Diagrams](docs/AXIOM_VISUAL_FLOW.md)** - See how Axiom interrupts planning
+- **[Real Metrics](docs/AXIOM_REAL_METRICS.md)** - Measured performance data
+- **[Success Stories](docs/AXIOM_SUCCESS_STORIES.md)** - Real projects built with Axiom
+
+### Parallel Execution & Orchestration
+- **[Parallel Subagents Guide](docs/AXIOM_PARALLEL_SUBAGENTS_GUIDE.md)** - Complete guide to parallel execution
+- **[Orchestration Patterns](docs/AXIOM_ORCHESTRATION_PATTERNS.md)** - Advanced coordination strategies
+- **[Parallel Execution Cookbook](docs/PARALLEL_EXECUTION_COOKBOOK.md)** - Ready-to-use recipes
+- **[Parallel Demo](examples/parallel-subagents-demo.js)** - Working examples
+
 ## Overview
 
 Axiom MCP v4 is a Model Context Protocol server that revolutionizes how AI assistants execute tasks. Instead of generating plans and research, Axiom forces immediate action with concrete deliverables.
